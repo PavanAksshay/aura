@@ -1,0 +1,81 @@
+"""Application settings, loaded once from the environment (.env in dev).
+
+Every knob the service exposes lives here so configuration is auditable in
+one place — important for a service that touches clinical audio.
+"""
+
+import tempfile
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _default_scratch_dir() -> Path:
+    """Per-process default under the system temp dir; overridable via env."""
+    return Path(tempfile.gettempdir()) / "clinical-scribe-audio"
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    # Supabase
+    supabase_url: str = "http://localhost:54321"
+    supabase_service_role_key: str = ""
+    supabase_jwt_secret: str = ""
+
+    # HTTP
+    allowed_origins: str = "http://localhost:3000"
+    # "development" | "production". In production the interactive API docs
+    # (/docs, /redoc, /openapi.json) are disabled to avoid exposing the schema.
+    environment: str = "development"
+
+    # Transcription: Whisper via faster-whisper (CTranslate2), fully local.
+    # "large-v3" = maximum accuracy; int8 keeps it runnable on CPU.
+    whisper_model: str = "large-v3"
+    whisper_compute_type: str = "int8"
+
+    # Speaker diarization (pyannote.audio). Optional enhancement: when enabled
+    # AND the deps + gated model are available, transcripts are speaker-labeled;
+    # otherwise the pipeline falls back to a plain transcript. The pyannote
+    # models are gated on Hugging Face — hf_token must belong to an account that
+    # has accepted the conditions for both the diarization and segmentation
+    # models. hf_token is read from HF_TOKEN in the environment.
+    enable_diarization: bool = True
+    # community-1 is pyannote.audio 4.x's flagship open pipeline (supersedes
+    # the 3.1 pipeline, higher accuracy). Gated on HF like all pyannote models.
+    diarization_model: str = "pyannote/speaker-diarization-community-1"
+    hf_token: str = ""
+
+    # Patient-memory embeddings, computed in-process (fastembed/ONNX).
+    # 768-dim — must match the vector(768) columns in migration 0005.
+    embedding_model: str = "nomic-ai/nomic-embed-text-v1.5"
+
+    # Local LLM (Ollama) for on-demand transcript summaries. Fully local; if
+    # unreachable the summarizer falls back to a deterministic heuristic.
+    ollama_url: str = "http://localhost:11434"
+    summary_model: str = "llama3.2:3b"
+
+    # Web Push (VAPID) for appointment reminders that arrive with the app
+    # closed. Empty keys disable the reminder scheduler entirely.
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_subject: str = "mailto:admin@example.com"
+    # How far ahead of an appointment to push the reminder, and how often the
+    # scheduler wakes to look for due ones.
+    reminder_lead_minutes: int = 10
+    reminder_poll_seconds: int = 60
+
+    audio_scratch_dir: Path = Field(default_factory=_default_scratch_dir)
+    max_audio_bytes: int = 100 * 1024 * 1024
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Cached accessor so every module shares one Settings instance."""
+    return Settings()

@@ -1,0 +1,132 @@
+/** Shared domain types — mirror backend/app/models/schemas.py. */
+
+export type SessionStatus = "processing" | "ready" | "exported" | "failed";
+
+export interface SoapNote {
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+}
+
+/** Structured, on-demand summary of a session transcript. */
+export interface SessionSummary {
+  patient_name: string;
+  age: string;
+  personal_details: string;
+  discussion: string;
+  engine: string;
+}
+
+export interface ClinicalSession {
+  id: string;
+  user_id: string;
+  /** Optional roster link (0004); null for unattributed recordings. */
+  patient_id: string | null;
+  title: string;
+  status: SessionStatus;
+  audio_duration_seconds: number | null;
+  /** Retained after export (migration 0007); only audio is ephemeral. */
+  raw_transcript: string | null;
+  soap: SoapNote | null;
+  /** Therapist's own free-text notes on the session (0014). */
+  clinician_notes: string | null;
+  summary: SessionSummary | null;
+  error_detail: string | null;
+  created_at: string;
+  updated_at: string;
+  exported_at: string | null;
+}
+
+export type PatientStatus = "active" | "paused" | "discharged";
+
+/** Roster entry (public.patients) — owner-only under RLS. */
+export interface Patient {
+  id: string;
+  user_id: string;
+  full_name: string;
+  date_of_birth: string | null;
+  pronouns: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  presenting_concerns: string | null;
+  status: PatientStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
+
+/** Calendar entry (public.appointments) — owner-only under RLS. */
+export interface Appointment {
+  id: string;
+  user_id: string;
+  /** Optional roster link (0008); null if the patient was removed. */
+  patient_id: string | null;
+  title: string;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  notes: string | null;
+  status: AppointmentStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Stored file metadata (public.documents); bytes live in Storage (0009). */
+export interface PatientDocument {
+  id: string;
+  user_id: string;
+  patient_id: string | null;
+  file_name: string;
+  storage_path: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  created_at: string;
+}
+
+/** A semantic-memory hit from match_note_chunks(). */
+export interface MemoryMatch {
+  session_id: string;
+  patient_id: string | null;
+  chunk_index: number;
+  content: string;
+  similarity: number;
+}
+
+/** A synthesized answer to a memory question + its supporting excerpts. */
+export interface MemoryAnswer {
+  answer: string;
+  engine: string;
+  matches: MemoryMatch[];
+}
+
+/** Clinician profile (public.profiles). clinic_name doubles as practice name. */
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  clinic_name: string | null;
+  title: string | null;
+  /** Clinician's own gender (0013); null = not shared. */
+  gender: string | null;
+  /** Clinician's own date of birth, "yyyy-mm-dd" (0013); null = not shared. */
+  date_of_birth: string | null;
+  practice_type: string | null;
+  country: string | null;
+  timezone: string | null;
+  specializations: string[];
+  years_experience: number | null;
+  onboarded: boolean;
+  /** Chosen inkblot avatar id (0010); null until picked at onboarding. */
+  avatar_id: string | null;
+  /** Custom profile photo path in the avatars bucket (0011); overrides inkblot. */
+  avatar_url: string | null;
+  current_streak: number;
+  longest_streak: number;
+  last_active_on: string | null;
+  /** Badge ids already awarded — drives one-shot unlock toasts (0010). */
+  earned_badges: string[];
+  privacy_accepted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

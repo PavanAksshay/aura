@@ -1,0 +1,29 @@
+# deps
+node_modules/
+.venv/
+__pycache__/
+*.egg-info/
+
+# env & secrets — templates (.env.example) are the only env files tracked
+.env
+.env.local
+.env.*.local
+
+# builds
+frontend/.next/
+frontend/out/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# transient audio must never be committable, wherever it lands in dev
+*.webm
+*.wav
+*.m4a
+*.mp3
+
+# os
+.DS_Store
+
+# local agent tooling / vendored skill packs — not part of the app
+.claude/

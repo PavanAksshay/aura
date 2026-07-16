@@ -1,0 +1,75 @@
+[project]
+name = "clinical-scribe-backend"
+version = "0.1.0"
+description = "FastAPI backend for the Clinical Scribe Workspace — audio ingestion, Whisper transcription, SOAP structuring, ephemeral data lifecycle."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-multipart>=0.0.12",
+    "PyJWT[crypto]>=2.9",
+    "certifi>=2024.2",
+    "httpx>=0.27",
+    "pywebpush>=2.0",
+    "supabase>=2.10",
+]
+
+[project.optional-dependencies]
+ml = [
+    # Whisper large-v3 on CTranslate2 — CPU int8, no PyTorch needed.
+    "faster-whisper>=1.1",
+    # Local ONNX embeddings for the patient-memory index.
+    "fastembed>=0.5",
+]
+# Optional speaker diarization. Pulls in PyTorch (~2 GB) and the pyannote
+# stack; only needed if you want speaker-labelled transcripts. The pyannote
+# models are gated on Hugging Face — see app/services/diarization.py.
+diarization = [
+    "pyannote.audio>=3.1",
+]
+dev = [
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+# E/F: pycodestyle+pyflakes, I: isort, B: bugbear, UP: pyupgrade,
+# S: bandit security checks — non-negotiable for a PHI-adjacent service.
+select = ["E", "F", "I", "B", "UP", "S", "RUF"]
+ignore = ["S101"]  # allow asserts in tests
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+# faster-whisper / fastembed / pyannote ship no type stubs; the rest stays
+# strict. torch is optional (diarization extra), so treat it as untyped too.
+[[tool.mypy.overrides]]
+module = [
+    "faster_whisper",
+    "faster_whisper.*",
+    "fastembed",
+    "fastembed.*",
+    "pyannote",
+    "pyannote.*",
+    "pywebpush",
+    "pywebpush.*",
+    "torch",
+    "torch.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
