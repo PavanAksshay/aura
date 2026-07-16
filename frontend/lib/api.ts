@@ -101,11 +101,13 @@ export async function searchMemory(opts: {
   return (await res.json()) as MemoryMatch[];
 }
 
-/** Ask a question and get a concise, specific answer synthesized from notes. */
+/** Ask a question and get a concise, specific answer synthesized from notes.
+ * Pass the chat's recent turns as `history` so follow-ups resolve correctly. */
 export async function askMemory(opts: {
   query: string;
   patientId?: string | null;
   limit?: number;
+  history?: { role: "user" | "assistant"; content: string }[];
 }): Promise<MemoryAnswer> {
   const res = await fetch(`${API_URL}/api/v1/memory/ask`, {
     method: "POST",
@@ -114,6 +116,8 @@ export async function askMemory(opts: {
       query: opts.query,
       patient_id: opts.patientId ?? null,
       limit: opts.limit ?? 4,
+      // Cap client-side too; the schema rejects >12 turns.
+      history: (opts.history ?? []).slice(-8),
     }),
   });
   if (!res.ok) return parseError(res);

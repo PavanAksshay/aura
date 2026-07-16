@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -39,12 +40,25 @@ class SessionSummary(BaseModel):
     engine: str = "heuristic"  # "ollama" | "heuristic"
 
 
+class ChatTurn(BaseModel):
+    """One prior turn of a memory chat, sent along for follow-up questions."""
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
+
+
 class MemorySearchRequest(BaseModel):
-    """Semantic query over the caller's own exported notes."""
+    """Semantic query over the caller's own exported notes.
+
+    `history` carries the recent turns of the current chat so the model can
+    resolve follow-ups ("which of those helped?"). Hard-capped so a client
+    can't stuff the local model's context.
+    """
 
     query: str = Field(min_length=1, max_length=500)
     patient_id: str | None = None
     limit: int = Field(default=8, ge=1, le=20)
+    history: list[ChatTurn] = Field(default_factory=list, max_length=12)
 
 
 class MemoryMatchOut(BaseModel):

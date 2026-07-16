@@ -101,6 +101,28 @@ export interface MemoryAnswer {
   matches: MemoryMatch[];
 }
 
+/** A persistent Patient Memory chat thread (0015), grouped per patient. */
+export interface MemoryChat {
+  id: string;
+  user_id: string;
+  patient_id: string | null;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** One turn of a memory chat (0015). matches = the excerpts an answer cited. */
+export interface MemoryMessage {
+  id: string;
+  chat_id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  engine: string | null;
+  matches: MemoryMatch[] | null;
+  created_at: string;
+}
+
 /** Clinician profile (public.profiles). clinic_name doubles as practice name. */
 export interface Profile {
   id: string;

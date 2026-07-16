@@ -17,18 +17,35 @@ logger = logging.getLogger(__name__)
 _PROMPT = """You are a clinical assistant helping a psychologist recall details \
 from their OWN therapy session notes. Answer the QUESTION using ONLY the note \
 excerpts provided. Be specific and concise — 1 to 3 sentences, plain clinical \
-language. If the excerpts do not contain the answer, reply exactly: "The notes \
-don't record that yet." Do not invent details.
-
-QUESTION: {question}
+language. If the QUESTION is a follow-up, use the CONVERSATION SO FAR to work \
+out what it refers to, but ground every fact in the excerpts. If the excerpts \
+do not contain the answer, reply exactly: "The notes don't record that yet." \
+Do not invent details.
 
 NOTE EXCERPTS:
 {context}
+{conversation}
+QUESTION: {question}
 
 ANSWER:"""
 
 
-def answer_question(question: str, excerpts: list[str]) -> tuple[str, str]:
+def _conversation_block(history: list[tuple[str, str]] | None) -> str:
+    """Render prior chat turns for the prompt; empty string when none."""
+    if not history:
+        return ""
+    lines = [
+        f"{'Clinician' if role == 'user' else 'Assistant'}: {content.strip()}"
+        for role, content in history[-8:]  # recent turns only — small model
+    ]
+    return "\nCONVERSATION SO FAR:\n" + "\n".join(lines) + "\n"
+
+
+def answer_question(
+    question: str,
+    excerpts: list[str],
+    history: list[tuple[str, str]] | None = None,
+) -> tuple[str, str]:
     """Return (answer, engine). engine is "ollama" or "heuristic"."""
     if not excerpts:
         return ("I couldn't find anything in your notes about that yet.", "heuristic")
@@ -40,7 +57,11 @@ def answer_question(question: str, excerpts: list[str]) -> tuple[str, str]:
             f"{settings.ollama_url}/api/generate",
             json={
                 "model": settings.summary_model,
-                "prompt": _PROMPT.format(question=question, context=context),
+                "prompt": _PROMPT.format(
+                    question=question,
+                    context=context,
+                    conversation=_conversation_block(history),
+                ),
                 "stream": False,
                 "options": {"temperature": 0.2},
             },

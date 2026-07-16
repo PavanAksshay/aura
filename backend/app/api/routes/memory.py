@@ -93,5 +93,9 @@ def ask_memory(body: MemorySearchRequest, user: CurrentUser) -> MemoryAnswer:
     candidates = _retrieve(user.id, query, max(body.limit * 3, 12), body.patient_id)
     useful = [m for m in candidates if not _is_placeholder(m.content)]
 
-    answer, engine = answer_question(query, [m.content for m in useful])
+    answer, engine = answer_question(
+        query,
+        [m.content for m in useful],
+        history=[(t.role, t.content) for t in body.history],
+    )
     return MemoryAnswer(answer=answer, engine=engine, matches=useful[: body.limit])
