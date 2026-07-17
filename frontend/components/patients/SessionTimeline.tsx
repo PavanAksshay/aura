@@ -15,7 +15,11 @@ import { ChevronDown, ExternalLink, Mic } from "lucide-react";
 
 import { normalizeNote, NOTE_SECTIONS } from "@/lib/note";
 import type { ClinicalSession } from "@/lib/types";
-import { Badge, SESSION_STATUS_TONE } from "@/components/ui/badge";
+import {
+  Badge,
+  SESSION_STATUS_LABEL,
+  SESSION_STATUS_TONE,
+} from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EASE_OUT } from "@/components/motion/primitives";
 import { SessionDocPreview } from "@/components/notes/SessionDocPreview";
@@ -144,7 +148,9 @@ export function SessionTimeline({
                       </p>
                     </div>
                     <div className="flex items-center gap-2.5">
-                      <Badge tone={SESSION_STATUS_TONE[s.status]}>{s.status}</Badge>
+                      <Badge tone={SESSION_STATUS_TONE[s.status]}>
+                        {SESSION_STATUS_LABEL[s.status]}
+                      </Badge>
                       <ChevronDown
                         className={`size-4 text-muted-foreground transition-transform duration-200 ${
                           open ? "rotate-180" : ""

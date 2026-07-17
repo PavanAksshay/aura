@@ -28,6 +28,18 @@ export const SESSION_STATUS_TONE: Record<SessionStatus, Tone> = {
   failed: "destructive",
 };
 
+/**
+ * What the clinician reads. "exported" is the internal lifecycle value (note
+ * finalized + indexed into Memory); "completed" is what that means to someone
+ * looking at a session.
+ */
+export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
+  processing: "processing",
+  ready: "ready",
+  exported: "completed",
+  failed: "failed",
+};
+
 export const APPOINTMENT_STATUS_TONE: Record<AppointmentStatus, Tone> = {
   scheduled: "primary",
   completed: "muted",

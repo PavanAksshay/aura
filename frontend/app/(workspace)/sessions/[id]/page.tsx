@@ -8,7 +8,11 @@ import { ProcessingPoller } from "@/components/notes/ProcessingPoller";
 import { SessionDocPreview } from "@/components/notes/SessionDocPreview";
 import { NoteView } from "@/components/notes/NoteView";
 import { TranscriptPanel } from "@/components/notes/TranscriptPanel";
-import { Badge, SESSION_STATUS_TONE } from "@/components/ui/badge";
+import {
+  Badge,
+  SESSION_STATUS_LABEL,
+  SESSION_STATUS_TONE,
+} from "@/components/ui/badge";
 import type { ClinicalSession, Patient } from "@/lib/types";
 
 export default async function SessionPage({
@@ -49,7 +53,7 @@ export default async function SessionPage({
               {session.title}
             </h1>
             <Badge tone={SESSION_STATUS_TONE[session.status]}>
-              {session.status}
+              {SESSION_STATUS_LABEL[session.status]}
             </Badge>
           </div>
           {patient && (

@@ -1,0 +1,46 @@
+{
+  "name": "Aura — Clinical Scribe",
+  "short_name": "Aura",
+  "description": "Privacy-first clinical documentation: record a session, get a structured note, and ask your own notes anything.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7efe6",
+  "theme_color": "#f7efe6",
+  "categories": ["medical", "productivity", "health"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New session",
+      "short_name": "Record",
+      "url": "/sessions/new",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Patient Memory",
+      "short_name": "Memory",
+      "url": "/memory",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

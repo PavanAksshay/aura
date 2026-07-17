@@ -62,6 +62,13 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except static assets and images.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Everything except static assets, images, and the PWA files.
+  //
+  // The PWA exclusions are load-bearing: the browser fetches the manifest and
+  // service worker without a session, so routing them through the auth guard
+  // 307s them to /login — a redirected worker script can't register, and
+  // install silently never becomes available.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline.html|icon-.*\\.png|apple-touch-icon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

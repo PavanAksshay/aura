@@ -12,7 +12,11 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import type { ClinicalSession, Profile } from "@/lib/types";
-import { Badge, SESSION_STATUS_TONE } from "@/components/ui/badge";
+import {
+  Badge,
+  SESSION_STATUS_LABEL,
+  SESSION_STATUS_TONE,
+} from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion/primitives";
 import { StatCard } from "@/components/ui/stat-card";
@@ -217,7 +221,7 @@ export default async function DashboardPage() {
                         </p>
                       </div>
                       <Badge tone={SESSION_STATUS_TONE[s.status]}>
-                        {s.status}
+                        {SESSION_STATUS_LABEL[s.status]}
                       </Badge>
                     </Link>
                   </li>

@@ -13,7 +13,17 @@ export function AuraMark({ className }: { className?: string }) {
       className={cn("size-8", className)}
     >
       <defs>
-        <linearGradient id="aura-g" x1="4" y1="28" x2="28" y2="4">
+        {/* userSpaceOnUse: these coords are in the 32-unit viewBox. Without it
+            they read as bounding-box fractions (0–1), so the mark sits at the
+            first stop and renders flat teal instead of the brand gradient. */}
+        <linearGradient
+          id="aura-g"
+          gradientUnits="userSpaceOnUse"
+          x1="4"
+          y1="28"
+          x2="28"
+          y2="4"
+        >
           <stop offset="0%" stopColor="var(--aurora-teal)" />
           <stop offset="55%" stopColor="var(--aurora-cyan)" />
           <stop offset="100%" stopColor="var(--aurora-violet)" />

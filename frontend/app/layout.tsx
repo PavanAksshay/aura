@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme";
 import { Toaster } from "@/components/ui/toaster";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,6 +24,32 @@ export const metadata: Metadata = {
   },
   description:
     "Aura is a privacy-first clinical workspace: ambient session transcription, structured notes, and patient memory — nothing leaves your practice.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Aura",
+  appleWebApp: {
+    // iOS has no install prompt; these make "Add to Home Screen" launch Aura
+    // full screen with the right title rather than as a Safari tab.
+    capable: true,
+    title: "Aura",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+};
+
+export const viewport: Viewport = {
+  // Matches the manifest so the OS chrome blends with the app in both themes.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7efe6" },
+    { media: "(prefers-color-scheme: dark)", color: "#101817" },
+  ],
+  // Let the app draw under the iPhone's notch / home indicator.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -45,6 +72,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster />
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

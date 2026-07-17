@@ -19,6 +19,7 @@ import { computeEarnedBadges } from "@/lib/badges";
 import { gatherStats } from "@/lib/stats";
 import { AchievementsGrid } from "@/components/profile/AchievementsGrid";
 import { PushToggle } from "@/components/profile/PushToggle";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PageHeading } from "@/components/ui/page-heading";
 import { StatCard } from "@/components/ui/stat-card";
@@ -230,8 +231,11 @@ export default async function ProfilePage() {
       </StaggerItem>
 
       <StaggerItem>
-        {/* Background reminders opt-in */}
-        <PushToggle userId={user.id} />
+        {/* Install as an app + background reminders opt-in */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <InstallPrompt />
+          <PushToggle userId={user.id} />
+        </div>
       </StaggerItem>
 
       <StaggerItem>
