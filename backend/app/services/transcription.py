@@ -108,21 +108,40 @@ def _dominant_speaker(
     return best_speaker
 
 
+def _speaker_label(index: int, roles: bool) -> str:
+    """Name the Nth distinct speaker (index 0-based, in order of appearance).
+
+    With roles on, the first voice is assumed to be the therapist — they open
+    the session — and everyone after is a patient (Patient, Patient 2, …). This
+    is a heuristic: diarization separates *voices*, it cannot know who is who,
+    so a session the patient opens would be mislabelled. Off, it's "Speaker N".
+    """
+    if not roles:
+        return f"Speaker {index + 1}"
+    if index == 0:
+        return "Therapist"
+    if index == 1:
+        return "Patient"
+    return f"Patient {index}"
+
+
 def _merge_speakers(
     segments: list[TranscriptSegment], turns: list[SpeakerTurn]
 ) -> str:
     """Fold speaker turns onto segments as a labelled, line-per-speaker script.
 
-    pyannote's raw labels (SPEAKER_00, …) are remapped to friendly, 1-based
-    "Speaker N" numbers in order of first appearance. Consecutive segments from
-    the same speaker are joined into one line so a back-and-forth reads
-    naturally. A segment with no overlapping turn inherits the current speaker.
+    pyannote's raw labels (SPEAKER_00, …) are remapped to friendly labels in
+    order of first appearance — Therapist / Patient / Patient 2 by default (see
+    _speaker_label). Consecutive segments from the same speaker are joined into
+    one line so a back-and-forth reads naturally. A segment with no overlapping
+    turn inherits the current speaker.
     """
+    roles = get_settings().label_speaker_roles
     labels: dict[str, str] = {}
 
     def friendly(raw: str) -> str:
         if raw not in labels:
-            labels[raw] = f"Speaker {len(labels) + 1}"
+            labels[raw] = _speaker_label(len(labels), roles)
         return labels[raw]
 
     lines: list[str] = []

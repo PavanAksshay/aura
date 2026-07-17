@@ -49,11 +49,43 @@ def test_merge_labels_and_groups_consecutive() -> None:
         SpeakerTurn(4.0, 6.0, "SPEAKER_00"),
     ]
     out = _merge_speakers(segments, turns)
+    # First voice → Therapist (opens the session), second → Patient.
     assert out == (
-        "Speaker 1: Hello, how are you?\n"
-        "Speaker 2: I've been anxious.\n"
-        "Speaker 1: Tell me more about that."
+        "Therapist: Hello, how are you?\n"
+        "Patient: I've been anxious.\n"
+        "Therapist: Tell me more about that."
     )
+
+
+def test_merge_labels_multiple_patients() -> None:
+    """1 therapist + 2 patients (couples/family): Therapist, Patient, Patient 2."""
+    segments = [
+        _seg(0.0, 2.0, "How are you both?"),
+        _seg(2.0, 4.0, "I feel unheard."),
+        _seg(4.0, 6.0, "I disagree."),
+    ]
+    turns = [
+        SpeakerTurn(0.0, 2.0, "SPEAKER_00"),
+        SpeakerTurn(2.0, 4.0, "SPEAKER_01"),
+        SpeakerTurn(4.0, 6.0, "SPEAKER_02"),
+    ]
+    assert _merge_speakers(segments, turns) == (
+        "Therapist: How are you both?\n"
+        "Patient: I feel unheard.\n"
+        "Patient 2: I disagree."
+    )
+
+
+def test_merge_neutral_labels_when_roles_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "label_speaker_roles", False)
+    segments = [_seg(0.0, 2.0, "Hi."), _seg(2.0, 4.0, "Hello.")]
+    turns = [
+        SpeakerTurn(0.0, 2.0, "SPEAKER_00"),
+        SpeakerTurn(2.0, 4.0, "SPEAKER_01"),
+    ]
+    assert _merge_speakers(segments, turns) == "Speaker 1: Hi.\nSpeaker 2: Hello."
 
 
 def test_merge_joins_same_speaker_run() -> None:
@@ -62,7 +94,7 @@ def test_merge_joins_same_speaker_run() -> None:
         _seg(2.0, 4.0, "Two."),
     ]
     turns = [SpeakerTurn(0.0, 4.0, "SPEAKER_00")]
-    assert _merge_speakers(segments, turns) == "Speaker 1: One. Two."
+    assert _merge_speakers(segments, turns) == "Therapist: One. Two."
 
 
 def test_merge_orphan_segment_inherits_current_speaker() -> None:
@@ -72,7 +104,7 @@ def test_merge_orphan_segment_inherits_current_speaker() -> None:
     ]
     turns = [SpeakerTurn(0.0, 2.0, "SPEAKER_00")]
     # The orphan keeps the running speaker rather than being dropped.
-    assert _merge_speakers(segments, turns) == "Speaker 1: Opening. Gap with no turn."
+    assert _merge_speakers(segments, turns) == "Therapist: Opening. Gap with no turn."
 
 
 def test_transcribe_falls_back_to_plain_when_diarization_unavailable(
@@ -113,4 +145,4 @@ def test_transcribe_labels_speakers_when_diarization_present(
     )
 
     out = tx.transcribe_audio(Path("ignored.webm"))
-    assert out == "Speaker 1: Hi.\nSpeaker 2: Hello back."
+    assert out == "Therapist: Hi.\nPatient: Hello back."

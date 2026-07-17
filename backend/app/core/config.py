@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # the 3.1 pipeline, higher accuracy). Gated on HF like all pyannote models.
     diarization_model: str = "pyannote/speaker-diarization-community-1"
     hf_token: str = ""
+    # Label diarized speakers by role instead of "Speaker N". The first voice
+    # to speak is assumed to be the therapist (they open the session); the rest
+    # become Patient, Patient 2, … Set false to keep neutral "Speaker N" labels.
+    label_speaker_roles: bool = True
 
     # Patient-memory embeddings, computed in-process (fastembed/ONNX).
     # 768-dim — must match the vector(768) columns in migration 0005.
