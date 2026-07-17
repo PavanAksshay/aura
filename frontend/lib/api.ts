@@ -36,7 +36,13 @@ async function authHeader(): Promise<Record<string, string>> {
     session = data.session;
   }
 
-  return { Authorization: `Bearer ${session.access_token}` };
+  return {
+    Authorization: `Bearer ${session.access_token}`,
+    // Skip ngrok's free-tier browser interstitial, which otherwise returns an
+    // HTML warning page instead of the JSON the app expects. Harmless on any
+    // other backend (an ignored custom header).
+    "ngrok-skip-browser-warning": "true",
+  };
 }
 
 async function parseError(res: Response): Promise<never> {

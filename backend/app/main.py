@@ -64,7 +64,7 @@ def create_app() -> FastAPI:
         # cookies, so cross-origin credentials are neither used nor allowed.
         allow_credentials=False,
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Authorization", "Content-Type", "ngrok-skip-browser-warning"],
     )
     app.include_router(api_router, prefix="/api/v1")
     return app
