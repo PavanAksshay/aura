@@ -48,21 +48,21 @@ def run_transcription_pipeline(
     on top of the ownership check the route already performed).
     """
     from app.services.embeddings import index_exported_note
-    from app.services.soap import build_soap_note
+    from app.services.note import build_session_note
     from app.services.summary import generate_summary
     from app.services.transcription import transcribe_audio
 
     db = get_service_client()
     try:
         transcript = transcribe_audio(audio_path)
-        note = build_soap_note(transcript)
+        note = build_session_note(transcript)
         summary = generate_summary(transcript)
 
         db.table("sessions").update(
             {
                 "status": SessionStatus.EXPORTED.value,
                 "raw_transcript": transcript,
-                "soap": note.model_dump(),
+                "note": note.model_dump(),
                 "summary": summary.model_dump(),
                 "exported_at": "now()",
             }

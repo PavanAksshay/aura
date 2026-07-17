@@ -13,6 +13,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ExternalLink, Mic } from "lucide-react";
 
+import { normalizeNote, NOTE_SECTIONS } from "@/lib/note";
 import type { ClinicalSession } from "@/lib/types";
 import { Badge, SESSION_STATUS_TONE } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ type TimelineSession = Pick<
   | "created_at"
   | "audio_duration_seconds"
   | "summary"
-  | "soap"
+  | "note"
   | "raw_transcript"
   | "clinician_notes"
 >;
@@ -169,28 +170,38 @@ export function SessionTimeline({
                       className="overflow-hidden"
                     >
                       <div className="space-y-4 border-t border-border px-5 py-4">
-                        {s.soap && (
+                        {s.note && (
                           <div className="grid gap-3 sm:grid-cols-2">
-                            {(
-                              [
-                                ["Subjective", s.soap.subjective],
-                                ["Objective", s.soap.objective],
-                                ["Assessment", s.soap.assessment],
-                                ["Plan", s.soap.plan],
-                              ] as const
-                            ).map(([label, text]) => (
-                              <div
-                                key={label}
-                                className="rounded-xl bg-foreground/[0.03] p-3"
-                              >
-                                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                  {label}
-                                </p>
-                                <p className="text-sm leading-relaxed text-foreground/85">
-                                  {text || "—"}
-                                </p>
-                              </div>
-                            ))}
+                            {NOTE_SECTIONS.map(({ key, label }) => {
+                              const items = normalizeNote(s.note)[key];
+                              return (
+                                <div
+                                  key={key}
+                                  className="rounded-xl bg-foreground/[0.03] p-3"
+                                >
+                                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    {label}
+                                  </p>
+                                  {items.length > 0 ? (
+                                    <ul className="space-y-1.5">
+                                      {items.map((bullet, j) => (
+                                        <li key={j} className="flex gap-2">
+                                          <span
+                                            aria-hidden
+                                            className="mt-1.5 size-1 shrink-0 rounded-full bg-primary/50"
+                                          />
+                                          <span className="text-sm leading-relaxed text-foreground/85">
+                                            {bullet}
+                                          </span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">—</p>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
 
@@ -220,13 +231,13 @@ export function SessionTimeline({
                               transcript={s.raw_transcript}
                             />
                           )}
-                          {s.soap && (
+                          {s.note && (
                             <SessionDocPreview
                               kind="Summary"
                               sessionTitle={s.title}
                               patientName={patientName}
                               dateISO={s.created_at}
-                              soap={s.soap}
+                              note={s.note}
                             />
                           )}
                           <Button asChild variant="ghost" size="sm">

@@ -54,6 +54,9 @@ type LocalMessage = Pick<
   "id" | "role" | "content" | "engine" | "matches"
 >;
 
+/** Which chat to re-open on return, per clinician. */
+const lastChatKey = (userId: string) => `aura:memory:last-chat:${userId}`;
+
 export function MemorySearch({
   userId,
   patients,
@@ -87,6 +90,48 @@ export function MemorySearch({
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, busy]);
+
+  // Coming back to the tab must restore what you left, not a blank page. The
+  // server render can be a cached RSC payload, so re-read the chat list on
+  // mount and re-open the chat that was last active (remembered per user).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data: fresh } = await supabase
+        .from("memory_chats")
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .returns<MemoryChat[]>();
+      if (cancelled) return;
+      const list = fresh ?? [];
+      if (fresh) setChats(list);
+
+      const lastId = localStorage.getItem(lastChatKey(userId));
+      const restore = list.find((c) => c.id === lastId);
+      if (!restore) return;
+
+      const { data: turns } = await supabase
+        .from("memory_messages")
+        .select("*")
+        .eq("chat_id", restore.id)
+        .order("created_at", { ascending: true })
+        .returns<MemoryMessage[]>();
+      if (cancelled) return;
+      setActiveId(restore.id);
+      setMessages(turns ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Mount-only: a deliberate one-shot restore, not a subscription.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Remember which chat to come back to.
+  useEffect(() => {
+    if (activeId) localStorage.setItem(lastChatKey(userId), activeId);
+    else localStorage.removeItem(lastChatKey(userId));
+  }, [activeId, userId]);
 
   async function openChat(chat: MemoryChat) {
     setActiveId(chat.id);

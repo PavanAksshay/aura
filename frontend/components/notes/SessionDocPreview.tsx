@@ -5,14 +5,15 @@
  * Clicking the trigger opens a drawer with a formatted preview; from there the
  * clinician downloads a PDF titled "<Session title> - <Patient name>".
  *
- * Summary uses the structured SOAP note (the clinical summary of the session);
+ * Summary uses the generated note ("What was discussed" / "What lies ahead");
  * Transcript uses the raw, speaker-labelled text.
  */
 
 import { useState } from "react";
 import { Download, FileText, ScrollText } from "lucide-react";
 
-import type { SoapNote } from "@/lib/types";
+import { normalizeNote, NOTE_SECTIONS } from "@/lib/note";
+import type { LegacySoapNote, SessionNote } from "@/lib/types";
 import { buildSessionTitle, downloadSessionPdf, type PdfSection } from "@/lib/pdf";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,23 +25,23 @@ import {
 
 type Kind = "Transcript" | "Summary";
 
-const SOAP_LABELS: [keyof SoapNote, string][] = [
-  ["subjective", "Subjective"],
-  ["objective", "Objective"],
-  ["assessment", "Assessment"],
-  ["plan", "Plan"],
-];
-
 function sectionsFor(
   kind: Kind,
   transcript: string | null,
-  soap: SoapNote | null,
+  note: SessionNote | LegacySoapNote | null,
 ): PdfSection[] {
   if (kind === "Transcript") {
     return [{ body: transcript ?? "No transcript available." }];
   }
-  if (!soap) return [{ body: "No summary available." }];
-  return SOAP_LABELS.map(([key, heading]) => ({ heading, body: soap[key] }));
+  if (!note) return [{ body: "No summary available." }];
+  const parsed = normalizeNote(note);
+  return NOTE_SECTIONS.map(({ key, label }) => ({
+    heading: label,
+    // Bulleted in the PDF too, so the exported doc reads like the app.
+    body: parsed[key].length
+      ? parsed[key].map((b) => `• ${b}`).join("\n")
+      : "—",
+  }));
 }
 
 export function SessionDocPreview({
@@ -49,17 +50,17 @@ export function SessionDocPreview({
   patientName,
   dateISO,
   transcript = null,
-  soap = null,
+  note = null,
 }: {
   kind: Kind;
   sessionTitle: string;
   patientName: string | null;
   dateISO: string;
   transcript?: string | null;
-  soap?: SoapNote | null;
+  note?: SessionNote | LegacySoapNote | null;
 }) {
   const [open, setOpen] = useState(false);
-  const sections = sectionsFor(kind, transcript, soap);
+  const sections = sectionsFor(kind, transcript, note);
   const Icon = kind === "Transcript" ? ScrollText : FileText;
 
   function handleDownload() {
@@ -88,10 +89,11 @@ export function SessionDocPreview({
             ) : (
               sections.map((s) => (
                 <div key={s.heading} className="rounded-xl bg-foreground/[0.03] p-4">
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-primary">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-primary">
                     {s.heading}
                   </p>
-                  <p className="text-sm leading-relaxed text-foreground/85">
+                  {/* Body is already bulleted ("• …" per line) — keep the lines. */}
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/85">
                     {s.body?.trim() || "—"}
                   </p>
                 </div>

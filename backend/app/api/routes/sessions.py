@@ -13,8 +13,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from app.core.ratelimit import rate_limit
 from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
-from app.models.schemas import SessionOut, SessionSummary, SoapNote
+from app.models.schemas import SessionOut, SessionSummary
 from app.services.embeddings import index_exported_note
+from app.services.note import parse_note
 from app.services.retention import export_session_row
 from app.services.summary import generate_summary
 
@@ -45,8 +46,8 @@ async def export_session(
             detail="No exportable session found.",
         )
 
-    if row.get("soap") is not None:
-        note = SoapNote.model_validate(row["soap"])
+    if row.get("note") is not None:
+        note = parse_note(cast(dict[str, object], row["note"]))
         background.add_task(
             index_exported_note,
             session_id,

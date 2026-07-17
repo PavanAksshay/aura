@@ -2,7 +2,17 @@
 
 export type SessionStatus = "processing" | "ready" | "exported" | "failed";
 
-export interface SoapNote {
+/**
+ * The generated session note: two readable sections of bullets (0016).
+ * Replaced SOAP, whose four buckets a therapy dialogue rarely fit.
+ */
+export interface SessionNote {
+  discussed: string[];
+  ahead: string[];
+}
+
+/** The legacy SOAP shape — older rows still hold it; read via normalizeNote(). */
+export interface LegacySoapNote {
   subjective: string;
   objective: string;
   assessment: string;
@@ -28,7 +38,8 @@ export interface ClinicalSession {
   audio_duration_seconds: number | null;
   /** Retained after export (migration 0007); only audio is ephemeral. */
   raw_transcript: string | null;
-  soap: SoapNote | null;
+  /** Generated note (0016). May hold the legacy SOAP shape on older rows. */
+  note: SessionNote | LegacySoapNote | null;
   /** Therapist's own free-text notes on the session (0014). */
   clinician_notes: string | null;
   summary: SessionSummary | null;

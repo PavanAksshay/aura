@@ -1,4 +1,4 @@
-/** Session detail: pipeline status → SOAP note review → transcript + summary. */
+/** Session detail: pipeline status → note review → transcript + summary. */
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProcessingPoller } from "@/components/notes/ProcessingPoller";
 import { SessionDocPreview } from "@/components/notes/SessionDocPreview";
-import { SoapNoteView } from "@/components/notes/SoapNoteView";
+import { NoteView } from "@/components/notes/NoteView";
 import { TranscriptPanel } from "@/components/notes/TranscriptPanel";
 import { Badge, SESSION_STATUS_TONE } from "@/components/ui/badge";
 import type { ClinicalSession, Patient } from "@/lib/types";
@@ -80,10 +80,10 @@ export default async function SessionPage({
           </p>
         )}
 
-        {reviewable && session.soap && (
-          <SoapNoteView
+        {reviewable && session.note && (
+          <NoteView
             sessionId={session.id}
-            note={session.soap}
+            note={session.note}
             exported={session.status === "exported"}
           />
         )}
@@ -102,13 +102,13 @@ export default async function SessionPage({
                   dateISO={session.created_at}
                   transcript={session.raw_transcript}
                 />
-                {session.soap && (
+                {session.note && (
                   <SessionDocPreview
                     kind="Summary"
                     sessionTitle={session.title}
                     patientName={patient?.full_name ?? null}
                     dateISO={session.created_at}
-                    soap={session.soap}
+                    note={session.note}
                   />
                 )}
               </div>

@@ -1,8 +1,8 @@
 """Local semantic memory: chunk exported notes and embed them with fastembed.
 
 Only *structured note* text is ever embedded — raw transcripts never reach
-this module (they are purged in the same write that triggers it). Embeddings
-are computed in-process with an ONNX model; nothing leaves the machine.
+this module. Embeddings are computed in-process with an ONNX model; nothing
+leaves the machine.
 """
 
 import logging
@@ -11,7 +11,7 @@ from typing import Any, cast
 
 from app.core.config import get_settings
 from app.db.supabase import get_service_client
-from app.models.schemas import SoapNote
+from app.models.schemas import SessionNote
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +33,18 @@ def _get_model() -> Any:
     return _model
 
 
-def chunk_note(note: SoapNote) -> list[str]:
-    """One chunk per SOAP section; long sections split at sentence seams.
+def chunk_note(note: SessionNote) -> list[str]:
+    """One chunk per note bullet; over-long bullets split at sentence seams.
 
-    Section labels stay inside the chunk text so retrieval hits carry their
-    clinical framing ("Plan: increase exposure homework…").
+    Because the note is already bulleted, each chunk is a single clinical fact
+    — sharper retrieval than the old section-sized blocks. The section label
+    stays inside the chunk text to carry framing ("Ahead: keep the daily
+    breathing practice…").
     """
     chunks: list[str] = []
-    for label, body in (
-        ("Subjective", note.subjective),
-        ("Objective", note.objective),
-        ("Assessment", note.assessment),
-        ("Plan", note.plan),
-    ):
+    labelled = [("Discussed", b) for b in note.discussed]
+    labelled += [("Ahead", b) for b in note.ahead]
+    for label, body in labelled:
         text = body.strip()
         if not text:
             continue
@@ -72,7 +71,7 @@ def index_exported_note(
     session_id: str,
     user_id: str,
     patient_id: str | None,
-    note: SoapNote,
+    note: SessionNote,
 ) -> None:
     """Background task run at export time: write the note into patient memory.
 

@@ -14,13 +14,22 @@ class SessionStatus(StrEnum):
     FAILED = "failed"
 
 
-class SoapNote(BaseModel):
-    """The structured clinical note. This is the only artifact that persists."""
+class SessionNote(BaseModel):
+    """The structured session note: two readable sections of bullets.
 
-    subjective: str = Field(description="Client-reported experience, symptoms, concerns.")
-    objective: str = Field(description="Clinician-observable data: affect, behavior, MSE.")
-    assessment: str = Field(description="Clinical interpretation, progress, risk factors.")
-    plan: str = Field(description="Interventions, homework, next-session goals.")
+    Replaces the earlier SOAP form, which split a therapy dialogue into four
+    clinical buckets it rarely fit — leaving misaligned transcript fragments
+    and empty "No … identified." boxes.
+    """
+
+    discussed: list[str] = Field(
+        default_factory=list,
+        description="What was discussed — the session's content, as bullets.",
+    )
+    ahead: list[str] = Field(
+        default_factory=list,
+        description="What lies ahead — plans, homework, next-session focus.",
+    )
 
 
 class TranscriptionAccepted(BaseModel):
@@ -86,7 +95,7 @@ class SessionOut(BaseModel):
     status: SessionStatus
     audio_duration_seconds: int | None
     raw_transcript: str | None
-    soap: SoapNote | None
+    note: SessionNote | None
     error_detail: str | None
     created_at: datetime
     updated_at: datetime

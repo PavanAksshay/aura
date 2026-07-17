@@ -22,7 +22,7 @@ type TimelineRow = Pick<
   | "created_at"
   | "audio_duration_seconds"
   | "summary"
-  | "soap"
+  | "note"
   | "raw_transcript"
   | "clinician_notes"
 >;
@@ -57,7 +57,7 @@ export default async function PatientProfilePage({
     supabase
       .from("sessions")
       .select(
-        "id, title, status, created_at, audio_duration_seconds, summary, soap, raw_transcript, clinician_notes",
+        "id, title, status, created_at, audio_duration_seconds, summary, note, raw_transcript, clinician_notes",
       )
       .eq("patient_id", id)
       .order("created_at", { ascending: false })
