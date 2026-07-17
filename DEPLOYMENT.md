@@ -48,25 +48,30 @@ you set in its dashboard.
 The frontend can't talk to `localhost:8000` on your Mac from the internet, so
 the backend needs a public HTTPS address. Two paths:
 
-### Free: tunnel from your Mac (no monthly cost)
+### Free + permanent: an ngrok static domain (recommended)
 
-Keep running the backend on your Mac and expose it with a tunnel:
+ngrok's free plan includes **one permanent static domain**, so the backend URL
+never changes — set it in Vercel once and forget it.
 
 ```bash
-# one-time
-brew install cloudflared
-# each time you run the backend:
-cloudflared tunnel --url http://localhost:8000
+brew install ngrok
+ngrok config add-authtoken <your-token>          # one-time, from ngrok dashboard
+# each time you run the backend (keep it running alongside uvicorn):
+ngrok http 8000 --url=https://<your-name>.ngrok-free.dev
 ```
 
-It prints a `https://<random>.trycloudflare.com` URL. Set that as
-`NEXT_PUBLIC_API_URL` in Vercel (and in the backend, add it to
-`ALLOWED_ORIGINS` alongside your Vercel domain), then redeploy the frontend.
+The frontend sends an `ngrok-skip-browser-warning` header so ngrok's free-tier
+interstitial never replaces an API response (the backend allows that header in
+CORS). Set the static URL as `NEXT_PUBLIC_API_URL` in Vercel and **redeploy**
+(it's baked into the build + CSP).
 
 Trade-offs, stated plainly:
-- Your Mac must be **on and running** the backend + Ollama for the app to work.
-- The free `trycloudflare.com` URL **changes every restart**. A stable name
-  needs a (free) Cloudflare account with a named tunnel, or a domain.
+- Your Mac must be **on and running** the backend + Ollama + the tunnel.
+- The URL is stable across restarts, so no Vercel changes are needed again.
+
+_(The quick-and-dirty alternative is `cloudflared tunnel --url http://localhost:8000`,
+but its `trycloudflare.com` URL changes every restart — a permanent Cloudflare
+tunnel needs a domain you own.)_
 
 ### Paid: a real host
 
