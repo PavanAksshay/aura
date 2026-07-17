@@ -72,11 +72,11 @@ export function AudioRecorder({
         patientId: patientId || null,
       });
       setPendingBlob(null); // release the audio buffer
-      // Rough ETA: Whisper large-v3 + diarization runs at ~2x realtime on CPU.
+      // Rough ETA: transcription + diarization runs at ~2x realtime on CPU.
       const etaMin = Math.max(1, Math.round((recordedSeconds * 2) / 60));
       toast.info(
         `Note ready in ~${etaMin} min`,
-        "Whisper is transcribing on the server. You'll be notified here when it's done — track it on this session page or your dashboard.",
+        "Your session is transcribing on the server. You'll be notified here when it's done — track it on this session page or your dashboard.",
       );
       router.push(`/sessions/${session_id}`);
     } catch (err) {

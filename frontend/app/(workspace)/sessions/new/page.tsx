@@ -17,7 +17,7 @@ const STEPS = [
   {
     icon: Sparkles,
     title: "Transcribe & structure",
-    body: "Whisper large-v3 transcribes on your machine, then drafts a SOAP note. A short session takes under a minute; longer ones a few minutes.",
+    body: "The session is transcribed privately on your own machine, with each speaker labelled, then turned into a clear note — what was discussed and what lies ahead. A short session takes under a minute; longer ones a few minutes.",
   },
   {
     icon: ShieldCheck,

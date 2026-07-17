@@ -237,48 +237,52 @@ function Waveform() {
   );
 }
 
-const SAMPLE_NOTE: { letter: string; label: string; text: string }[] = [
+const SAMPLE_NOTE: { heading: string; bullets: string[] }[] = [
   {
-    letter: "S",
-    label: "Subjective",
-    text: "Reports work-related anxiety; sleep disrupted 4–5 nights this week.",
+    heading: "What was discussed",
+    bullets: [
+      "Work-related anxiety; sleep disrupted 4–5 nights this week.",
+      "Slow-breathing practice helped before presentations.",
+    ],
   },
   {
-    letter: "O",
-    label: "Objective",
-    text: "Alert and cooperative; affect mildly anxious, speech normal rate.",
-  },
-  {
-    letter: "A",
-    label: "Assessment",
-    text: "Generalized anxiety, moderate. Responding to CBT; insight improving.",
-  },
-  {
-    letter: "P",
-    label: "Plan",
-    text: "Continue weekly CBT + sleep-hygiene plan. Review in two weeks.",
+    heading: "What lies ahead",
+    bullets: [
+      "Keep the daily breathing practice; fixed 11:30pm bedtime.",
+      "Next session: fear of disappointing family.",
+    ],
   },
 ];
 
-function SoapSkeleton() {
+function NoteSkeleton() {
   return (
-    <div className="space-y-2">
-      {SAMPLE_NOTE.map(({ letter, label, text }, i) => (
+    <div className="space-y-3">
+      {SAMPLE_NOTE.map((section, i) => (
         <motion.div
-          key={letter}
-          className="flex items-start gap-3 rounded-xl bg-foreground/[0.03] px-3 py-2"
+          key={section.heading}
+          className="rounded-xl bg-foreground/[0.03] px-3 py-2.5"
           initial={{ opacity: 0, x: -8 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.15 + i * 0.12 }}
+          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.15 + i * 0.15 }}
         >
-          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 font-display text-xs font-semibold text-primary">
-            {letter}
-          </span>
-          <p className="text-sm leading-snug text-foreground/75">
-            <span className="font-medium text-foreground/90">{label}. </span>
-            {text}
+          <p className="mb-1.5 font-display text-xs font-semibold uppercase tracking-wide text-primary">
+            {section.heading}
           </p>
+          <ul className="space-y-1">
+            {section.bullets.map((b, j) => (
+              <li
+                key={j}
+                className="flex gap-2 text-sm leading-snug text-foreground/75"
+              >
+                <span
+                  aria-hidden
+                  className="mt-1.5 size-1 shrink-0 rounded-full bg-primary/50"
+                />
+                {b}
+              </li>
+            ))}
+          </ul>
         </motion.div>
       ))}
     </div>
@@ -289,16 +293,16 @@ const FEATURES = [
   {
     icon: AudioLines,
     title: "Ambient scribe",
-    body: "Record the session and stay present. Aura transcribes with Whisper running inside your own backend — no speech API, no cloud vendor, no transcript ever leaving your infrastructure.",
+    body: "Record the session and stay present. Aura transcribes inside your own backend — no speech API, no cloud vendor, no transcript ever leaving your infrastructure.",
     span: "md:col-span-7",
     visual: <Waveform />,
   },
   {
     icon: FileText,
     title: "Structured notes, instantly",
-    body: "Every session becomes a clean SOAP draft you review, edit, and own.",
+    body: "Every session becomes a clean, structured note — what was discussed and what lies ahead — that you review, edit, and own.",
     span: "md:col-span-5",
-    visual: <SoapSkeleton />,
+    visual: <NoteSkeleton />,
   },
   {
     icon: Timer,
@@ -401,7 +405,7 @@ const STEPS = [
   {
     n: "02",
     title: "Review",
-    body: "Minutes later, a structured SOAP draft is waiting. Edit it like a document; the raw transcript stays visible until you're done.",
+    body: "Minutes later, a structured note is waiting — what was discussed and what lies ahead. Edit it like a document; the raw transcript stays visible until you're done.",
   },
   {
     n: "03",
