@@ -61,10 +61,28 @@ def chunk_note(note: SessionNote) -> list[str]:
     return chunks
 
 
-def embed_texts(texts: list[str]) -> list[list[float]]:
-    """Embed a batch of strings → 768-dim vectors (see migration 0005)."""
-    model = _get_model()
-    return [[float(x) for x in vector] for vector in model.embed(texts)]
+def _to_lists(vectors: Any) -> list[list[float]]:
+    return [[float(x) for x in vector] for vector in vectors]
+
+
+def embed_documents(texts: list[str]) -> list[list[float]]:
+    """Embed note chunks for storage → 768-dim vectors (see migration 0005).
+
+    Uses `passage_embed`, the document side of the model's asymmetric retrieval
+    pair. Queries must go through `embed_query` — mixing the two, or mixing
+    vectors from different models, makes cosine distance meaningless.
+    """
+    return _to_lists(_get_model().passage_embed(texts))
+
+
+def embed_query(text: str) -> list[float]:
+    """Embed a search query → one 768-dim vector.
+
+    Uses `query_embed`, which applies the model's retrieval instruction prefix
+    ("Represent this sentence for searching relevant passages:" for BGE). This
+    is what makes a short question match a longer note chunk.
+    """
+    return _to_lists(_get_model().query_embed([text]))[0]
 
 
 def index_exported_note(
@@ -83,7 +101,7 @@ def index_exported_note(
         chunks = chunk_note(note)
         if not chunks:
             return
-        vectors = embed_texts(chunks)
+        vectors = embed_documents(chunks)
 
         db = get_service_client()
         db.table("note_embeddings").delete().eq("session_id", session_id).eq(

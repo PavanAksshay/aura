@@ -20,7 +20,7 @@ from app.models.schemas import (
     MemoryMatchOut,
     MemorySearchRequest,
 )
-from app.services.embeddings import embed_texts
+from app.services.embeddings import embed_query
 from app.services.memory_answer import answer_question
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def _is_placeholder(content: str) -> bool:
 def _retrieve(
     user_id: str, query: str, match_count: int, patient_id: str | None
 ) -> list[MemoryMatchOut]:
-    [query_vector] = embed_texts([query])
+    query_vector = embed_query(query)
     db = get_service_client()
     try:
         result = db.rpc(

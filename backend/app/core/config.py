@@ -54,7 +54,12 @@ class Settings(BaseSettings):
 
     # Patient-memory embeddings, computed in-process (fastembed/ONNX).
     # 768-dim — must match the vector(768) columns in migration 0005.
-    embedding_model: str = "nomic-ai/nomic-embed-text-v1.5"
+    #
+    # bge-base beat nomic-embed-text-v1.5 on this corpus (4/4 vs 3/4 correct
+    # top-1 on real clinician questions) at 2.5x smaller (0.21 GB vs 0.52 GB),
+    # which matters on an 8 GB machine also holding Whisper + Ollama.
+    # CHANGING THIS INVALIDATES EVERY STORED VECTOR — re-index all notes after.
+    embedding_model: str = "BAAI/bge-base-en-v1.5"
 
     # Local LLM (Ollama) for on-demand transcript summaries. Fully local; if
     # unreachable the summarizer falls back to a deterministic heuristic.
