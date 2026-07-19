@@ -7,9 +7,10 @@
  */
 
 import { useState } from "react";
-import { Download, Loader2, Sparkles, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftRight, Download, Loader2, Sparkles, User } from "lucide-react";
 
-import { summarizeSession } from "@/lib/api";
+import { summarizeSession, swapSpeakers } from "@/lib/api";
 import { toast } from "@/lib/toast";
 import type { SessionSummary } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +31,9 @@ export function TranscriptPanel({
   transcript: string;
   initialSummary: SessionSummary | null;
 }) {
+  const router = useRouter();
   const [summary, setSummary] = useState<SessionSummary | null>(initialSummary);
+  const [swapping, setSwapping] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +64,28 @@ export function TranscriptPanel({
     }
   }
 
+  async function handleSwapSpeakers() {
+    setSwapping(true);
+    try {
+      await swapSpeakers(sessionId);
+      toast.success(
+        "Speaker labels swapped",
+        "The note was redrafted from the corrected transcript — please review it again.",
+      );
+      router.refresh();
+    } catch (err) {
+      toast.error(
+        "Could not swap speakers",
+        err instanceof Error ? err.message : "Please try again.",
+      );
+    } finally {
+      setSwapping(false);
+    }
+  }
+
+  // Only meaningful when diarization actually produced role labels.
+  const hasRoleLabels = /^(Therapist|Patient):/m.test(transcript);
+
   const details: { label: string; value: string }[] = summary
     ? [
         { label: "Name", value: summary.patient_name },
@@ -85,6 +110,30 @@ export function TranscriptPanel({
         <p className="max-h-96 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground/85">
           {transcript}
         </p>
+        {/* Diarization separates voices but cannot tell who is the clinician;
+            it assumes whoever speaks first is the therapist. When that is
+            wrong, every line is attributed to the wrong person. */}
+        {hasRoleLabels && (
+          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
+            <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+              Labels are a guess based on who spoke first. If they are the wrong
+              way round, swap them — the note will be redrafted to match.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleSwapSpeakers}
+              disabled={swapping}
+            >
+              {swapping ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <ArrowLeftRight />
+              )}
+              {swapping ? "Redrafting…" : "Swap speakers"}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Summary */}

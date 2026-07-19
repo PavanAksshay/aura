@@ -187,10 +187,15 @@ function Hero({ authed }: { authed: boolean }) {
           transition={{ duration: 0.8, delay: 0.55 }}
           className="mt-16 grid grid-cols-3 gap-8 text-center"
         >
+          {/* Every number here must stay literally true — this is a privacy
+              claim on a public page. "1 artifact persists: your note" was
+              wrong: migration 0007 retains the transcript too, deliberately,
+              so it can be reviewed and downloaded after the fact. Only the
+              audio is ephemeral. */}
           {[
-            ["0", "recordings retained"],
-            ["100%", "on-device transcription"],
-            ["1", "artifact persists: your note"],
+            ["0", "audio recordings kept"],
+            ["100%", "transcribed on your machine"],
+            ["0", "words sent to a cloud AI"],
           ].map(([value, label]) => (
             <div key={label}>
               <dt className="font-display text-2xl font-semibold text-foreground sm:text-3xl">

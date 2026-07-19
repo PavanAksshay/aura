@@ -37,14 +37,12 @@ export default function GlobalError({
         }}
       >
         <main style={{ maxWidth: "34rem", textAlign: "center" }}>
-          <h1 style={{ fontSize: "1.5rem", margin: "0 0 0.75rem" }}>
-            Aura is temporarily unavailable
+          <h1
+            style={{ fontSize: "1.5rem", lineHeight: 1.4, margin: "0 0 1.5rem" }}
+          >
+            Sorry for the inconvenience caused. App is down for maintenance.
+            Please try again later
           </h1>
-          <p style={{ lineHeight: 1.6, margin: "0 0 1.5rem", opacity: 0.8 }}>
-            We hit an unexpected problem loading the app. Your patients, notes
-            and recordings are stored safely and have not been affected —
-            reloading usually resolves it.
-          </p>
           <button
             type="button"
             onClick={reset}

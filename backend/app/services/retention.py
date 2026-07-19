@@ -108,3 +108,24 @@ def export_session_row(session_id: str, user_id: str) -> dict[str, object] | Non
     )
     rows = cast(list[dict[str, object]], result.data or [])
     return rows[0] if rows else None
+
+
+def mark_session_reviewed(session_id: str, user_id: str) -> dict[str, object] | None:
+    """Record that this clinician read the generated note and stands behind it.
+
+    Notes are drafted by a local 3B model and auto-indexed into Memory with no
+    human in the loop, so until this is set the note is an unverified machine
+    draft (migration 0017). Scoped by owner; the WHERE clause is the
+    authorization check. Idempotent by intent — re-attesting refreshes the
+    timestamp rather than erroring.
+    """
+    db = get_service_client()
+    result = (
+        db.table("sessions")
+        .update({"reviewed_at": "now()", "reviewed_by": user_id})
+        .eq("id", session_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    rows = cast(list[dict[str, object]], result.data or [])
+    return rows[0] if rows else None

@@ -51,10 +51,12 @@ async function authHeader(): Promise<Record<string, string>> {
  * user's data is fine and the right advice is "try again shortly", not
  * "something went wrong".
  */
+/** One wording for every unreachable-backend path, matching the banner. */
+export const MAINTENANCE_MESSAGE =
+  "Sorry for the inconvenience caused. App is down for maintenance. Please try again later";
+
 export class BackendUnavailableError extends Error {
-  constructor(
-    message = "Aura's processing service is temporarily unavailable. Your notes and patients are safe — please try again in a moment.",
-  ) {
+  constructor(message = MAINTENANCE_MESSAGE) {
     super(message);
     this.name = "BackendUnavailableError";
   }
@@ -112,9 +114,7 @@ async function request(
     // some engines surface a plain "AbortError" instead.
     const name = (error as { name?: string })?.name;
     if (name === "TimeoutError" || name === "AbortError") {
-      throw new BackendUnavailableError(
-        "Aura's processing service did not respond in time. Your work is saved — please try again shortly.",
-      );
+      throw new BackendUnavailableError();
     }
     if (error instanceof TypeError) throw new BackendUnavailableError();
     throw error;
@@ -213,8 +213,36 @@ export async function askMemory(opts: {
 }
 
 /**
- * Export the structured note. Server-side this is the point of no return:
- * the raw transcript is purged and only the SOAP note survives.
+ * Fix an inverted Therapist/Patient labelling. The server also redrafts the
+ * note from the corrected transcript, so this runs the local LLM and is slow.
+ */
+export async function swapSpeakers(sessionId: string): Promise<ClinicalSession> {
+  const res = await request(
+    `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/swap-speakers`,
+    { method: "POST", headers: await authHeader() },
+    LLM_TIMEOUT_MS,
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as ClinicalSession;
+}
+
+/**
+ * Attest that a clinician has read the generated note and it is accurate.
+ * Until this is set the note is an unverified machine draft (migration 0017).
+ */
+export async function reviewSession(sessionId: string): Promise<ClinicalSession> {
+  const res = await request(
+    `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/review`,
+    { method: "POST", headers: await authHeader() },
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as ClinicalSession;
+}
+
+/**
+ * Export the structured note: marks it exported and indexes it into Memory.
+ * The raw transcript is RETAINED (migration 0007) — only the audio is
+ * ephemeral, and that is already gone by this point.
  */
 export async function exportSession(sessionId: string): Promise<ClinicalSession> {
   const res = await request(

@@ -1,0 +1,66 @@
+# Aura — backend + local LLM, one command.
+#
+#   cp backend/.env.example backend/.env   # fill in Supabase values
+#   docker compose up -d
+#
+# The first start is slow: it pulls the Ollama model and Whisper downloads
+# ~1.5 GB of weights on the first transcription. Both are cached in volumes,
+# so later starts are fast.
+#
+# Everything here runs on the clinician's own machine. Nothing in this file
+# sends audio, transcripts, or notes anywhere except the Supabase project
+# named in backend/.env.
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        # Drop to "ml" for a much smaller image without speaker labelling.
+        EXTRAS: ml,diarization
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Reach the sibling container, not the host's loopback.
+      OLLAMA_URL: http://ollama:11434
+      AUDIO_SCRATCH_DIR: /tmp/clinical-scribe-audio
+    volumes:
+      # Model weights survive rebuilds — re-downloading large-v3 is painful.
+      - whisper-cache:/home/aura/.cache/huggingface
+      # tmpfs: audio is ephemeral by design, so never let it touch a disk.
+    tmpfs:
+      - /tmp/clinical-scribe-audio
+    depends_on:
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      # Exposed so you can `ollama` against it from the host for debugging.
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+  # Pulls the summarisation model once, then exits. Without this the first
+  # note silently falls back to the heuristic because the model isn't there.
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_started
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "until ollama list >/dev/null 2>&1; do echo 'waiting for ollama…'; sleep 2; done;
+       ollama pull llama3.2:3b"
+    restart: "no"
+
+volumes:
+  whisper-cache:
+  ollama-models:

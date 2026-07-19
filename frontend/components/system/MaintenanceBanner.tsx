@@ -78,19 +78,10 @@ export function MaintenanceBanner() {
               aria-hidden
               className="size-5 shrink-0 text-amber-600 dark:text-amber-400"
             />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">
-                Recording and Memory are paused for maintenance
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Aura&apos;s processing service is offline.{" "}
-                <strong className="font-medium text-foreground">
-                  Nothing has been lost
-                </strong>{" "}
-                — your patients, past notes and schedule are all still here and
-                editable. New recordings can be made once it&apos;s back.
-              </p>
-            </div>
+            <p className="min-w-0 flex-1 text-sm font-medium">
+              Sorry for the inconvenience caused. App is down for maintenance.
+              Please try again later
+            </p>
             <button
               type="button"
               onClick={retry}

@@ -9,9 +9,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Copy, Loader2, MessagesSquare, Route, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Check,
+  Copy,
+  Loader2,
+  MessagesSquare,
+  Route,
+  ShieldCheck,
+} from "lucide-react";
 
-import { exportSession } from "@/lib/api";
+import { exportSession, reviewSession } from "@/lib/api";
 import { normalizeNote, noteToText, NOTE_SECTIONS } from "@/lib/note";
 import { toast } from "@/lib/toast";
 import type { LegacySoapNote, SessionNote } from "@/lib/types";
@@ -23,6 +32,14 @@ const SECTION_ICON = {
   ahead: Route,
 } as const;
 
+/** Wall-clock formatting kept out of render so the component stays pure. */
+function formatReviewDate(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 const EMPTY_COPY = {
   discussed: "Nothing was captured from this session.",
   ahead: "No plans or next steps were agreed.",
@@ -32,16 +49,38 @@ export function NoteView({
   sessionId,
   note: raw,
   exported,
+  reviewedAt,
 }: {
   sessionId: string;
   note: SessionNote | LegacySoapNote;
   exported: boolean;
+  /** ISO timestamp of clinician attestation; null = unverified AI draft. */
+  reviewedAt?: string | null;
 }) {
   const router = useRouter();
   const note = normalizeNote(raw);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [reviewed, setReviewed] = useState<string | null>(reviewedAt ?? null);
+  const [reviewing, setReviewing] = useState(false);
+
+  async function handleReview() {
+    setReviewing(true);
+    try {
+      const updated = await reviewSession(sessionId);
+      setReviewed(updated.reviewed_at ?? new Date().toISOString());
+      toast.success("Note marked as reviewed");
+      router.refresh();
+    } catch (err) {
+      toast.error(
+        "Could not save your review",
+        err instanceof Error ? err.message : "Please try again.",
+      );
+    } finally {
+      setReviewing(false);
+    }
+  }
 
   async function handleExport() {
     setBusy(true);
@@ -70,6 +109,31 @@ export function NoteView({
 
   return (
     <div className="space-y-4">
+      {/* The note is drafted by a local model and indexed into Memory without
+          anyone reading it first. Say so, until a clinician says otherwise. */}
+      {reviewed ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <BadgeCheck aria-hidden className="size-4 text-primary" />
+          Reviewed by you on {formatReviewDate(reviewed)}
+        </p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <AlertTriangle
+            aria-hidden
+            className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
+          />
+          <p className="min-w-0 flex-1 text-sm">
+            <strong className="font-medium">AI draft — not yet reviewed.</strong>{" "}
+            Aura wrote this from the recording. Check it against what happened
+            before relying on it.
+          </p>
+          <Button size="sm" onClick={handleReview} disabled={reviewing}>
+            {reviewing ? <Loader2 className="animate-spin" /> : <BadgeCheck />}
+            {reviewing ? "Saving…" : "Mark as reviewed"}
+          </Button>
+        </div>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
         {NOTE_SECTIONS.map(({ key, label }, i) => {
           const Icon = SECTION_ICON[key];

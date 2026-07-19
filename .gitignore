@@ -27,3 +27,6 @@ frontend/out/
 
 # local agent tooling / vendored skill packs — not part of the app
 .claude/
+
+# Accuracy harness artefacts (generated audio, transcripts)
+backend/scripts/accuracy/out/

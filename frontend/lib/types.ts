@@ -47,6 +47,9 @@ export interface ClinicalSession {
   created_at: string;
   updated_at: string;
   exported_at: string | null;
+  /** Clinician attestation (0017). null = note is an unverified AI draft. */
+  reviewed_at: string | null;
+  reviewed_by: string | null;
 }
 
 export type PatientStatus = "active" | "paused" | "discharged";

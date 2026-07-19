@@ -100,3 +100,6 @@ class SessionOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     exported_at: datetime | None
+    # NULL means the note is still an unverified machine draft (migration 0017).
+    reviewed_at: datetime | None = None
+    reviewed_by: str | None = None

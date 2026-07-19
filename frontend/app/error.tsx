@@ -26,20 +26,14 @@ export default function WorkspaceError({
     console.error("Aura route error:", error);
   }, [error]);
 
-  const offline = error.name === "BackendUnavailableError";
-
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-xl flex-col items-center justify-center px-4 text-center">
       <div className="glass flex w-full flex-col items-center gap-4 rounded-3xl px-6 py-10">
         <AlertTriangle aria-hidden className="size-8 text-amber-500" />
         <h1 className="font-display text-2xl font-semibold tracking-tight">
-          {offline ? "Aura is offline for maintenance" : "Something went wrong"}
+          Sorry for the inconvenience caused. App is down for maintenance.
+          Please try again later
         </h1>
-        <p className="text-muted-foreground">
-          {offline
-            ? "The processing service isn't reachable right now. Your patients, notes and schedule are safe and unchanged — recording and Memory will work again once it's back."
-            : "This page failed to load. Nothing has been lost — your records are stored safely and were not affected."}
-        </p>
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
           <button

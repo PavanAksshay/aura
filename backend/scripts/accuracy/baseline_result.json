@@ -1,0 +1,27 @@
+{
+  "wer": 0.1016949152542373,
+  "facts_in_transcript": 10,
+  "facts_lost": [
+    "weight loss"
+  ],
+  "facts_in_note": 7,
+  "labels": [
+    "Patient",
+    "Therapist"
+  ],
+  "discussed": [
+    "symptoms of insomnia and anxiety",
+    "replaying argument with mother about marriage proposal",
+    "physical symptoms of chest tightness during anxiety attacks",
+    "history of panic attacks before stopping Sertraline",
+    "loss of appetite and weight loss"
+  ],
+  "ahead": [
+    "book an appointment with psychiatrist this week",
+    "keep a sleep diary each night",
+    "try the 4-7-8 breathing exercise when chest tightens",
+    "examine conflict with mother in more depth next session (in two weeks)",
+    "review Sertraline treatment plan with psychiatrist"
+  ],
+  "seconds": 430.2825243473053
+}

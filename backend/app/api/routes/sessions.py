@@ -15,9 +15,10 @@ from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
 from app.models.schemas import SessionOut, SessionSummary
 from app.services.embeddings import index_exported_note
-from app.services.note import parse_note
-from app.services.retention import export_session_row
+from app.services.note import build_session_note, parse_note
+from app.services.retention import export_session_row, mark_session_reviewed
 from app.services.summary import generate_summary
+from app.services.transcription import swap_speaker_roles
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -57,6 +58,89 @@ async def export_session(
         )
 
     return SessionOut.model_validate(row)
+
+
+@router.post(
+    "/sessions/{session_id}/review",
+    response_model=SessionOut,
+    dependencies=[Depends(rate_limit(60, 60))],
+)
+async def review_session(session_id: str, user: CurrentUser) -> SessionOut:
+    """Attest that the clinician has read the generated note and it is accurate.
+
+    Notes are machine-drafted and auto-indexed into Memory with no human in the
+    loop, so this is the only signal separating a verified clinical record from
+    an unchecked AI draft. Deliberately not a gate on export — export has
+    already happened by this point — but the state is surfaced wherever the
+    note is shown.
+    """
+    row = mark_session_reviewed(session_id=session_id, user_id=user.id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
+    return SessionOut.model_validate(row)
+
+
+# `def` (not `async def`): redrafting runs the local LLM, which blocks.
+@router.post(
+    "/sessions/{session_id}/swap-speakers",
+    response_model=SessionOut,
+    dependencies=[Depends(rate_limit(20, 60))],
+)
+def swap_session_speakers(session_id: str, user: CurrentUser) -> SessionOut:
+    """Correct an inverted Therapist/Patient labelling, and redraft the note.
+
+    Diarization separates voices but cannot know which is the clinician, so the
+    pipeline guesses that whoever speaks first is the therapist. When that guess
+    is wrong every line is attributed to the wrong person.
+
+    Swapping the transcript alone would leave the note — which was written from
+    the wrong attribution — quietly contradicting it, so the note is rebuilt
+    from the corrected transcript. Any prior review attestation is cleared for
+    the same reason: it was given for different content.
+    """
+    db = get_service_client()
+    result = (
+        db.table("sessions")
+        .select("raw_transcript")
+        .eq("id", session_id)
+        .eq("user_id", user.id)
+        .execute()
+    )
+    rows = cast(list[dict[str, object]], result.data or [])
+    if not rows:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
+
+    transcript = rows[0].get("raw_transcript")
+    if not isinstance(transcript, str) or not transcript.strip():
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, detail="No transcript available to relabel."
+        )
+    if "Therapist:" not in transcript and "Patient:" not in transcript:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="This transcript has no speaker labels to swap.",
+        )
+
+    swapped = swap_speaker_roles(transcript)
+    note = build_session_note(swapped)
+    updated = (
+        db.table("sessions")
+        .update(
+            {
+                "raw_transcript": swapped,
+                "note": note.model_dump(),
+                "reviewed_at": None,
+                "reviewed_by": None,
+            }
+        )
+        .eq("id", session_id)
+        .eq("user_id", user.id)
+        .execute()
+    )
+    changed = cast(list[dict[str, object]], updated.data or [])
+    if not changed:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
+    return SessionOut.model_validate(changed[0])
 
 
 # `def` (not `async def`): the Ollama call is blocking, so FastAPI runs this

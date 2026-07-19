@@ -16,6 +16,7 @@ first request and are cached locally afterwards.
 """
 
 import logging
+import re
 import threading
 from dataclasses import dataclass
 from pathlib import Path
@@ -123,6 +124,26 @@ def _speaker_label(index: int, roles: bool) -> str:
     if index == 1:
         return "Patient"
     return f"Patient {index}"
+
+
+def swap_speaker_roles(transcript: str) -> str:
+    """Exchange the Therapist and Patient labels throughout a transcript.
+
+    The role assignment in `_speaker_label` is a guess — whoever speaks first
+    is called the therapist. When a patient opens the session that guess
+    inverts every line, which in a clinical record means the patient's words
+    are attributed to the clinician, and vice versa. This is the correction.
+
+    Only the two primary roles swap; "Patient 2" and beyond are left alone,
+    since in a multi-party session they are unambiguously not the therapist.
+    The sentinel avoids the classic double-replacement bug, where
+    Therapist→Patient followed by Patient→Therapist restores the original.
+    """
+    sentinel = "\x00ROLE\x00"
+    out = re.sub(r"^Therapist:", sentinel, transcript, flags=re.MULTILINE)
+    # Anchored with a colon, so "Patient 2:" is untouched.
+    out = re.sub(r"^Patient:", "Therapist:", out, flags=re.MULTILINE)
+    return out.replace(sentinel, "Patient:")
 
 
 def _merge_speakers(
