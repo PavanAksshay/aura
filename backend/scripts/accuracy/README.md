@@ -62,6 +62,41 @@ Two failures worth knowing about, both visible in the saved transcript:
 Neither is fixable by prompt engineering. They are the reason the note carries
 an unreviewed-draft warning until a clinician attests to it.
 
+## First real recording (2026-07-19)
+
+The first session recorded through the real app on real hardware, then
+corrected by the clinician using the note editor. Their edit is the closest
+thing to ground truth this project has.
+
+| | |
+|---|---|
+| Audio | 45 s, real voice, real mic, browser capture |
+| Transcript | Matched the spoken words exactly |
+| Note as drafted | ~8 bullets |
+| Note after clinician correction | **2 bullets** |
+
+**Transcription was not the weak link — note construction was.** Whisper heard
+every word correctly; the 3B model then turned a short recording into eight
+bullets, and roughly three quarters of them were noise the clinician removed.
+
+That direction of failure is worth naming precisely, because it is the
+*opposite* of the fabrication problem found on noisy audio. Here nothing was
+invented — every bullet was grounded in the transcript, which is exactly why
+the grounding guard passed them. The model simply had no sense of what was
+clinically *worth* recording, so it minuted everything.
+
+Two implications:
+
+- The grounding guard defends against invention, not against noise. A bullet
+  can be perfectly faithful and still not belong in a record.
+- Editing is not an edge case. On the first real session it was needed, which
+  is why the editor exists and why the note is labelled an unverified draft
+  until a human says otherwise.
+
+Caveat on generality: one 45-second recording of deliberate test speech. It
+says something real about note construction; it says nothing yet about a
+50-minute session with a distressed patient.
+
 ## Negative result: Whisper's confidence signal does not flag hallucination
 
 The obvious mitigation is to highlight low-confidence passages using

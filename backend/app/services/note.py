@@ -28,9 +28,11 @@ logger = logging.getLogger(__name__)
 _PROMPT = """You are a clinical documentation assistant for a psychologist. \
 From the therapy session transcript below, produce a STRICT JSON object with \
 exactly these keys:
-- "discussed": bullet strings summarizing what was actually discussed — \
-symptoms, experiences, feelings, and anything clinically relevant the patient \
-reported. Plain clinical language, third person, no speaker labels.
+- "discussed": bullet strings for what a clinician would want in the record — \
+symptoms, experiences, feelings, and anything clinically significant the \
+patient reported. Plain clinical language, third person, no speaker labels. \
+Write one bullet per distinct clinical point, not per sentence: if the \
+transcript covers two things, write two bullets, not eight.
 - "ahead": bullet strings covering what lies ahead. Include EVERY forward- \
 looking thing the transcript states: anything suggested, agreed, or planned, \
 homework, routines or techniques to try, and any topic named for a future \
@@ -43,9 +45,15 @@ typical therapy content that is not there. This note goes into a patient's \
 clinical record, so an invented bullet is a serious error.
 2. Equally, do not omit something the transcript does state — a plan that was \
 agreed out loud belongs in "ahead".
-3. There is NO minimum number of bullets. Write as many as the transcript \
-supports and no more — at most 8 for "discussed" and 5 for "ahead".
-4. Use empty lists only when the transcript genuinely offers nothing: no \
+3. There is NO minimum number of bullets, and the maximums are limits, NOT \
+targets — at most 8 for "discussed" and 5 for "ahead". A short session should \
+produce two or three bullets, not eight. Measured on a real recording: this \
+model produced eight bullets where the clinician kept two, because it minuted \
+every passing phrase instead of recording what mattered.
+4. Do not write a bullet for procedural or incidental talk — scheduling, \
+small talk, or the mechanics of the recording itself. Something can be \
+faithfully in the transcript and still not belong in a clinical record.
+5. Use empty lists only when the transcript genuinely offers nothing: no \
 clinical content at all, or no plan of any kind. If the recording is not a \
 therapy session, return {{"discussed": [], "ahead": []}}.
 Return ONLY the JSON object, no prose.
