@@ -44,9 +44,13 @@ export function SessionWatcher() {
           // Sessions auto-export, so a finished one lands on "ready" or
           // "exported" — either means the note is done.
           if (row.status === "ready" || row.status === "exported") {
+            // Sticky: this lands minutes later, while the clinician is on
+            // another tab or with the next patient. A 6s toast they never saw
+            // is the same as no notification at all.
             toast.success(
               "Session note ready",
               `“${row.title}” has been transcribed and saved to Memory.`,
+              { sticky: true },
             );
           } else if (row.status === "failed") {
             toast.error(

@@ -80,6 +80,8 @@ export function AudioRecorder({
       toast.info(
         `Note ready in ~${etaMin} min`,
         "Your session is transcribing on the server. You'll be notified here when it's done — track it on this session page or your dashboard.",
+        // Sticky: it is the standing reminder that a job is in flight.
+        { sticky: true },
       );
       router.push(`/sessions/${session_id}`);
     } catch (err) {

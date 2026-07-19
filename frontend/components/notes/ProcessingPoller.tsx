@@ -46,7 +46,13 @@ export function ProcessingPoller({
       // Sessions auto-export, so a finished one is "ready" or "exported".
       const ready = data.status === "ready" || data.status === "exported";
       if (ready)
-        toast.success("Transcription complete", `“${title}” is ready and saved to Memory.`);
+        // Sticky — the wait is measured in minutes, so this almost always
+        // arrives when the user's attention is elsewhere.
+        toast.success(
+          "Transcription complete",
+          `“${title}” is ready and saved to Memory.`,
+          { sticky: true },
+        );
       else toast.error("Transcription failed", `“${title}” could not be transcribed.`);
 
       if (typeof Notification !== "undefined" && Notification.permission === "granted") {

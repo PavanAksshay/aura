@@ -12,6 +12,7 @@ from typing import cast
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.core.quota import ai_quota
 from app.core.ratelimit import rate_limit
 from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
@@ -79,7 +80,7 @@ def search_memory(body: MemorySearchRequest, user: CurrentUser) -> list[MemoryMa
     "/memory/ask",
     response_model=MemoryAnswer,
     # Each ask runs an Ollama generation on top of retrieval.
-    dependencies=[Depends(rate_limit(20, 60))],
+    dependencies=[Depends(rate_limit(20, 60)), Depends(ai_quota())],
 )
 def ask_memory(body: MemorySearchRequest, user: CurrentUser) -> MemoryAnswer:
     """Answer a question from the caller's notes: a concise, specific answer

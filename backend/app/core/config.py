@@ -66,6 +66,13 @@ class Settings(BaseSettings):
     ollama_url: str = "http://localhost:11434"
     summary_model: str = "llama3.2:3b"
 
+    # AI usage quota. Every Ollama call runs on the operator's own machine, so
+    # guests get a daily allowance and the operator does not. Matched against
+    # the JWT-verified email claim (see core/quota.py) — never a client-supplied
+    # value. Set ai_daily_limit to 0 to disable the quota entirely.
+    owner_email: str = ""
+    ai_daily_limit: int = 25
+
     # Web Push (VAPID) for appointment reminders that arrive with the app
     # closed. Empty keys disable the reminder scheduler entirely.
     vapid_public_key: str = ""

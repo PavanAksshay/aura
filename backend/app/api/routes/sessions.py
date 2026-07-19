@@ -10,6 +10,7 @@ from typing import cast
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
+from app.core.quota import ai_quota
 from app.core.ratelimit import rate_limit
 from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
@@ -160,7 +161,8 @@ def edit_session_note(session_id: str, payload: NoteUpdate, user: CurrentUser) -
 @router.post(
     "/sessions/{session_id}/regenerate-note",
     response_model=SessionOut,
-    dependencies=[Depends(rate_limit(10, 60))],
+    # Runs the local LLM, so it counts against the daily AI allowance.
+    dependencies=[Depends(rate_limit(10, 60)), Depends(ai_quota())],
 )
 def regenerate_session_note(session_id: str, user: CurrentUser) -> SessionOut:
     """Re-draft the note from the stored transcript, discarding the current one.
@@ -192,7 +194,8 @@ def regenerate_session_note(session_id: str, user: CurrentUser) -> SessionOut:
 @router.post(
     "/sessions/{session_id}/swap-speakers",
     response_model=SessionOut,
-    dependencies=[Depends(rate_limit(20, 60))],
+    # Runs the local LLM, so it counts against the daily AI allowance.
+    dependencies=[Depends(rate_limit(20, 60)), Depends(ai_quota())],
 )
 def swap_session_speakers(session_id: str, user: CurrentUser) -> SessionOut:
     """Correct an inverted Therapist/Patient labelling, and redraft the note.
@@ -256,8 +259,9 @@ def swap_session_speakers(session_id: str, user: CurrentUser) -> SessionOut:
 @router.post(
     "/sessions/{session_id}/summarize",
     response_model=SessionSummary,
-    # Each call is a full local-LLM pass over the transcript.
-    dependencies=[Depends(rate_limit(20, 60))],
+    # Each call is a full local-LLM pass over the transcript, so it counts
+    # against the daily AI allowance.
+    dependencies=[Depends(rate_limit(20, 60)), Depends(ai_quota())],
 )
 def summarize_session(session_id: str, user: CurrentUser) -> SessionSummary:
     """Generate + persist a structured summary of a session's transcript."""
