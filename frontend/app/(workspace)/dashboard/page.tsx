@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   AudioLines,
+  BadgeCheck,
   BrainCircuit,
   CalendarClock,
   Mic,
@@ -23,7 +24,7 @@ import { StatCard } from "@/components/ui/stat-card";
 
 type SessionRow = Pick<
   ClinicalSession,
-  "id" | "title" | "status" | "created_at"
+  "id" | "title" | "status" | "created_at" | "reviewed_at"
 >;
 
 const TIPS = [
@@ -66,24 +67,34 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const weekAgo = weekAgoIso();
 
-  const [profileQ, recent, totalQ, weekQ, patientsQ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, timezone")
-      .maybeSingle<Pick<Profile, "full_name" | "timezone">>(),
-    supabase
-      .from("sessions")
-      .select("id, title, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(6)
-      .returns<SessionRow[]>(),
-    supabase.from("sessions").select("id", { count: "exact", head: true }),
-    supabase
-      .from("sessions")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", weekAgo),
-    supabase.from("patients").select("id", { count: "exact", head: true }),
-  ]);
+  const [profileQ, recent, totalQ, weekQ, patientsQ, unreviewedQ] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, timezone")
+        .maybeSingle<Pick<Profile, "full_name" | "timezone">>(),
+      supabase
+        .from("sessions")
+        .select("id, title, status, created_at, reviewed_at")
+        .order("created_at", { ascending: false })
+        .limit(6)
+        .returns<SessionRow[]>(),
+      supabase.from("sessions").select("id", { count: "exact", head: true }),
+      supabase
+        .from("sessions")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", weekAgo),
+      supabase.from("patients").select("id", { count: "exact", head: true }),
+      // Notes nobody has verified yet. Auto-export means these are already in
+      // Memory and already readable as if they were records, so the count is
+      // the honest measure of how much unchecked machine output is in play.
+      // Hits sessions_unreviewed_idx (migration 0017).
+      supabase
+        .from("sessions")
+        .select("id", { count: "exact", head: true })
+        .is("reviewed_at", null)
+        .eq("status", "exported"),
+    ]);
 
   const firstName =
     profileQ.data?.full_name?.trim().split(/\s+/).slice(-1)[0] ?? "";
@@ -96,6 +107,7 @@ export default async function DashboardPage() {
   ];
 
   const sessions = recent.data ?? [];
+  const unreviewed = unreviewedQ.count ?? 0;
 
   return (
     <div>
@@ -114,6 +126,32 @@ export default async function DashboardPage() {
           Here&apos;s your practice at a glance.
         </p>
       </FadeIn>
+
+      {/* Notes no human has checked. Auto-export puts every draft into Memory
+          and the patient record immediately, so without this the count of
+          unverified machine output is invisible. */}
+      {unreviewed > 0 && (
+        <FadeIn className="mb-4">
+          <Link
+            href="/patients"
+            className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 transition hover:bg-amber-500/15"
+          >
+            <BadgeCheck
+              aria-hidden
+              className="size-5 shrink-0 text-amber-600 dark:text-amber-400"
+            />
+            <p className="min-w-0 flex-1 text-sm">
+              <strong className="font-medium">
+                {unreviewed} {unreviewed === 1 ? "note" : "notes"} awaiting your
+                review
+              </strong>{" "}
+              — Aura drafted {unreviewed === 1 ? "it" : "them"} from the
+              recording. Check {unreviewed === 1 ? "it" : "them"} against what
+              happened.
+            </p>
+          </Link>
+        </FadeIn>
+      )}
 
       {/* Stats row across the top */}
       <Stagger className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-3">
@@ -139,7 +177,9 @@ export default async function DashboardPage() {
               <Mic className="size-6" />
             </div>
             <div className="relative">
-              <h2 className="font-display text-3xl font-bold">Start a session</h2>
+              <h2 className="font-display text-3xl font-bold">
+                Start a session
+              </h2>
               <p className="mt-2 max-w-sm text-sm text-primary-foreground/80">
                 Record, and Aura drafts the note. The audio never persists.
               </p>
@@ -158,13 +198,21 @@ export default async function DashboardPage() {
                 Quick actions
               </h2>
               <div className="space-y-2">
-                <Button asChild variant="secondary" className="w-full justify-start">
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="w-full justify-start"
+                >
                   <Link href="/patients">
                     <UsersRound />
                     Add a patient
                   </Link>
                 </Button>
-                <Button asChild variant="secondary" className="w-full justify-start">
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="w-full justify-start"
+                >
                   <Link href="/memory">
                     <BrainCircuit />
                     Search patient memory
