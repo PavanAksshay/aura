@@ -22,6 +22,7 @@ import { AchievementToaster } from "@/components/profile/AchievementToaster";
 import { ActivityPing } from "@/components/profile/ActivityPing";
 import { SessionWatcher } from "@/components/notes/SessionWatcher";
 import { AppointmentReminder } from "@/components/schedule/AppointmentReminder";
+import { MaintenanceBanner } from "@/components/system/MaintenanceBanner";
 
 export default async function WorkspaceLayout({
   children,
@@ -97,6 +98,10 @@ export default async function WorkspaceLayout({
           </div>
         </nav>
       </header>
+
+      {/* Sits under the nav so it is the first thing read when the backend is
+          down, without hiding records that are still perfectly usable. */}
+      <MaintenanceBanner />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
         {children}

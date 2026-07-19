@@ -45,7 +45,41 @@ async function authHeader(): Promise<Record<string, string>> {
   };
 }
 
+/**
+ * The processing backend is unreachable — offline, restarting, or its tunnel
+ * is down. Distinct from a request that failed on its own merits, because the
+ * user's data is fine and the right advice is "try again shortly", not
+ * "something went wrong".
+ */
+export class BackendUnavailableError extends Error {
+  constructor(
+    message = "Aura's processing service is temporarily unavailable. Your notes and patients are safe — please try again in a moment.",
+  ) {
+    super(message);
+    this.name = "BackendUnavailableError";
+  }
+}
+
+export function isBackendUnavailable(error: unknown): boolean {
+  return error instanceof BackendUnavailableError;
+}
+
+/** Gateway statuses a tunnel or proxy returns when nothing is listening. */
+const GATEWAY_DOWN = new Set([502, 503, 504]);
+
+// Transcription is a long job (Whisper runs locally); everything else should
+// answer quickly. Without a ceiling a dead tunnel leaves requests hanging
+// forever and the UI stuck in a spinner with no way to recover.
+const DEFAULT_TIMEOUT_MS = 30_000;
+// Whisper large-v3 on CPU runs slower than real time; an hour-long session is
+// a long wait, not a fault.
+const TRANSCRIBE_TIMEOUT_MS = 20 * 60_000;
+// Ollama generation on a laptop is slow but bounded.
+const LLM_TIMEOUT_MS = 4 * 60_000;
+
 async function parseError(res: Response): Promise<never> {
+  if (GATEWAY_DOWN.has(res.status)) throw new BackendUnavailableError();
+
   let detail = `Request failed (${res.status})`;
   try {
     const body = (await res.json()) as { detail?: string };
@@ -54,6 +88,52 @@ async function parseError(res: Response): Promise<never> {
     // non-JSON error body — keep the generic message
   }
   throw new Error(detail);
+}
+
+/**
+ * fetch with a timeout, translating "cannot reach the backend at all" into
+ * BackendUnavailableError. A bare fetch rejects with an opaque TypeError
+ * ("Failed to fetch") for DNS failures, refused connections, CORS rejections
+ * and offline devices alike — surfacing that verbatim tells a clinician
+ * nothing and reads like data loss.
+ */
+async function request(
+  url: string,
+  init: RequestInit,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (error) {
+    // AbortSignal.timeout() rejects with a DOMException named "TimeoutError";
+    // some engines surface a plain "AbortError" instead.
+    const name = (error as { name?: string })?.name;
+    if (name === "TimeoutError" || name === "AbortError") {
+      throw new BackendUnavailableError(
+        "Aura's processing service did not respond in time. Your work is saved — please try again shortly.",
+      );
+    }
+    if (error instanceof TypeError) throw new BackendUnavailableError();
+    throw error;
+  }
+}
+
+/** Liveness probe used by the maintenance banner. Never throws. */
+export async function pingBackend(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/health`, {
+      // Health must reflect reality, not a cached 200 from minutes ago.
+      cache: "no-store",
+      headers: { "ngrok-skip-browser-warning": "true" },
+      signal: AbortSignal.timeout(8000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 /** Upload a recorded session; the backend transcribes and structures it. */
@@ -67,11 +147,12 @@ export async function submitRecording(
   form.append("duration_seconds", String(Math.round(opts.durationSeconds)));
   if (opts.patientId) form.append("patient_id", opts.patientId);
 
-  const res = await fetch(`${API_URL}/api/v1/transcriptions`, {
-    method: "POST",
-    headers: await authHeader(),
-    body: form,
-  });
+  const res = await request(
+    `${API_URL}/api/v1/transcriptions`,
+    { method: "POST", headers: await authHeader(), body: form },
+    // Whisper transcribes locally; a long session legitimately takes minutes.
+    TRANSCRIBE_TIMEOUT_MS,
+  );
   if (!res.ok) return parseError(res);
   return (await res.json()) as { session_id: string };
 }
@@ -80,9 +161,10 @@ export async function submitRecording(
 export async function summarizeSession(
   sessionId: string,
 ): Promise<SessionSummary> {
-  const res = await fetch(
+  const res = await request(
     `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/summarize`,
     { method: "POST", headers: await authHeader() },
+    LLM_TIMEOUT_MS,
   );
   if (!res.ok) return parseError(res);
   return (await res.json()) as SessionSummary;
@@ -94,7 +176,7 @@ export async function searchMemory(opts: {
   patientId?: string | null;
   limit?: number;
 }): Promise<MemoryMatch[]> {
-  const res = await fetch(`${API_URL}/api/v1/memory/search`, {
+  const res = await request(`${API_URL}/api/v1/memory/search`, {
     method: "POST",
     headers: { ...(await authHeader()), "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -115,7 +197,7 @@ export async function askMemory(opts: {
   limit?: number;
   history?: { role: "user" | "assistant"; content: string }[];
 }): Promise<MemoryAnswer> {
-  const res = await fetch(`${API_URL}/api/v1/memory/ask`, {
+  const res = await request(`${API_URL}/api/v1/memory/ask`, {
     method: "POST",
     headers: { ...(await authHeader()), "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -135,7 +217,7 @@ export async function askMemory(opts: {
  * the raw transcript is purged and only the SOAP note survives.
  */
 export async function exportSession(sessionId: string): Promise<ClinicalSession> {
-  const res = await fetch(
+  const res = await request(
     `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/export`,
     { method: "POST", headers: await authHeader() },
   );
