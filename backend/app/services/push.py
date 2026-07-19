@@ -23,10 +23,21 @@ def push_configured() -> bool:
     return bool(settings.vapid_public_key and settings.vapid_private_key)
 
 
-def _forget_subscription(endpoint: str) -> None:
+def _forget_subscription(endpoint: str, user_id: str | None) -> None:
+    """Drop a dead subscription, scoped by owner whenever we know it.
+
+    The endpoint currently comes from our own database rather than from a
+    request, so an unscoped delete is not exploitable today. It goes in anyway:
+    an unscoped delete on a shared table is precisely what turns into a hole
+    the first time a caller passes user input, and the cost of the filter is
+    nothing.
+    """
     try:
         db = get_service_client()
-        db.table("push_subscriptions").delete().eq("endpoint", endpoint).execute()
+        query = db.table("push_subscriptions").delete().eq("endpoint", endpoint)
+        if user_id:
+            query = query.eq("user_id", user_id)
+        query.execute()
         logger.info("Pruned expired push subscription")
     except Exception:
         logger.exception("Failed pruning expired push subscription")
@@ -35,7 +46,8 @@ def _forget_subscription(endpoint: str) -> None:
 def send_push(subscription: dict[str, Any], payload: dict[str, Any]) -> bool:
     """Deliver one push. Returns True on success. Never raises.
 
-    `subscription` is a row from push_subscriptions (endpoint/p256dh/auth).
+    `subscription` is a row from push_subscriptions (endpoint/p256dh/auth);
+    include `user_id` so a dead-subscription cleanup stays owner-scoped.
     """
     settings = get_settings()
     endpoint = cast(str, subscription["endpoint"])
@@ -58,7 +70,7 @@ def send_push(subscription: dict[str, Any], payload: dict[str, Any]) -> bool:
         status_code = getattr(exc.response, "status_code", None)
         # 404/410: the subscription is permanently gone — stop trying.
         if status_code in (404, 410):
-            _forget_subscription(endpoint)
+            _forget_subscription(endpoint, subscription.get("user_id"))
         else:
             logger.warning("Web push failed (status=%s)", status_code)
         return False

@@ -43,9 +43,12 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  // Match on a path boundary, not a bare prefix: plain startsWith would make
+  // "/privacy-internal" or "/loginbypass" public the day such a route exists.
+  // No such route does today — this closes the footgun, not a live hole.
   const isPublic =
     PUBLIC_EXACT.includes(pathname) ||
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

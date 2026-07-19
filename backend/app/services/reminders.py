@@ -43,7 +43,7 @@ def _subscriptions_for(user_id: str) -> list[dict[str, Any]]:
     db = get_service_client()
     result = (
         db.table("push_subscriptions")
-        .select("endpoint, p256dh, auth")
+        .select("endpoint, p256dh, auth, user_id")
         .eq("user_id", user_id)
         .execute()
     )

@@ -15,6 +15,7 @@ import { toast } from "@/lib/toast";
 import type { Patient, PatientStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
+import { currentYear, DateField, todayYmd } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,10 +133,7 @@ function PatientForm({
       setError(error.message);
       return;
     }
-    toast.success(
-      patient ? "Patient updated" : "Patient added",
-      row.full_name,
-    );
+    toast.success(patient ? "Patient updated" : "Patient added", row.full_name);
     onOpenChange(false);
     router.refresh();
   }
@@ -192,11 +190,17 @@ function PatientForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="p-dob">Date of birth</Label>
-            <Input
+            {/* Themed picker, matching Schedule and onboarding — the native
+                date input renders the OS widget, which ignores the app theme
+                entirely and looked like a different product. */}
+            <DateField
               id="p-dob"
-              type="date"
               value={draft.date_of_birth}
-              onChange={(e) => set("date_of_birth", e.target.value)}
+              onChange={(value) => set("date_of_birth", value)}
+              placeholder="Select date of birth"
+              fromYear={1920}
+              toYear={currentYear()}
+              max={todayYmd()}
             />
           </div>
         </div>

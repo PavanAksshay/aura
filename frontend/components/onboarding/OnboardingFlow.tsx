@@ -25,7 +25,7 @@ import { AVATARS, Avatar } from "@/lib/avatars";
 import { EASE_OUT } from "@/components/motion/primitives";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
-import { DateField } from "@/components/ui/date-field";
+import { currentYear, DateField, todayYmd } from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -77,16 +77,6 @@ const COUNTRIES: { name: string; tz: string }[] = [
 const PREFER_NOT_TO_SAY = "Prefer not to say";
 const GENDERS = ["Woman", "Man", "Non-binary", PREFER_NOT_TO_SAY];
 
-// Clock reads kept out of the render body (react-hooks/purity).
-function currentYear(): number {
-  return new Date().getFullYear();
-}
-function todayYmd(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 // Grouped loosely by modality, then presentation, then population/context — so
 // the chip wall scans in a sensible order rather than alphabetically.
 const SPECIALIZATIONS = [
@@ -134,9 +124,18 @@ const SPECIALIZATIONS = [
 
 const STEP_META = [
   { title: "About you", subtitle: "How should Aura address you?" },
-  { title: "Your practice", subtitle: "A little context about where you work." },
-  { title: "Specializations", subtitle: "Pick everything that applies — this shapes your workspace." },
-  { title: "Choose your avatar", subtitle: "Pick a look for your profile — you can change it later." },
+  {
+    title: "Your practice",
+    subtitle: "A little context about where you work.",
+  },
+  {
+    title: "Specializations",
+    subtitle: "Pick everything that applies — this shapes your workspace.",
+  },
+  {
+    title: "Choose your avatar",
+    subtitle: "Pick a look for your profile — you can change it later.",
+  },
   { title: "Your privacy", subtitle: "One last thing before you begin." },
 ] as const;
 
@@ -474,24 +473,25 @@ export function OnboardingFlow({
                     <ul className="space-y-2.5 text-sm leading-relaxed text-muted-foreground">
                       <li className="flex gap-2.5">
                         <Lock className="mt-0.5 size-4 shrink-0 text-accent" />
-                        Audio is processed on-device and never stored — it&rsquo;s
-                        deleted the moment a note is drafted.
+                        Audio is processed on-device and never stored —
+                        it&rsquo;s deleted the moment a note is drafted.
                       </li>
                       <li className="flex gap-2.5">
                         <Trash2 className="mt-0.5 size-4 shrink-0 text-accent" />
-                        Raw transcripts stay under your control and are purged on
-                        export; only the structured note you approve is kept.
+                        Raw transcripts stay under your control and are purged
+                        on export; only the structured note you approve is kept.
                       </li>
                       <li className="flex gap-2.5">
                         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-accent" />
                         Every record is isolated to your account by row-level
-                        security — no colleague, and no one at Aura, can read it.
+                        security — no colleague, and no one at Aura, can read
+                        it.
                       </li>
                     </ul>
                   </div>
                   <p className="text-xs text-muted-foreground/70">
-                    By continuing you confirm you&rsquo;ve read this and agree to
-                    handle client data responsibly.
+                    By continuing you confirm you&rsquo;ve read this and agree
+                    to handle client data responsibly.
                   </p>
                 </div>
               )}

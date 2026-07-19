@@ -90,6 +90,7 @@ export default async function SessionPage({
             note={session.note}
             exported={session.status === "exported"}
             reviewedAt={session.reviewed_at}
+            noteEditedAt={session.note_edited_at}
           />
         )}
 

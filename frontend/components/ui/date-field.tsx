@@ -7,15 +7,34 @@
  */
 
 import { useState } from "react";
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 // Impure clock reads kept out of the render body (react-hooks/purity).
@@ -46,8 +65,15 @@ function initialView(selected: Date | null): Date {
 
 function monthCells(view: Date): (Date | null)[] {
   const startWeekday = startOfMonth(view).getDay();
-  const daysInMonth = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
-  const cells: (Date | null)[] = Array.from({ length: startWeekday }, () => null);
+  const daysInMonth = new Date(
+    view.getFullYear(),
+    view.getMonth() + 1,
+    0,
+  ).getDate();
+  const cells: (Date | null)[] = Array.from(
+    { length: startWeekday },
+    () => null,
+  );
   for (let d = 1; d <= daysInMonth; d += 1) {
     cells.push(new Date(view.getFullYear(), view.getMonth(), d));
   }
@@ -60,6 +86,18 @@ const labelFmt = new Intl.DateTimeFormat(undefined, {
   month: "short",
   year: "numeric",
 });
+
+/** Current year — a clock read, so kept out of component render bodies. */
+export function currentYear(): number {
+  return new Date().getFullYear();
+}
+
+/** Today as "yyyy-mm-dd", for `max` on any past-only date field. */
+export function todayYmd(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export function DateField({
   id,
@@ -201,7 +239,9 @@ export function DateField({
                     isSelected
                       ? "bg-primary font-medium text-primary-foreground"
                       : "hover:bg-foreground/8",
-                    !isSelected && isToday && "font-semibold text-primary ring-1 ring-primary/40",
+                    !isSelected &&
+                      isToday &&
+                      "font-semibold text-primary ring-1 ring-primary/40",
                     disabled && "pointer-events-none opacity-30",
                   )}
                 >

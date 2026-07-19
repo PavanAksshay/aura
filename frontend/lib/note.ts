@@ -15,6 +15,9 @@ export const NOTE_SECTIONS = [
   { key: "ahead", label: "What lies ahead" },
 ] as const;
 
+/** The two section keys, derived from NOTE_SECTIONS so they cannot drift. */
+export type NoteSectionKey = (typeof NOTE_SECTIONS)[number]["key"];
+
 const PLACEHOLDER = /^no\b.*\bidentified\.?$/i;
 
 function bullets(value: unknown): string[] {

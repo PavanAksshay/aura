@@ -213,6 +213,42 @@ export async function askMemory(opts: {
 }
 
 /**
+ * Replace the generated note with the clinician's corrected version. This is
+ * the remedy when the draft is wrong — the server re-indexes Memory and clears
+ * any prior review attestation, since it was given for different words.
+ */
+export async function updateNote(
+  sessionId: string,
+  note: { discussed: string[]; ahead: string[] },
+): Promise<ClinicalSession> {
+  const res = await request(
+    `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/note`,
+    {
+      method: "PATCH",
+      headers: { ...(await authHeader()), "Content-Type": "application/json" },
+      body: JSON.stringify(note),
+    },
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as ClinicalSession;
+}
+
+/**
+ * Ask the model for a fresh draft from the same transcript. Discards the
+ * current note, including hand edits, so the UI confirms first. Runs the local
+ * LLM, hence the longer ceiling.
+ */
+export async function regenerateNote(sessionId: string): Promise<ClinicalSession> {
+  const res = await request(
+    `${API_URL}/api/v1/sessions/${encodeURIComponent(sessionId)}/regenerate-note`,
+    { method: "POST", headers: await authHeader() },
+    LLM_TIMEOUT_MS,
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as ClinicalSession;
+}
+
+/**
  * Fix an inverted Therapist/Patient labelling. The server also redrafts the
  * note from the corrected transcript, so this runs the local LLM and is slow.
  */

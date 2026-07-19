@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class SessionStatus(StrEnum):
@@ -30,6 +30,29 @@ class SessionNote(BaseModel):
         default_factory=list,
         description="What lies ahead — plans, homework, next-session focus.",
     )
+
+
+class NoteUpdate(BaseModel):
+    """A clinician's hand-corrected note.
+
+    Bounded on both axes because this text is written into a clinical record,
+    re-embedded into the memory index, and rendered back to the browser. The
+    caps mirror the generator's own limits so an edited note cannot become
+    something the rest of the pipeline was never built to carry.
+    """
+
+    discussed: list[str] = Field(default_factory=list, max_length=20)
+    ahead: list[str] = Field(default_factory=list, max_length=20)
+
+    @field_validator("discussed", "ahead")
+    @classmethod
+    def _clean(cls, bullets: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        for bullet in bullets:
+            text = " ".join(bullet.split())  # collapse newlines/runs of space
+            if text:
+                cleaned.append(text[:500])
+        return cleaned
 
 
 class TranscriptionAccepted(BaseModel):

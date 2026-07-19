@@ -13,7 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from app.core.ratelimit import rate_limit
 from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
-from app.models.schemas import SessionOut, SessionSummary
+from app.models.schemas import NoteUpdate, SessionNote, SessionOut, SessionSummary
 from app.services.embeddings import index_exported_note
 from app.services.note import build_session_note, parse_note
 from app.services.retention import export_session_row, mark_session_reviewed
@@ -78,6 +78,114 @@ async def review_session(session_id: str, user: CurrentUser) -> SessionOut:
     if row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
     return SessionOut.model_validate(row)
+
+
+def _load_owned_session(session_id: str, user_id: str, columns: str) -> dict[str, object]:
+    """Fetch one session the caller owns, or 404. The filter is the authz check."""
+    db = get_service_client()
+    result = (
+        db.table("sessions").select(columns).eq("id", session_id).eq("user_id", user_id).execute()
+    )
+    rows = cast(list[dict[str, object]], result.data or [])
+    if not rows:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
+    return rows[0]
+
+
+def _save_note(
+    session_id: str,
+    user_id: str,
+    note: SessionNote,
+    patient_id: str | None,
+    *,
+    edited: bool,
+) -> dict[str, object]:
+    """Persist a note, reset its review state, and re-index it into Memory.
+
+    Any change to the note invalidates a prior attestation — it was given for
+    different words — so reviewed_at is cleared and the clinician re-confirms.
+    Re-indexing matters just as much: the note is already searchable in Memory,
+    and leaving the old vectors would make Memory answer from text that no
+    longer exists in the record.
+    """
+    db = get_service_client()
+    updated = (
+        db.table("sessions")
+        .update(
+            {
+                "note": note.model_dump(),
+                "reviewed_at": None,
+                "reviewed_by": None,
+                "note_edited_at": "now()" if edited else None,
+            }
+        )
+        .eq("id", session_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    rows = cast(list[dict[str, object]], updated.data or [])
+    if not rows:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Session not found.")
+
+    index_exported_note(session_id, user_id, patient_id, note)
+    return rows[0]
+
+
+@router.patch(
+    "/sessions/{session_id}/note",
+    response_model=SessionOut,
+    dependencies=[Depends(rate_limit(60, 60))],
+)
+def edit_session_note(session_id: str, payload: NoteUpdate, user: CurrentUser) -> SessionOut:
+    """Replace the generated note with the clinician's corrected version.
+
+    This is the remedy when the draft is wrong. The pipeline is measurably
+    fallible — it has fabricated text and inverted clinical meaning on hard
+    audio — so attesting to a bad note or discarding the session were never
+    acceptable as the only options.
+    """
+    row = _load_owned_session(session_id, user.id, "patient_id")
+    note = SessionNote(discussed=payload.discussed, ahead=payload.ahead)
+    saved = _save_note(
+        session_id,
+        user.id,
+        note,
+        cast(str | None, row.get("patient_id")),
+        edited=True,
+    )
+    return SessionOut.model_validate(saved)
+
+
+# `def` (not `async def`): redrafting runs the local LLM, which blocks.
+@router.post(
+    "/sessions/{session_id}/regenerate-note",
+    response_model=SessionOut,
+    dependencies=[Depends(rate_limit(10, 60))],
+)
+def regenerate_session_note(session_id: str, user: CurrentUser) -> SessionOut:
+    """Re-draft the note from the stored transcript, discarding the current one.
+
+    Decoding is not deterministic, so a second pass genuinely can produce a
+    better note — but it can equally reintroduce a different error, and it
+    overwrites hand edits. The UI warns before calling this.
+    """
+    row = _load_owned_session(session_id, user.id, "raw_transcript, patient_id")
+    transcript = row.get("raw_transcript")
+    if not isinstance(transcript, str) or not transcript.strip():
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail="No transcript available to redraft from.",
+        )
+
+    note = build_session_note(transcript)
+    saved = _save_note(
+        session_id,
+        user.id,
+        note,
+        cast(str | None, row.get("patient_id")),
+        edited=False,
+    )
+    return SessionOut.model_validate(saved)
 
 
 # `def` (not `async def`): redrafting runs the local LLM, which blocks.
@@ -172,7 +280,7 @@ def summarize_session(session_id: str, user: CurrentUser) -> SessionSummary:
         )
 
     summary = generate_summary(transcript)
-    db.table("sessions").update({"summary": summary.model_dump()}).eq(
-        "id", session_id
-    ).eq("user_id", user.id).execute()
+    db.table("sessions").update({"summary": summary.model_dump()}).eq("id", session_id).eq(
+        "user_id", user.id
+    ).execute()
     return summary

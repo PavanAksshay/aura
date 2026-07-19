@@ -50,6 +50,8 @@ export interface ClinicalSession {
   /** Clinician attestation (0017). null = note is an unverified AI draft. */
   reviewed_at: string | null;
   reviewed_by: string | null;
+  /** When the clinician last hand-edited the note (0018); null = as drafted. */
+  note_edited_at: string | null;
 }
 
 export type PatientStatus = "active" | "paused" | "discharged";
