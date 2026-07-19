@@ -8,7 +8,6 @@
  * the product — no invented logos, numbers, or testimonials.
  */
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -27,7 +26,7 @@ import { Butterfly, ScrollButterflies } from "@/components/ui/butterfly";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AuraWordmark } from "@/components/ui/aura-logo";
 import { Button } from "@/components/ui/button";
-import { renderCanvas } from "@/components/ui/canvas";
+import { CursorTrail } from "@/components/ui/cursor-trail";
 import { GooeyFilter } from "@/components/ui/gooey-filter";
 import { PixelTrail } from "@/components/ui/pixel-trail";
 import { useScreenSize } from "@/hooks/use-screen-size";
@@ -121,18 +120,13 @@ function LandingNav({ authed }: { authed: boolean }) {
 /* ----------------------------------------------------------------------- */
 
 function Hero({ authed }: { authed: boolean }) {
-  // Flowing cursor-trail across the hero (vendored 21st.dev effect).
-  useEffect(() => {
-    renderCanvas();
-  }, []);
-
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-24">
-      <canvas
-        id="canvas"
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-[1] h-full w-full"
-      />
+      {/* Flowing cursor-trail across the hero (vendored 21st.dev effect).
+          Uses the shared component rather than a second inline copy, so the
+          desktop-only gate applies here too — this is the first thing anyone
+          opening the public link sees, phone included. */}
+      <CursorTrail />
       {/* WebGL orb sits behind the copy, masked so text stays legible */}
       <HeroOrb className="pointer-events-none absolute left-1/2 top-1/2 size-[min(120vw,54rem)] -translate-x-1/2 -translate-y-1/2 opacity-80 [mask-image:radial-gradient(circle,black_30%,transparent_72%)]" />
 
