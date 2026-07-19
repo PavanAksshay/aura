@@ -22,7 +22,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 AUDIO = pathlib.Path(__file__).parent / "out" / "noisy_session.webm"
 # The hallucinated span, and a control phrase Whisper got right.
-HALLUCINATED = "sahasran"
+# Match loosely: the models invent DIFFERENT words in this passage
+# ("Sahasran Questiony" vs "Sahesan question me"), so an exact string gave a
+# false "did not reproduce" on the distil run.
+HALLUCINATED = "closed a movie"
 INVERTED = "won't help"
 
 
@@ -64,14 +67,19 @@ def run(model_name: str, compute: str = "int8") -> None:
     print("\nper-segment (worst logprob first):")
     for r in sorted(rows, key=lambda r: r["avg_logprob"])[:6]:
         flag = ""
-        if HALLUCINATED in r["text"].lower():
+        if HALLUCINATED in r["text"].lower() or "closed the movie" in r["text"].lower():
             flag = "  <-- HALLUCINATED SPAN"
         elif INVERTED in r["text"].lower():
             flag = "  <-- MEANING-INVERTED SPAN"
         print(f"  logprob {r['avg_logprob']:+.3f} | no_speech {r['no_speech_prob']:.3f} "
               f"| cr {r['compression_ratio']:.2f} | {r['text'][:60]!r}{flag}")
 
-    hall = [r for r in rows if HALLUCINATED in r["text"].lower()]
+    hall = [
+        r
+        for r in rows
+        if HALLUCINATED in r["text"].lower()
+        or "closed the movie" in r["text"].lower()
+    ]
     if hall:
         h = hall[0]
         rank = sorted(logprobs).index(h["avg_logprob"]) + 1
@@ -86,3 +94,4 @@ def run(model_name: str, compute: str = "int8") -> None:
 
 if __name__ == "__main__":
     run("large-v3")
+    run("distil-large-v3")

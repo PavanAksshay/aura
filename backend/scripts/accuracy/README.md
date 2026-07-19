@@ -88,12 +88,48 @@ Reproduce with `confidence_probe.py` if you want to re-test after a model
 change — a different model may behave differently, and this conclusion is
 specific to large-v3 int8.
 
-## Speed
+## Speed, and why distil-large-v3 is not worth it
 
-Three timed runs of large-v3 int8 on an M1: **4.2x, 4.5x, 4.6x realtime**
-(excluding a ~120 s cold model load). A 50-minute session therefore takes
-roughly 3.5 hours to produce a note. The in-app ETA uses 4.5x.
+large-v3 int8 on an M1, excluding cold model load:
 
-If that is too slow, `distil-large-v3` is the first thing to benchmark — but
-benchmark it here, on this audio, before switching. Accuracy on clean speech
-says nothing about accuracy on a noisy consulting room.
+| Run | Speed | Notes |
+|---|---|---|
+| Scored run | 4.2x realtime | machine otherwise idle |
+| Probe, idle | 4.5x realtime | |
+| Probe, contended | 8.5x realtime | competing with a frontend build + pytest |
+
+So **4.2x when idle, up to 8.5x under load** — a 50-minute session is ~3.5
+hours idle and can double if the machine is busy. The in-app ETA uses 4.5x.
+Do not run other heavy work during a transcription.
+
+`distil-large-v3` transcribed the same audio in **46 s — 0.4x realtime**,
+roughly 10-20x faster, which would turn that 3.5 hours into about 20 minutes.
+**It is still the wrong trade**, because of what it did to the medication name:
+
+| Ground truth | large-v3 | distil-large-v3 |
+|---|---|---|
+| "the sertraline fifty milligrams" | "the Sertraline 50mg" | "the **searcherline** 50 milligrams" |
+| "You stopped the sertraline" | "You stopped the Sertraline" | "You stopped the **certoline**" |
+
+It mangled the drug name twice, differently each time, so neither instance is
+even correctable by find-and-replace. A speed win that costs the medication
+name is not a speed win in a clinical record.
+
+If you revisit this, benchmark on *this* audio and check the critical-facts
+table, not the WER. Clean-speech benchmarks say nothing about a noisy
+consulting room.
+
+## The hallucination is reproducible, and cross-model
+
+`confidence_probe.py` reported "hallucination did not reproduce" on the distil
+run. That was a **false negative in the probe, not a clean run** — it matched
+the literal string `sahasran`, and distil produced a variant:
+
+- large-v3: "Twice last year closed a movie, **Sahasran Questiony**, a freaky
+  rendering, and you knew me."
+- distil:   "Twice last year closed the movie **Sahesan question me**, a frea…"
+
+Ground truth for that passage is simply "Twice last year." Both models invent
+fluent text there, in different words. It is a property of the audio (a
+low-SNR passage after a short utterance), not a fluke of one decode — which is
+why human review is the mitigation and a confidence threshold is not.
