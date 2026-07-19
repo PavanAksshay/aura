@@ -31,6 +31,7 @@ import { renderCanvas } from "@/components/ui/canvas";
 import { GooeyFilter } from "@/components/ui/gooey-filter";
 import { PixelTrail } from "@/components/ui/pixel-trail";
 import { useScreenSize } from "@/hooks/use-screen-size";
+import { useFinePointer } from "@/hooks/use-fine-pointer";
 import { EASE_OUT } from "@/components/motion/primitives";
 import { HeroOrb } from "@/components/landing/hero-orb";
 
@@ -495,25 +496,32 @@ function Privacy() {
 
 function CtaBand({ authed }: { authed: boolean }) {
   const screenSize = useScreenSize();
+  const finePointer = useFinePointer();
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 pb-28 pt-4 sm:px-6">
       <Reveal>
         <div className="glass relative overflow-hidden rounded-[2.5rem] px-6 py-20 text-center sm:px-14">
-          {/* Gooey pixel trail: move the cursor and pastel blobs melt away */}
-          <GooeyFilter id="gooey-filter-pixel-trail" strength={5} />
-          <div
-            aria-hidden
-            className="absolute inset-0 z-0"
-            style={{ filter: "url(#gooey-filter-pixel-trail)" }}
-          >
-            <PixelTrail
-              pixelSize={screenSize.lessThan("md") ? 24 : 32}
-              fadeDuration={0}
-              delay={500}
-              pixelClassName="bg-primary/25"
-            />
-          </div>
+          {/* Gooey pixel trail: move the cursor and pastel blobs melt away.
+              Cursor-driven, so it is desktop-only — on touch it would render a
+              full grid of dots that nothing can ever animate. */}
+          {finePointer && (
+            <>
+              <GooeyFilter id="gooey-filter-pixel-trail" strength={5} />
+              <div
+                aria-hidden
+                className="absolute inset-0 z-0"
+                style={{ filter: "url(#gooey-filter-pixel-trail)" }}
+              >
+                <PixelTrail
+                  pixelSize={screenSize.lessThan("md") ? 24 : 32}
+                  fadeDuration={0}
+                  delay={500}
+                  pixelClassName="bg-primary/25"
+                />
+              </div>
+            </>
+          )}
 
           <div className="pointer-events-none relative z-10">
             <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-5xl">

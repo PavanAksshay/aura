@@ -14,6 +14,7 @@ created before this change keep rendering.
 
 import json
 import logging
+import math
 import re
 from typing import Any
 
@@ -27,12 +28,26 @@ logger = logging.getLogger(__name__)
 _PROMPT = """You are a clinical documentation assistant for a psychologist. \
 From the therapy session transcript below, produce a STRICT JSON object with \
 exactly these keys:
-- "discussed": a list of 4 to 8 short bullet strings summarizing what was \
-discussed — symptoms, experiences, feelings, and anything clinically relevant \
-the patient reported. Plain clinical language, third person, no speaker labels.
-- "ahead": a list of 2 to 5 short bullet strings covering what lies ahead — \
-agreed plans, homework, routines to try, and the focus of the next session. \
-If nothing was planned, return an empty list.
+- "discussed": bullet strings summarizing what was actually discussed — \
+symptoms, experiences, feelings, and anything clinically relevant the patient \
+reported. Plain clinical language, third person, no speaker labels.
+- "ahead": bullet strings covering what lies ahead. Include EVERY forward- \
+looking thing the transcript states: anything suggested, agreed, or planned, \
+homework, routines or techniques to try, and any topic named for a future \
+session. Phrases like "let's try", "this week", "before bed", "next session" \
+signal these — capture them.
+
+RULES — these override everything else:
+1. Write ONLY what the transcript states. Never infer, embellish, or add \
+typical therapy content that is not there. This note goes into a patient's \
+clinical record, so an invented bullet is a serious error.
+2. Equally, do not omit something the transcript does state — a plan that was \
+agreed out loud belongs in "ahead".
+3. There is NO minimum number of bullets. Write as many as the transcript \
+supports and no more — at most 8 for "discussed" and 5 for "ahead".
+4. Use empty lists only when the transcript genuinely offers nothing: no \
+clinical content at all, or no plan of any kind. If the recording is not a \
+therapy session, return {{"discussed": [], "ahead": []}}.
 Return ONLY the JSON object, no prose.
 
 Transcript:
@@ -71,6 +86,125 @@ def _clean_bullets(raw: Any, cap: int) -> list[str]:
     return bullets
 
 
+# --- Grounding guard -------------------------------------------------------
+# A 3B model told to summarize a therapy session will happily invent a
+# textbook one when the transcript has nothing clinical in it — real observed
+# failure: a transcript of someone reading the app's own marketing copy
+# produced "Patient reports feeling overwhelmed by work responsibilities",
+# "symptoms of anxiety and depression", "difficulty sleeping". None of it was
+# said. Fabricated symptoms in a patient's record are the worst thing this
+# app could do, so every bullet is checked against the transcript's own words
+# and dropped if it shares almost none of them.
+
+_WORD = re.compile(r"[a-z]+")
+# Function words plus note boilerplate ("patient reports …", "during the
+# session …") — phrasing the model adds that is never spoken aloud, so it
+# should neither prove nor disprove that a bullet is grounded.
+_IGNORED_WORDS = frozenset(
+    """a an and are as at be been being but by for from had has have he her his
+    him i in into is it its me my of on or our she that the their them they this
+    to was we were what when which who will with you your
+    patient client therapist session discussed discussion reports reported
+    reporting expresses expressed expressing describes described feeling feels
+    felt states stated mentions mentioned notes noted explores explored
+    exploring during about""".split()
+)
+# Share of a bullet's content words that must also appear in the transcript.
+# Tuned against real output: observed fabrications scored 0.0 (not one word in
+# common), while honest paraphrase — "has withdrawn from previous exercise
+# routine" for "I've stopped going to the gym" — scored as low as 0.25. The
+# threshold sits below that, because wrongly deleting real clinical content is
+# as harmful as keeping invented content. This is a guard against wholesale
+# confabulation, not a fact-checker: it cannot catch a bullet that borrows the
+# transcript's words but distorts their meaning.
+_GROUNDING_THRESHOLD = 0.2
+
+
+def _content_words(text: str) -> set[str]:
+    """Meaning-bearing word stems, so plurals/tenses still match ("sleeping"↔"sleep")."""
+    return {
+        _stem(word)
+        for word in _WORD.findall(text.lower())
+        if len(word) > 2 and word not in _IGNORED_WORDS
+    }
+
+
+def _stem(word: str) -> str:
+    for suffix in ("ing", "ed", "es", "s"):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+            return word[: -len(suffix)]
+    return word
+
+
+# Second chance for bullets with no shared vocabulary: honest paraphrase can
+# legitimately share no words at all ("stopped going to the gym" → "withdrawn
+# from a previous exercise routine"), and deleting real clinical content is its
+# own kind of harm. Cosine against the transcript's own sentences catches that.
+#
+# Measured separation on real output is real but narrow — fabricated bullets
+# scored 0.45-0.53 against an unrelated transcript, honest paraphrase 0.70-0.89
+# against its own — so this threshold sits in the gap. It is only a rescue
+# path, never a rejection path: embeddings cannot tell an invented bullet from
+# a true one when both are plausible therapy language (measured: fabricated
+# bullets score 0.53-0.68 against a genuine therapy transcript).
+_SIMILARITY_THRESHOLD = 0.65
+
+
+def _cosine(a: list[float], b: list[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b, strict=True))
+    norm = math.sqrt(sum(x * x for x in a)) * math.sqrt(sum(y * y for y in b))
+    return dot / norm if norm else 0.0
+
+
+def _similar_to_transcript(bullets: list[str], transcript: str) -> dict[str, float]:
+    """Best cosine between each bullet and any sentence actually spoken."""
+    sentences = [s.strip() for s in _SENTENCE_SPLIT.split(transcript) if len(s.strip()) > 12]
+    if not sentences or not bullets:
+        return {}
+    try:
+        from app.services.embeddings import embed_documents
+
+        spoken = embed_documents(sentences)
+        return {
+            bullet: max(_cosine(vector, s) for s in spoken)
+            for bullet, vector in zip(bullets, embed_documents(bullets), strict=True)
+        }
+    except Exception:
+        # Embeddings unavailable — fall back to lexical-only grounding rather
+        # than failing the note.
+        logger.warning("Similarity grounding unavailable", exc_info=True)
+        return {}
+
+
+def _grounded(bullets: list[str], transcript: str) -> list[str]:
+    """Drop bullets that neither share the transcript's words nor its meaning."""
+    spoken = _content_words(transcript)
+    if not spoken:
+        return []
+
+    kept: list[str] = []
+    unanchored: list[str] = []
+    for bullet in bullets:
+        words = _content_words(bullet)
+        # No content words at all — nothing to verify against, so don't keep it.
+        if not words:
+            continue
+        if len(words & spoken) / len(words) >= _GROUNDING_THRESHOLD:
+            kept.append(bullet)
+        else:
+            unanchored.append(bullet)
+
+    similarity = _similar_to_transcript(unanchored, transcript)
+    for bullet in unanchored:
+        score = similarity.get(bullet, 0.0)
+        if score >= _SIMILARITY_THRESHOLD:
+            kept.append(bullet)
+        else:
+            logger.warning("Dropped ungrounded note bullet (similarity %.2f): %r", score, bullet)
+    # Restore the model's ordering; the two passes above interleave it.
+    return [b for b in bullets if b in kept]
+
+
 def _heuristic_note(transcript: str) -> SessionNote:
     """No-LLM fallback: future-looking sentences → ahead, the rest → discussed."""
     text = _SPEAKER_LABEL.sub("", transcript.strip())
@@ -105,13 +239,14 @@ def build_session_note(transcript: str) -> SessionNote:
         )
         response.raise_for_status()
         data = json.loads(response.json().get("response", "{}"))
-        note = SessionNote(
-            discussed=_clean_bullets(data.get("discussed"), _MAX_DISCUSSED),
-            ahead=_clean_bullets(data.get("ahead"), _MAX_AHEAD),
+        # Every bullet must be traceable to the transcript before it reaches a
+        # clinical record; an empty note is the correct output for a recording
+        # with no clinical content, so it is returned as-is rather than
+        # triggering the fallback (which would only re-inject raw transcript).
+        return SessionNote(
+            discussed=_grounded(_clean_bullets(data.get("discussed"), _MAX_DISCUSSED), transcript),
+            ahead=_grounded(_clean_bullets(data.get("ahead"), _MAX_AHEAD), transcript),
         )
-        if note.discussed:
-            return note
-        logger.warning("Ollama note came back empty — using heuristic")
     except Exception:
         logger.warning(
             "Ollama note structuring unavailable — falling back to heuristic",
@@ -135,9 +270,7 @@ def parse_note(raw: dict[str, Any]) -> SessionNote:
         return text if text and not _LEGACY_PLACEHOLDER.match(text) else None
 
     discussed = [
-        t
-        for key in ("subjective", "objective", "assessment")
-        if (t := keep(raw.get(key)))
+        t for key in ("subjective", "objective", "assessment") if (t := keep(raw.get(key)))
     ]
     ahead = [t] if (t := keep(raw.get("plan"))) else []
     return SessionNote(discussed=discussed, ahead=ahead)
