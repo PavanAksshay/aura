@@ -1,3 +1,15 @@
+# Pin the build backend and the package set explicitly. Without this, `pip
+# install .` falls back to setuptools auto-discovery, which infers packages
+# from whatever top-level directories happen to be present — so the same
+# command can succeed locally and fail in a Docker build (or vice versa)
+# purely because tests/ and scripts/ are or aren't in the build context.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [project]
 name = "clinical-scribe-backend"
 version = "0.1.0"
