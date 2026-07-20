@@ -50,6 +50,13 @@ export const viewport: Viewport = {
   ],
   // Let the app draw under the iPhone's notch / home indicator.
   viewportFit: "cover",
+  // Zoom disabled on the installed app by explicit product decision. Note the
+  // trade-off this makes: pinch-to-zoom is an accessibility affordance (WCAG
+  // 1.4.4), and switching it off removes it for everyone, including anyone who
+  // needs to magnify text. Input font sizes are kept at 16px on mobile anyway,
+  // so iOS has no reason to zoom on focus even if this is ever reverted.
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

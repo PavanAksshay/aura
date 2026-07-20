@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     # (/docs, /redoc, /openapi.json) are disabled to avoid exposing the schema.
     environment: str = "development"
 
+    # How many transcription pipelines may run at once. Each one holds a
+    # Whisper model, a pyannote pass and an Ollama call, on ONE machine — so
+    # this is a hard physical limit, not a tuning knob. Measured on an 8 GB M1:
+    # a single job runs at 4.2x realtime idle and 8.5x under light contention,
+    # so raising this does not get work done faster, it just makes every job
+    # slower at once and risks exhausting memory. Extra jobs queue.
+    max_concurrent_transcriptions: int = 1
+
     # Transcription: Whisper via faster-whisper (CTranslate2), fully local.
     # "large-v3" = maximum accuracy; int8 keeps it runnable on CPU.
     whisper_model: str = "large-v3"

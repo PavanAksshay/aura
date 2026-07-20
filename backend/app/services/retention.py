@@ -11,9 +11,11 @@ Guarantees enforced here so they are auditable:
 """
 
 import logging
+import threading
 from pathlib import Path
 from typing import cast
 
+from app.core.config import get_settings
 from app.db.supabase import get_service_client
 from app.models.schemas import SessionStatus
 
@@ -27,6 +29,20 @@ def delete_audio_file(path: Path) -> None:
     except OSError:
         # Log loudly: a lingering audio file is a retention-policy violation.
         logger.exception("Failed to delete scratch audio %s — manual purge required", path)
+
+
+# One machine, one set of models. Without this gate every upload spawned its
+# own pipeline immediately: FastAPI runs sync background tasks on the anyio
+# threadpool (40 threads by default), so ten simultaneous recordings meant ten
+# concurrent Whisper + pyannote runs competing for 8 cores and a shared RAM
+# budget. That does not finish ten jobs in the time of one — it makes all ten
+# slower and can exhaust memory, taking down jobs that were nearly done.
+#
+# Queueing instead means the tenth clinician waits longer, which is honest and
+# survivable, rather than everyone failing together.
+_pipeline_slots = threading.BoundedSemaphore(
+    max(1, get_settings().max_concurrent_transcriptions)
+)
 
 
 def run_transcription_pipeline(
@@ -47,6 +63,19 @@ def run_transcription_pipeline(
     All DB writes are scoped by BOTH session id and user id (belt and suspenders
     on top of the ownership check the route already performed).
     """
+    # Blocks until a slot frees. The audio is already safely on disk, so
+    # waiting here costs a threadpool thread, not the clinician's recording.
+    with _pipeline_slots:
+        _run_pipeline_locked(session_id, user_id, audio_path, patient_id)
+
+
+def _run_pipeline_locked(
+    session_id: str,
+    user_id: str,
+    audio_path: Path,
+    patient_id: str | None,
+) -> None:
+    """The pipeline itself, running with a concurrency slot already held."""
     from app.services.embeddings import index_exported_note
     from app.services.note import build_session_note
     from app.services.summary import generate_summary
