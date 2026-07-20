@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 #
-# Aura — one-command setup.
+# Aura — local setup.
 #
 #   ./setup.sh
 #
-# Checks prerequisites, creates the env files from their templates, generates a
-# matching VAPID keypair, and starts the backend + local LLM. Everything runs on
-# this machine; nothing is sent anywhere except the Supabase project you name.
+# Aura runs entirely on this machine, by design: session audio is transcribed
+# by a local Whisper model and notes are drafted by a local LLM, so nothing is
+# sent to a cloud AI service. That is the whole point of the product, and it is
+# also why there is no container image or cloud deploy here — see README.
+#
+# This script prepares the environment. It does not start anything, because the
+# backend, Ollama and the frontend all want their own terminal.
 #
 # Deliberately verbose about what is missing rather than failing at the first
-# error — a half-configured install that reports itself as "down for
-# maintenance" is much harder to debug than one that refuses to start.
+# error: a half-configured install that reports itself as "down for
+# maintenance" is far harder to debug than one that refuses to start.
 
 set -euo pipefail
 
@@ -32,7 +36,10 @@ need() {
 }
 
 echo "Checking prerequisites…"
-need docker "https://docs.docker.com/get-docker/"
+need python3 "https://www.python.org/downloads/ (3.12+)"
+need node "https://nodejs.org (20+)"
+need ffmpeg "brew install ffmpeg — decodes the browser's webm/opus audio"
+need ollama "https://ollama.com/download — drafts the session notes locally"
 if [ "$missing" -ne 0 ]; then
   red "Install the missing tools above, then run ./setup.sh again."
   exit 1
@@ -42,44 +49,54 @@ fi
 if [ ! -f backend/.env ]; then
   cp backend/.env.example backend/.env
   yellow "Created backend/.env from the template."
-  NEEDS_SUPABASE=1
-else
-  green "backend/.env already exists — leaving it alone."
-  NEEDS_SUPABASE=0
 fi
-
 if [ ! -f frontend/.env.local ]; then
   cp frontend/.env.example frontend/.env.local
   yellow "Created frontend/.env.local from the template."
-  NEEDS_SUPABASE=1
 fi
 
 # --- VAPID ------------------------------------------------------------------
 # Empty keys silently disable every appointment reminder, so generate a pair if
 # the backend has none. Both sides must carry the SAME public key.
 if ! grep -qE '^VAPID_PRIVATE_KEY=.+' backend/.env 2>/dev/null; then
-  if command -v python3 >/dev/null 2>&1 &&
-     python3 -c "import cryptography" >/dev/null 2>&1; then
+  if python3 -c "import cryptography" >/dev/null 2>&1; then
     echo "Generating a Web Push (VAPID) keypair…"
     keys="$(python3 backend/scripts/generate_vapid_keys.py)"
     pub="$(echo "$keys" | grep '^VAPID_PUBLIC_KEY=' | cut -d= -f2-)"
     priv="$(echo "$keys" | grep '^VAPID_PRIVATE_KEY=' | cut -d= -f2-)"
 
-    # BSD vs GNU sed take different -i arguments; rewrite with a temp file.
-    for f in backend/.env; do
-      grep -v '^VAPID_PUBLIC_KEY=\|^VAPID_PRIVATE_KEY=' "$f" > "$f.tmp"
-      printf 'VAPID_PUBLIC_KEY=%s\nVAPID_PRIVATE_KEY=%s\n' "$pub" "$priv" >> "$f.tmp"
-      mv "$f.tmp" "$f"
-    done
+    # BSD and GNU sed take different -i arguments; rewrite via a temp file.
+    grep -v '^VAPID_PUBLIC_KEY=\|^VAPID_PRIVATE_KEY=' backend/.env > backend/.env.tmp
+    printf 'VAPID_PUBLIC_KEY=%s\nVAPID_PRIVATE_KEY=%s\n' "$pub" "$priv" >> backend/.env.tmp
+    mv backend/.env.tmp backend/.env
+
     grep -v '^NEXT_PUBLIC_VAPID_PUBLIC_KEY=' frontend/.env.local > frontend/.env.local.tmp
     printf 'NEXT_PUBLIC_VAPID_PUBLIC_KEY=%s\n' "$pub" >> frontend/.env.local.tmp
     mv frontend/.env.local.tmp frontend/.env.local
     green "VAPID keypair written to both env files."
   else
     yellow "Skipped VAPID generation (needs python3 + cryptography)."
-    yellow "Appointment reminders stay disabled until you run:"
+    yellow "Reminders stay disabled until you run:"
     yellow "  python3 backend/scripts/generate_vapid_keys.py"
   fi
+fi
+
+# --- Python deps ------------------------------------------------------------
+if [ ! -d backend/.venv ]; then
+  echo "Creating the backend virtualenv (this pulls PyTorch — several minutes)…"
+  python3 -m venv backend/.venv
+  # shellcheck disable=SC1091
+  backend/.venv/bin/pip install --quiet --upgrade pip
+  (cd backend && .venv/bin/pip install -e ".[ml,diarization,dev]")
+  green "Backend dependencies installed."
+else
+  green "backend/.venv already exists — leaving it alone."
+fi
+
+# --- Ollama model -----------------------------------------------------------
+if ! ollama list 2>/dev/null | grep -q "llama3.2:3b"; then
+  echo "Pulling the note-drafting model (llama3.2:3b)…"
+  ollama pull llama3.2:3b || yellow "Could not pull the model — start Ollama and retry."
 fi
 
 # --- Supabase ---------------------------------------------------------------
@@ -89,26 +106,20 @@ if grep -q 'your-project-ref' backend/.env 2>/dev/null; then
   yellow "Fill these in backend/.env and frontend/.env.local:"
   yellow "  SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_JWT_SECRET"
   yellow "  NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY"
-  yellow "Then apply supabase/migrations/*.sql in order, and re-run ./setup.sh."
-  exit 0
+  yellow "Then apply supabase/migrations/*.sql in order."
 fi
 
-# --- start ------------------------------------------------------------------
 echo
-echo "Starting backend + Ollama…"
-docker compose up -d --build
-
+green "Setup complete. Start Aura in three terminals:"
 echo
-green "Aura's backend is starting on http://localhost:8000"
+echo "  1.  ollama serve"
+echo "  2.  cd backend  && .venv/bin/uvicorn app.main:app --reload --port 8000"
+echo "  3.  cd frontend && npm install && npm run dev"
 echo
-echo "The first run downloads the Whisper weights (~1.5 GB) and the Ollama"
-echo "model, so the first recording will be slow. Both are cached afterwards."
+echo "  Health:  curl http://localhost:8000/api/v1/health"
 echo
-echo "  Health:   curl http://localhost:8000/api/v1/health"
-echo "  Logs:     docker compose logs -f backend"
-echo "  Stop:     docker compose down"
-echo
-echo "Frontend:   cd frontend && npm install && npm run dev"
-echo
-yellow "Reminder: NEXT_PUBLIC_API_URL is baked into the frontend at BUILD time"
-yellow "(it drives the CSP). If you change it, rebuild the frontend."
+yellow "Two things that bite people later:"
+yellow "  · NEXT_PUBLIC_API_URL is baked into the frontend's CSP at BUILD time."
+yellow "    Change it and you must rebuild, or every backend call is blocked."
+yellow "  · uvicorn --reload watches .py files, NOT .env. Restart properly"
+yellow "    after changing settings, or you will debug a stale process."

@@ -2,12 +2,40 @@
 
 Privacy-first session documentation for clinical psychologists. Record a
 session, have it transcribed **locally** with Whisper large-v3 (with speaker
-labels), get a structured SOAP note and summary automatically, and ask
+labels), get a structured note and summary automatically, and ask
 plain-language questions of your own notes through a private semantic
 **Patient Memory**.
 
 Every AI step — transcription, diarization, embeddings, summarization —
 runs on your own machine. No OpenAI, no Google, no speech API.
+
+## Scale: this is a single-clinician tool
+
+Stated plainly, because it is easy to assume otherwise and expensive to find
+out late.
+
+Aura's privacy model and its capacity are the same fact: every AI step runs on
+one machine, so that machine is the ceiling. Measured on an 8 GB M1 with
+Whisper large-v3 int8:
+
+| | |
+|---|---|
+| Transcription speed | **4.2x realtime** idle, **8.5x** under light CPU contention |
+| A 50-minute session | ~3.5 hours to produce a note |
+| Concurrent jobs | **1** — further uploads queue (`MAX_CONCURRENT_TRANSCRIPTIONS`) |
+
+Raising the concurrency limit does not increase throughput. Each job holds a
+Whisper model, a pyannote pass and an Ollama call; running several at once
+makes all of them slower and can exhaust memory, killing jobs that were nearly
+finished. Queueing is the honest behaviour.
+
+**There is no container image or cloud deployment, deliberately.** Moving
+transcription to a rented GPU would make long sessions finish in minutes, but
+it would also mean patient audio leaving the clinician's machine — which is
+the one promise Aura makes that cloud-based scribes cannot. If that trade is
+ever worth making, the public claims in this README, on the landing page and
+in the privacy policy must all change first, and cross-border transfer of
+health data becomes a live legal question (see `docs/regulatory-brief.md`).
 
 ## Stack
 
