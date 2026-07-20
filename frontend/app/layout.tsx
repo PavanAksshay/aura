@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { themeInitScript } from "@/lib/theme";
+import { SPLASH_STYLE } from "@/lib/splash";
 import { Toaster } from "@/components/ui/toaster";
+import { AppSplash } from "@/components/pwa/AppSplash";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 
 const inter = Inter({
@@ -75,8 +77,12 @@ export default function RootLayout({
       <head>
         {/* Must run before paint, or the page flashes the wrong theme. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Styles the splash on the first frame, before the CSS bundle loads. */}
+        <style dangerouslySetInnerHTML={{ __html: SPLASH_STYLE }} />
       </head>
       <body className="min-h-full flex flex-col">
+        {/* First child, so it covers the app from the very first paint. */}
+        <AppSplash />
         {children}
         <Toaster />
         <ServiceWorkerRegistrar />
