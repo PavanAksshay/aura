@@ -263,7 +263,7 @@ export function NoteView({
                         onChange={(e) => setBullet(key, j, e.target.value)}
                         rows={2}
                         aria-label={`${label} — point ${j + 1}`}
-                        className="min-h-[3.25rem] w-full resize-y rounded-lg border border-border bg-background/60 px-3 py-2 text-sm leading-relaxed outline-none focus:border-primary"
+                        className="min-h-[3.25rem] w-full resize-y rounded-lg border border-border bg-background/60 px-3 py-2 text-base leading-relaxed outline-none focus:border-primary sm:text-sm"
                       />
                       <button
                         type="button"

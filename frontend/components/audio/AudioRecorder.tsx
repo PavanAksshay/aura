@@ -6,7 +6,7 @@
  * dropped from memory; nothing is written to localStorage, IndexedDB, or disk.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -46,6 +46,18 @@ export function AudioRecorder({
   const [recordedSeconds, setRecordedSeconds] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // A captured recording lives only in memory — there is deliberately no
+  // localStorage or IndexedDB copy, because that would write session audio to
+  // the device. The upside is privacy; the downside is that closing the tab
+  // destroys it, and an upload that failed (no signal, backend down) leaves the
+  // clinician holding the only copy of a real session. Warn before that.
+  useEffect(() => {
+    if (!pendingBlob) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [pendingBlob]);
 
   async function handleStop() {
     const blob = await rec.stop();
@@ -163,9 +175,20 @@ export function AudioRecorder({
                 </Button>
               </div>
               {submitError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {submitError}
-                </p>
+                <div
+                  role="alert"
+                  className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm"
+                >
+                  <p className="text-destructive">{submitError}</p>
+                  <p className="mt-1.5 text-foreground/80">
+                    <strong className="font-medium">
+                      Your recording is safe on this screen
+                    </strong>{" "}
+                    — but it is not saved yet. Stay on this page and press
+                    Generate note again when you have a connection. Closing the
+                    app now would lose it.
+                  </p>
+                </div>
               )}
             </motion.div>
           ) : (
