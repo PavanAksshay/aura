@@ -1,5 +1,6 @@
 "use client";
 
+
 /**
  * Aura intake: three-step animated onboarding. Steps slide horizontally via
  * AnimatePresence (direction-aware), progress fills the brand gradient, and
@@ -22,6 +23,7 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 import { AVATARS, Avatar } from "@/lib/avatars";
+import { INSTALL_NUDGE_KEY } from "@/lib/pwa-install";
 import { EASE_OUT } from "@/components/motion/primitives";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -227,6 +229,13 @@ export function OnboardingFlow({
       setError(error.message);
       setBusy(false);
       return;
+    }
+    // A newly-registered clinician: flag the install nudge to show once on the
+    // dashboard. Wrapped because storage can throw in private mode.
+    try {
+      localStorage.setItem(INSTALL_NUDGE_KEY, "pending");
+    } catch {
+      // no nudge, no harm
     }
     router.push("/dashboard");
     router.refresh();

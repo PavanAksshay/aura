@@ -23,6 +23,7 @@ import { ActivityPing } from "@/components/profile/ActivityPing";
 import { SessionWatcher } from "@/components/notes/SessionWatcher";
 import { AppointmentReminder } from "@/components/schedule/AppointmentReminder";
 import { MaintenanceBanner } from "@/components/system/MaintenanceBanner";
+import { InstallNudge } from "@/components/pwa/InstallNudge";
 
 export default async function WorkspaceLayout({
   children,
@@ -73,6 +74,8 @@ export default async function WorkspaceLayout({
             newlyEarned={newlyEarned}
             allEarned={allEarned}
           />
+          {/* One-time install suggestion for a just-registered clinician. */}
+          <InstallNudge />
         </>
       )}
 

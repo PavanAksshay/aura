@@ -12,6 +12,14 @@ export interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+/**
+ * Set to "pending" the moment a user finishes registering (onboarding), read
+ * once on the dashboard to show the install nudge, then cleared. Kept here so
+ * the onboarding flow and the nudge component agree on the key without one
+ * importing the other's component module.
+ */
+export const INSTALL_NUDGE_KEY = "aura-install-nudge";
+
 let deferred: InstallPromptEvent | null = null;
 let attached = false;
 const listeners = new Set<() => void>();
