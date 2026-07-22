@@ -499,12 +499,17 @@ body {
    Desktop keeps the full effect.
    -------------------------------------------------------------------------- */
 @media (hover: none) {
+  /* Butterflies are desktop-only. Merely freezing them still left a 115vw SVG
+     to rasterise and keep in memory on a phone, so they are dropped outright.
+     One rule on the wrapper covers every one of them — hero and
+     scroll-revealed, workspace and landing. */
+  .butterfly-float {
+    display: none;
+  }
+
   .aurora-blob-a,
   .aurora-blob-b,
-  .aurora-blob-c,
-  .butterfly-float,
-  .butterfly-wing-left,
-  .butterfly-wing-right {
+  .aurora-blob-c {
     animation: none;
   }
 
@@ -514,11 +519,6 @@ body {
     filter: blur(45px);
     /* Nothing is animating now, so release the compositor layers it needed. */
     will-change: auto;
-  }
-
-  .butterfly-float {
-    will-change: auto;
-    perspective: none;
   }
 
   /* iOS pays for backdrop blur superlinearly, and these sit on the nav and on
