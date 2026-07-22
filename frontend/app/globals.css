@@ -481,3 +481,55 @@ body {
     animation: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Touch-device performance
+
+   On a phone the ambient layer costs almost nothing to LOOK at and a great
+   deal to ANIMATE. Three 90px-blurred aurora blobs and the butterflies drift
+   continuously *underneath* .glass surfaces, and backdrop-filter has to be
+   recomputed against whatever is behind it — so every frame of that barely
+   visible drift forces Safari to re-blur the nav and every card on screen.
+   That is the reported iPhone jank: the wings look "stuck" because the
+   compositor is dropping frames, not because the animation is wrong.
+
+   The motion is decorative and nearly imperceptible anyway (opacity 0.11–0.16
+   over 17–32s loops), so on touch devices it is dropped rather than throttled.
+   The layout and colours are unchanged — the page simply stops repainting.
+   Desktop keeps the full effect.
+   -------------------------------------------------------------------------- */
+@media (hover: none) {
+  .aurora-blob-a,
+  .aurora-blob-b,
+  .aurora-blob-c,
+  .butterfly-float,
+  .butterfly-wing-left,
+  .butterfly-wing-right {
+    animation: none;
+  }
+
+  /* Blur cost grows sharply with radius, and this is the most expensive single
+     paint on the page. Halved — at these opacities the wash looks the same. */
+  .aurora-blob {
+    filter: blur(45px);
+    /* Nothing is animating now, so release the compositor layers it needed. */
+    will-change: auto;
+  }
+
+  .butterfly-float {
+    will-change: auto;
+    perspective: none;
+  }
+
+  /* iOS pays for backdrop blur superlinearly, and these sit on the nav and on
+     every card. Lighter radius, same frosted read. */
+  .glass {
+    backdrop-filter: blur(10px) saturate(1.25);
+    -webkit-backdrop-filter: blur(10px) saturate(1.25);
+  }
+
+  .glass-subtle {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
