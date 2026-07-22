@@ -124,6 +124,8 @@ export default async function SessionPage({
               title={session.title}
               transcript={session.raw_transcript}
               initialSummary={session.summary}
+              patientName={patient?.full_name ?? null}
+              dateISO={session.created_at}
             />
           </div>
         )}
