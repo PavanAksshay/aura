@@ -5,7 +5,11 @@ copy, so these tests care about one guarantee above all: the stored transcript
 must never keep Tamil/Devanagari letters, even when the model is unavailable.
 """
 
-from app.services.romanize import has_indic_letters, romanize_transcript
+from app.services.romanize import (
+    _normalize_sentence_case,
+    has_indic_letters,
+    romanize_transcript,
+)
 
 TAMIL = (
     "Therapist: Vanakkam, indha vaaram eppadi irundheenga?\n"
@@ -32,6 +36,16 @@ def test_mechanical_fallback_removes_all_tamil_letters() -> None:
 def test_mechanical_fallback_removes_all_devanagari_letters() -> None:
     out = romanize_transcript(HINDI, use_llm=False)
     assert not has_indic_letters(out)
+
+
+def test_sentence_case_undoes_the_models_title_case() -> None:
+    # Small models Capitalise Every Word regardless of the prompt; the pipeline
+    # fixes it deterministically.
+    src = "Therapist: Vanakkam Enna Aachu?\nPatient: Enakku Romba Kavalai. I Am Tired."
+    out = _normalize_sentence_case(src)
+    assert out == (
+        "Therapist: Vanakkam enna aachu?\nPatient: Enakku romba kavalai. I am tired."
+    )
 
 
 def test_has_indic_letters() -> None:

@@ -46,6 +46,8 @@ Rules:
 - Keep every word in its original language (Tamil, Hindi, English). Only change \
 Tamil/Hindi letters into Latin letters that sound the same. English words stay \
 exactly as they already are.
+- Use normal sentence casing: lowercase words, capitalising ONLY the first word \
+of a sentence and proper nouns (people's names). Do NOT Capitalise Every Word.
 - Keep the speaker labels ("Therapist:", "Patient:") and every line break.
 - Do not add, remove, translate, summarize, or reorder anything. Same number of \
 lines, same content.
@@ -70,6 +72,42 @@ def _mechanical(text: str) -> str:
     out = transliterate(out, sanscript.DEVANAGARI, sanscript.ISO)
     # Transliteration leaves danda punctuation as-is; normalise to a full stop.
     return out.translate(_DANDA)
+
+
+_SPEAKER_PREFIX = re.compile(r"^(\s*[A-Za-z][A-Za-z ]*:\s*)(.*)$")
+
+
+def _sentence_case(body: str) -> str:
+    """Lowercase, then capitalise the first letter of each sentence."""
+    chars: list[str] = []
+    capitalise = True
+    for ch in body.lower():
+        if capitalise and ch.isalpha():
+            chars.append(ch.upper())
+            capitalise = False
+        else:
+            chars.append(ch)
+        if ch in ".!?":
+            capitalise = True
+    out = "".join(chars)
+    # Restore the standalone English pronoun "I", which the lowercasing eats.
+    return re.sub(r"\bi\b", "I", out)
+
+
+def _normalize_sentence_case(text: str) -> str:
+    """Undo the model's Title Case: small models Capitalise Every Word no matter
+    how the prompt asks, so this is done deterministically instead. The
+    "Therapist:"/"Patient:" label on each line is preserved; only the spoken body
+    is recased. Proper nouns are lowercased too — an acceptable trade in an
+    already-phonetic transcript, for consistently readable casing."""
+    lines = []
+    for line in text.split("\n"):
+        m = _SPEAKER_PREFIX.match(line)
+        if m:
+            lines.append(m.group(1) + _sentence_case(m.group(2)))
+        else:
+            lines.append(_sentence_case(line))
+    return "\n".join(lines)
 
 
 def _plausible(original: str, candidate: str) -> bool:
@@ -120,14 +158,14 @@ def romanize_transcript(text: str, *, use_llm: bool = True) -> str:
                 and not has_indic_letters(candidate)
                 and _plausible(text, candidate)
             ):
-                return candidate
+                return _normalize_sentence_case(candidate)
             logger.warning("LLM romanization rejected; using mechanical fallback")
         except Exception:
             logger.warning("LLM romanization unavailable; using mechanical fallback",
                            exc_info=True)
 
     try:
-        return _mechanical(text)
+        return _normalize_sentence_case(_mechanical(text))
     except Exception:
         # Never fail the pipeline over romanization — worst case the transcript
         # keeps its original script, which is still a faithful record.
