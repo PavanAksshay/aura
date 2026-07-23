@@ -1,27 +1,32 @@
 "use client";
 
 /**
- * A one-time, dismissible nudge shown to a freshly-registered clinician,
- * suggesting they install Aura as an app. It does not install anything itself
- * — the real install button (and the iOS instructions) live on the profile,
- * so this only points there. Installing is entirely the user's choice.
+ * A persistent nudge, shown to every user who hasn't installed Aura yet,
+ * suggesting they add it from their Profile. It installs nothing itself — the
+ * real install button (and iOS instructions) live on the profile, so this only
+ * points there.
  *
- * Trigger: onboarding sets INSTALL_NUDGE_KEY to "pending" just before
- * redirecting to the dashboard, so only a new registration ever sees this;
- * existing users never had the flag set. It shows once and any interaction
- * clears the flag, so it never nags. It also suppresses itself if the app is
- * already installed, or if the user is already on the profile page.
+ * Behaviour:
+ *  - Shows once per browsing session until the app is installed. It never
+ *    auto-dismisses: it stays until the user taps it, swipes it away, or closes
+ *    it, then hides for the rest of the session (so it doesn't nag on every
+ *    navigation) and reminds again next session.
+ *  - Tapping the card opens the Profile; swiping it sideways or pressing × just
+ *    dismisses it.
+ *  - Suppresses itself when already installed, or when already on /profile.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, type PanInfo } from "framer-motion";
 import { X } from "lucide-react";
 
-import { INSTALL_NUDGE_KEY } from "@/lib/pwa-install";
 import { AuraMark } from "@/components/ui/aura-logo";
-import { Button } from "@/components/ui/button";
-import { EASE_OUT } from "@/components/motion/primitives";
+
+// Per-session so it reminds again next visit, but not on every page change.
+const DISMISS_KEY = "aura-install-nudge-dismissed";
+// Sideways travel (px) past which a swipe counts as "dismiss".
+const SWIPE_THRESHOLD = 90;
 
 function isInstalled(): boolean {
   if (typeof window === "undefined") return false;
@@ -32,45 +37,33 @@ function isInstalled(): boolean {
   );
 }
 
-function clearFlag() {
-  try {
-    localStorage.removeItem(INSTALL_NUDGE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
 export function InstallNudge() {
   const router = useRouter();
   const pathname = usePathname();
   const [show, setShow] = useState(false);
+  // True while a drag is in flight, so the click that trails a swipe doesn't
+  // also navigate to the profile.
+  const dragged = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    // Async so the setState is scheduled, not called synchronously inside the
-    // effect (which the react-hooks rule flags as cascade-prone).
     void (async () => {
-      let pending = false;
+      if (isInstalled()) return;
+      let dismissed = false;
       try {
-        pending = localStorage.getItem(INSTALL_NUDGE_KEY) === "pending";
+        dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
       } catch {
-        // Private mode / storage disabled — simply never nudge.
+        // Storage blocked (private mode) — showing it is the safe default.
       }
-      if (cancelled || !pending) return;
-      // Nothing to suggest if they are already running the installed app.
-      if (isInstalled()) {
-        clearFlag();
-        return;
-      }
-      setShow(true);
+      if (!dismissed) setShow(true);
     })();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   function dismiss() {
-    clearFlag();
+    try {
+      sessionStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      // ignore
+    }
     setShow(false);
   }
 
@@ -79,53 +72,82 @@ export function InstallNudge() {
     router.push("/profile");
   }
 
-  // They are already where the real install control lives.
-  if (pathname === "/profile") return null;
+  function onDragEnd(_: unknown, info: PanInfo) {
+    if (Math.abs(info.offset.x) > SWIPE_THRESHOLD) {
+      dismiss();
+      return;
+    }
+    // Snapped back — clear the flag on the next tick so a real tap still works.
+    setTimeout(() => {
+      dragged.current = false;
+    }, 0);
+  }
+
+  // Already where the real install control lives, or nothing to show.
+  if (!show || pathname === "/profile") return null;
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          role="dialog"
-          aria-label="Install the Aura app"
-          initial={{ opacity: 0, y: 20, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.97 }}
-          transition={{ duration: 0.35, ease: EASE_OUT }}
-          className="fixed bottom-4 left-1/2 z-[90] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-4 sm:translate-x-0"
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4 sm:justify-start sm:pl-4">
+      <motion.div
+        drag="x"
+        dragElastic={0.25}
+        dragConstraints={{ left: 0, right: 0 }}
+        onDragStart={() => {
+          dragged.current = true;
+        }}
+        onDragEnd={onDragEnd}
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35 }}
+        className="pointer-events-auto w-[min(23rem,calc(100vw-2rem))] cursor-grab active:cursor-grabbing"
+      >
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Download the Aura app from your Profile"
+          onClick={() => {
+            if (dragged.current) {
+              dragged.current = false;
+              return;
+            }
+            openProfile();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openProfile();
+            }
+          }}
+          className="glass relative cursor-pointer rounded-2xl border border-border/60 p-4 shadow-xl transition hover:border-primary/50"
         >
-          <div className="glass relative rounded-2xl border border-border/60 p-4 shadow-xl">
-            <button
-              type="button"
-              onClick={dismiss}
-              aria-label="Dismiss"
-              className="absolute right-2.5 top-2.5 rounded-md p-1 text-muted-foreground transition hover:bg-foreground/8 hover:text-foreground"
-            >
-              <X className="size-4" />
-            </button>
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/12">
-                <AuraMark className="size-5" />
-              </span>
-              <div className="min-w-0 pr-4">
-                <p className="text-sm font-medium">Get the full Aura experience</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Install Aura as an app for faster access — anytime, from your
-                  Profile.
-                </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <Button size="sm" onClick={openProfile}>
-                    Open Profile
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={dismiss}>
-                    Not now
-                  </Button>
-                </div>
-              </div>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={(e) => {
+              e.stopPropagation();
+              dismiss();
+            }}
+            onPointerDownCapture={(e) => e.stopPropagation()}
+            className="absolute right-2.5 top-2.5 rounded-md p-1 text-muted-foreground transition hover:bg-foreground/8 hover:text-foreground"
+          >
+            <X className="size-4" />
+          </button>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/12">
+              <AuraMark className="size-5" />
+            </span>
+            <div className="min-w-0 pr-4">
+              <p className="text-sm leading-relaxed">
+                wait, before you continue, would you mind downloading me?? you
+                wouldn&apos;t have to search for me everytime then
+              </p>
+              <p className="mt-2 text-xs font-medium text-primary">
+                Tap to open your Profile →
+              </p>
             </div>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </motion.div>
+    </div>
   );
 }
