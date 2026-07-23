@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     # has accepted the conditions for both the diarization and segmentation
     # models. hf_token is read from HF_TOKEN in the environment.
     enable_diarization: bool = True
+    # Romanize non-English (Tamil/Hindi) transcripts to the Latin alphabet, so
+    # the stored transcript has no Indic letters. The note is still built from
+    # the original transcript, so this only affects the readable transcript.
+    romanize_transcripts: bool = True
     # community-1 is pyannote.audio 4.x's flagship open pipeline (supersedes
     # the 3.1 pipeline, higher accuracy). Gated on HF like all pyannote models.
     diarization_model: str = "pyannote/speaker-diarization-community-1"

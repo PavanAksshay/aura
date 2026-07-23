@@ -52,6 +52,12 @@ export interface ClinicalSession {
   reviewed_by: string | null;
   /** When the clinician last hand-edited the note (0018); null = as drafted. */
   note_edited_at: string | null;
+  /**
+   * Session was transcribed in a non-English language, so the note is an
+   * English translation (0020). Set by the pipeline from the original script,
+   * before romanization. Older rows are false and fall back to text-detection.
+   */
+  source_non_english: boolean | null;
 }
 
 export type PatientStatus = "active" | "paused" | "discharged";

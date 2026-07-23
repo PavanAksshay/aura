@@ -34,6 +34,9 @@ ml = [
     "faster-whisper>=1.1",
     # Local ONNX embeddings for the patient-memory index.
     "fastembed>=0.5",
+    # Deterministic script→Latin fallback for romanizing Tamil/Hindi
+    # transcripts (app/services/romanize.py). Pure-Python, lightweight.
+    "indic-transliteration>=2.3",
 ]
 # Optional speaker diarization. Pulls in PyTorch (~2 GB) and the pyannote
 # stack; only needed if you want speaker-labelled transcripts. The pyannote

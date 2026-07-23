@@ -77,20 +77,33 @@ def _run_pipeline_locked(
 ) -> None:
     """The pipeline itself, running with a concurrency slot already held."""
     from app.services.embeddings import index_exported_note
-    from app.services.note import build_session_note
+    from app.services.note import _is_multilingual, build_session_note
+    from app.services.romanize import romanize_transcript
     from app.services.summary import generate_summary
     from app.services.transcription import transcribe_audio
 
     db = get_service_client()
     try:
         transcript = transcribe_audio(audio_path)
+        # Detect the language on the ORIGINAL script, before any romanization —
+        # that's the reliable signal and it drives the "translated note" banner.
+        source_non_english = _is_multilingual(transcript)
+        # The note and summary are built from the ORIGINAL transcript for best
+        # fidelity; only the stored, human-readable transcript is romanized, so
+        # romanization drift can never reach the clinical note.
         note = build_session_note(transcript)
         summary = generate_summary(transcript)
+        stored_transcript = (
+            romanize_transcript(transcript)
+            if get_settings().romanize_transcripts
+            else transcript
+        )
 
         db.table("sessions").update(
             {
                 "status": SessionStatus.EXPORTED.value,
-                "raw_transcript": transcript,
+                "raw_transcript": stored_transcript,
+                "source_non_english": source_non_english,
                 "note": note.model_dump(),
                 "summary": summary.model_dump(),
                 "exported_at": "now()",

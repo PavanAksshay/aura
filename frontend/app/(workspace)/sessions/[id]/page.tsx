@@ -44,9 +44,11 @@ export default async function SessionPage({
   }
 
   const reviewable = session.status === "ready" || session.status === "exported";
-  const nonEnglish = session.raw_transcript
-    ? isNonEnglishTranscript(session.raw_transcript)
-    : false;
+  // Prefer the pipeline's flag (detected on the original script, before
+  // romanization); fall back to text-detection for rows predating migration 0020.
+  const nonEnglish =
+    session.source_non_english ??
+    (session.raw_transcript ? isNonEnglishTranscript(session.raw_transcript) : false);
 
   return (
     <div>
