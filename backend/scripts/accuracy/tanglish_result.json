@@ -1,0 +1,17 @@
+{
+  "audio": "/Users/pavanaksshay/Downloads/clinical-scribe-workspace/backend/scripts/accuracy/out/tanglish_session.webm",
+  "transcript_seconds": 2163.6,
+  "transcript": "Therapist: வணக்கம் திவாயல் இந்த வாரம் எப்படி இருந்தீங்க?\nPatient: ஐயா ரொம்பத்தாக ஐருந்துச்சி இரவுல தூக்கமே வரலை படுத்தாலும் மனசுல ஓபிஸ் வர்ப் பற்றி யோசனை ஓடிக்கிட்டே இருக்கு.\nTherapist: ஒரு நாளைக்கு எத்தனை மணி நேரம் தூங்குறீங்க?\nPatient: மூனு மணி நேரம் தான் சார் காலையில் எழுந்தால் full tired ஆயிருக்கு, workலா concentrate பண்ண முடியலை.\nTherapist: சாப்பாடு appetite எல்லாம் எப்படி இருக்கு?\nPatient: பசியே இல்ல சார் சில நாள் launch foodersக்கு பண்றேன் இந்த வாரம் என் போனதையும் நிலுத்திக்கின் அயினையே இல்ல.\nTherapist: இந்த anxiety ஆ trigger பண்றது officeலா ஏதாவது specific ஆயிருக்கா?\nPatient: என் மேனியல் அடுத்த மாசம் appraisal பத்தி சொன்னாரு நான் fail ஆயிடுவேனோ, எல்லாரும் யாயி பண்ணுவாங்களோ உங்கிற பயம் சார்.\nTherapist: சரி, ஒரு plan பண்ணலாம் தினன் மும் படுக்கரதுக்கு முன்னாடி அந்த 4-7-8 breathing exercise try பண்ணுங்க இரவு 11 மணிக்கு 5's daytime வெச்சுக்கோங்க.\nPatient: சரி சார் try பண்றேன்.\nTherapist: தினன் மும் ஒரு sheetலா எந்தத் தோப்பாரி பண்ணுதோ அதை எழுதி வெச்சுக்கோங்க அடுத்த sessionலா அந்த appraisal film பத்தி பேசலாம்.\nPatient: ஓகே சார் நன்றி.",
+  "detected_non_english": true,
+  "summary_seconds": 39.6,
+  "discussed": [
+    "Reported excessive daytime sleepiness, with difficulty concentrating at work due to lack of sleep",
+    "Experienced anxiety and fear of failure, triggered by negative self-talk and criticism from others",
+    "Desire to launch new food plan for the week, but struggling with appetite and motivation"
+  ],
+  "ahead": [
+    "Plan to try 4-7-8 breathing exercise before bed at 11 PM",
+    "Agreed to write down thoughts and feelings on a sheet of paper for next session",
+    "Next session planned to discuss appraisal and film review"
+  ]
+}

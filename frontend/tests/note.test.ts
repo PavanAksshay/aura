@@ -113,3 +113,26 @@ test("leaves English transcripts — including accented names — alone", () => 
   assert.ok(!isNonEnglishTranscript("José and café owner Renée spoke at length."));
   assert.ok(!isNonEnglishTranscript(""));
 });
+
+// Romanized Tanglish/Hinglish is 100% Latin, so the script test misses it —
+// the distinctive-marker test has to carry it, or the banner never shows.
+test("flags romanized Tanglish/Hinglish even with no Tamil letters", () => {
+  assert.ok(
+    isNonEnglishTranscript(
+      "Hi doctor, konjam stress-a feel panren. Recent-a romba overthink panren. " +
+        "Naan enough illa nu feel aagudhu.",
+    ),
+  );
+  assert.ok(
+    isNonEnglishTranscript("Mujhe bahut tension hai aur mera neend nahi aa rahi hai."),
+  );
+});
+
+test("a stray foreign loanword does not flag ordinary English", () => {
+  // "kya" or a single borrowed word shouldn't cross the 5% marker threshold.
+  assert.ok(
+    !isNonEnglishTranscript(
+      "We discussed her yoga practice and a mantra she repeats when anxious.",
+    ),
+  );
+});

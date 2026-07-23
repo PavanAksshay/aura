@@ -1,0 +1,47 @@
+[
+  {
+    "model": "llama3.2:3b",
+    "median_s": 24.5,
+    "timings_s": [
+      24.1,
+      25.0
+    ],
+    "discussed": [
+      "Experiencing difficulty sleeping, with a feeling of being pulled down by the weight of work and office stress",
+      "Difficulty concentrating on work due to anxiety and fear of failure",
+      "Lack of energy and motivation, including skipping meals and canceling gym plans",
+      "Feeling overwhelmed by the prospect of an upcoming appraisal at work",
+      "Anxiety triggered by specific situations in the office, such as a manager's comment about performance"
+    ],
+    "ahead": [
+      "Try practicing breathing exercises before bed, using the 4-7-8 technique",
+      "Establish a fixed bedtime routine, going to bed at 11 PM",
+      "Write down thoughts and worries each day on a sheet of paper to process and reflect on them",
+      "Discuss and focus on overcoming fear of failure and anxiety in the next session"
+    ],
+    "english_bullets": "9/9"
+  },
+  {
+    "model": "qwen2.5:3b",
+    "median_s": 23.8,
+    "timings_s": [
+      22.8,
+      24.8
+    ],
+    "discussed": [
+      "Patient reports experiencing anxiety triggered by a manager's upcoming performance review at work.",
+      "Patient has skipped lunch due to fatigue from office work and gym sessions.",
+      "Patient anticipates feeling judged by colleagues if they fail the performance review.",
+      "Patient mentions difficulty concentrating in work-related tasks.",
+      "Patient expresses concern about their appetite, skipping meals sometimes."
+    ],
+    "ahead": [
+      "Plan for patient to practice breathing exercises (four-seven-eight) every morning before bed.",
+      "Patient is instructed to write down any thoughts that worry them on a sheet of paper for the next session.",
+      "Next session will focus on managing anxiety related to the upcoming performance review.",
+      "Patient agrees to try the breathing exercise and fixed bedtime plan.",
+      "Patient agrees to write down their worries for the next session."
+    ],
+    "english_bullets": "10/10"
+  }
+]

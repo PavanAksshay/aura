@@ -1,0 +1,12 @@
+Therapist: வணக்கம் Divya, இந்த வாரம் எப்படி இருந்தீங்க?
+Patient: சார், romba tough-ஆ இருந்துச்சு. Night-la தூக்கமே வரலை. நான் படுத்தாலும் மனசுல office work பத்தி யோசனை ஓடிக்கிட்டே இருக்கு.
+Therapist: எத்தனை மணி நேரம் தூங்குறீங்க average-ஆ?
+Patient: மூணு, மூணரை மணி நேரம் தான். காலைல எழுந்தா full-ஆ tired-ஆ இருக்கு. Concentrate பண்ண முடியலை work-la.
+Therapist: சாப்பாடு, appetite எல்லாம் எப்படி?
+Patient: பசியே இல்ல சார். Lunch-ஐ கூட skip பண்றேன் sometimes. இந்த வாரம் நான் gym போறதையும் நிறுத்திட்டேன், no energy.
+Therapist: புரியுது. இந்த anxiety-ஐ trigger பண்றது office-la ஏதாவது specific-ஆ இருக்கா?
+Patient: என் manager next month appraisal பத்தி சொன்னாரு. அதுல இருந்து தான் இந்த feeling. நான் fail ஆயிடுவேனோ, எல்லாரும் என்னை judge பண்ணுவாங்களோ-ன்னு பயமா இருக்கு.
+Therapist: சரி. நாம ஒரு plan பண்ணலாம். இந்த வாரம் ஒவ்வொரு நாளும் படுக்கறதுக்கு முன்னாடி அந்த breathing exercise — நான் காட்டினேனே, four-seven-eight — அத try பண்ணுங்க. And ஒரு fixed bedtime வெச்சுக்கோங்க, பதினொரு மணிக்கு.
+Patient: சரி சார், try பண்றேன்.
+Therapist: இன்னும் ஒண்ணு, தினமும் ஒரு sheet-la எந்த thought உங்களை worry பண்ணுதோ அத எழுதி வெச்சுக்கோங்க. அடுத்த session-la நாம அத பத்தி பேசலாம். அப்புறம் அந்த appraisal fear-ஐ focus பண்ணலாம்.
+Patient: ஓகே சார். நன்றி.

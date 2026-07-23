@@ -58,17 +58,39 @@ export function noteHasContent(note: SessionNote): boolean {
   return note.discussed.length > 0 || note.ahead.length > 0;
 }
 
+// High-frequency function words that are distinctive to romanized Tamil and
+// Hindi ("Tanglish"/"Hinglish") and rare in English. A therapy transcript that
+// leans on several of these is code-mixed even though it is written in the
+// Latin alphabet — which the script test below cannot see. Kept deliberately to
+// distinctive, multi-letter words so ordinary English does not trip it.
+const ROMANIZED_MARKERS = new Set([
+  // Tamil
+  "panren", "panni", "pannunga", "pannalaam", "pannama", "panradha",
+  "pannuvom", "irukku", "irukka", "irukkalam", "irundhu", "irundha",
+  "irukken", "varudhu", "aagudhu", "aachu", "aana", "aagiduven", "enna",
+  "eppo", "eppadi", "ippo", "romba", "konjam", "kooda", "sila", "adhigama",
+  "seri", "puriyudhu", "dhaan", "naan", "neenga", "unga", "adha", "adhu",
+  "indha", "adhukku", "maadhiri", "perusa", "chinna", "illa", "vandhu",
+  "pesalaam", "sonnaru",
+  // Hindi
+  "hai", "nahi", "nahin", "kya", "mera", "meri", "bahut", "raha", "rahi",
+  "hoon", "mujhe", "karta", "karti", "tha", "thi", "hota", "hoti",
+]);
+
 /**
  * Roughly, was this session spoken in a non-English language (Tamil, Hindi, …)?
  *
- * Whisper writes the transcript in the spoken language's own script, so a
- * non-English session carries a substantial share of non-Latin letters even
- * when code-switched with English. The summary is always written in English,
- * which the backend can only do by understanding the other language — so on
- * these sessions the note is a translation, and the automatic grounding check
- * that guards English notes cannot run. The UI uses this to ask the clinician
- * for extra scrutiny. Mirrors the backend's `_is_multilingual`; kept in step
- * with it so both sides agree on what "non-English" means.
+ * Two ways in. Whisper usually writes the transcript in the spoken language's
+ * own script, so a Tamil/Hindi session carries non-Latin letters — that's the
+ * script test. But when the speech is heavily code-switched (or later
+ * romanized) it can come back in the Latin alphabet, e.g. "konjam stress-a
+ * feel panren" — all Latin, yet not English. The marker test catches that.
+ *
+ * The summary is always written in English, so on either kind of session the
+ * note is a translation and the UI asks the clinician for extra scrutiny. This
+ * drives that banner. (The backend's grounding guard keys on script alone: for
+ * romanized text its lexical check still has real English words to work with,
+ * so it stays on there — this function is intentionally broader than that.)
  */
 export function isNonEnglishTranscript(transcript: string): boolean {
   let letters = 0;
@@ -80,7 +102,13 @@ export function isNonEnglishTranscript(transcript: string): boolean {
     // and other scripts sit above it.
     if (ch.codePointAt(0)! > 0x024f) foreign += 1;
   }
-  return letters > 0 && foreign / letters >= 0.15;
+  if (letters > 0 && foreign / letters >= 0.15) return true;
+
+  // Romanized code-mixing: several distinctive Tamil/Hindi markers in Latin.
+  const words = transcript.toLowerCase().match(/[a-z]+/g) ?? [];
+  if (words.length === 0) return false;
+  const hits = words.filter((w) => ROMANIZED_MARKERS.has(w)).length;
+  return hits / words.length >= 0.05;
 }
 
 /** Plain-text rendering (clipboard, PDF fallback). */
