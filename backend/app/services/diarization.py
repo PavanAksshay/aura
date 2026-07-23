@@ -2,7 +2,8 @@
 
 Diarization answers "who spoke when": it segments the audio into speaker turns
 so the transcript can be labelled (Speaker 1 / Speaker 2 / …). It runs fully
-locally on CPU, like the rest of the pipeline.
+locally — on Apple's MPS GPU when available (much faster there than on CPU),
+otherwise on CPU.
 
 It is deliberately best-effort. Every failure mode — the extra deps not being
 installed, `enable_diarization` off, no Hugging Face token, the gated model not
@@ -18,6 +19,7 @@ Whisper model in transcription.py.
 from __future__ import annotations
 
 import logging
+import os
 import threading
 from dataclasses import dataclass
 from typing import Any
@@ -25,6 +27,10 @@ from typing import Any
 import numpy as np
 
 from app.core.config import get_settings
+
+# Let any op that MPS doesn't implement fall back to CPU rather than erroring.
+# Must be set before torch runs its first MPS op; harmless when MPS is unused.
+os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +49,25 @@ class SpeakerTurn:
     start: float
     end: float
     speaker: str
+
+
+def _select_device(preferred: str) -> str:
+    """Pick a torch device for pyannote: the configured one, or auto (MPS/CPU).
+
+    pyannote is torch-based, so unlike Whisper it can use Apple's MPS GPU. On the
+    M1 that took diarization from tens of minutes on CPU to sub-realtime.
+    """
+    pref = preferred.strip().lower()
+    if pref:
+        return pref
+    try:
+        import torch
+
+        if torch.backends.mps.is_available():
+            return "mps"
+    except Exception:
+        logger.debug("MPS probe failed; falling back to CPU", exc_info=True)
+    return "cpu"
 
 
 def _load_pipeline() -> Any:
@@ -83,8 +108,25 @@ def _load_pipeline() -> Any:
                     "pyannote returned no pipeline — the HF token likely hasn't "
                     "accepted the gated model conditions."
                 )
+            # Move the pipeline onto the GPU (MPS on Apple) when available; this
+            # is the difference between sub-realtime and tens of minutes here.
+            device = _select_device(settings.diarization_device)
+            if device != "cpu":
+                try:
+                    import torch
+
+                    pipeline.to(torch.device(device))
+                except Exception:
+                    logger.warning(
+                        "Could not move diarization to %s; staying on CPU.",
+                        device, exc_info=True,
+                    )
+                    device = "cpu"
             _pipeline = pipeline
-            logger.info("Loaded diarization pipeline %s", settings.diarization_model)
+            logger.info(
+                "Loaded diarization pipeline %s on %s",
+                settings.diarization_model, device,
+            )
             return _pipeline
         except Exception:
             logger.warning(

@@ -58,6 +58,10 @@ class Settings(BaseSettings):
     # community-1 is pyannote.audio 4.x's flagship open pipeline (supersedes
     # the 3.1 pipeline, higher accuracy). Gated on HF like all pyannote models.
     diarization_model: str = "pyannote/speaker-diarization-community-1"
+    # Torch device for diarization. "" = auto (Apple's MPS GPU when available,
+    # else CPU). On an M1, MPS ran diarization at ~0.5x realtime versus CPU's
+    # tens-of-minutes on the 8 GB machine. Set to "cpu" to force CPU.
+    diarization_device: str = ""
     hf_token: str = ""
     # Label diarized speakers by role instead of "Speaker N". The first voice
     # to speak is assumed to be the therapist (they open the session); the rest

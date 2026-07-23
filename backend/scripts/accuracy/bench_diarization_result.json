@@ -1,0 +1,16 @@
+{
+  "model": "pyannote/speaker-diarization-community-1",
+  "audio_seconds": 64.5,
+  "mps": {
+    "device": "mps",
+    "seconds": 29.5,
+    "speakers": 2,
+    "realtime_x": 0.5
+  },
+  "cpu": {
+    "device": "cpu",
+    "seconds": 92.3,
+    "speakers": 2,
+    "realtime_x": 1.4
+  }
+}
