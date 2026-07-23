@@ -16,6 +16,7 @@ import { Butterfly } from "@/components/ui/butterfly";
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { FloatingQuotes } from "@/components/ui/floating-quotes";
 import { NavLinks } from "@/components/ui/nav-links";
+import { isOwnerEmail } from "@/lib/owner";
 import { SignOutButton } from "@/components/ui/SignOutButton";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AchievementToaster } from "@/components/profile/AchievementToaster";
@@ -24,6 +25,7 @@ import { SessionWatcher } from "@/components/notes/SessionWatcher";
 import { AppointmentReminder } from "@/components/schedule/AppointmentReminder";
 import { MaintenanceBanner } from "@/components/system/MaintenanceBanner";
 import { InstallNudge } from "@/components/pwa/InstallNudge";
+import { DailyCheckin } from "@/components/checkin/DailyCheckin";
 
 export default async function WorkspaceLayout({
   children,
@@ -76,6 +78,8 @@ export default async function WorkspaceLayout({
           />
           {/* One-time install suggestion for a just-registered clinician. */}
           <InstallNudge />
+          {/* Daily well-being check-in — a no-op for all but one account. */}
+          <DailyCheckin userEmail={user.email ?? null} />
         </>
       )}
 
@@ -90,7 +94,7 @@ export default async function WorkspaceLayout({
           </Link>
           {/* Scrollable on small screens so the pill never pushes off-screen */}
           <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <NavLinks />
+            <NavLinks showInbox={isOwnerEmail(user.email)} />
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-4 sm:pl-2">
             <span className="hidden text-[0.95rem] text-muted-foreground lg:inline">

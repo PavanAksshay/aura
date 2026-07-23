@@ -288,3 +288,91 @@ export async function exportSession(sessionId: string): Promise<ClinicalSession>
   if (!res.ok) return parseError(res);
   return (await res.json()) as ClinicalSession;
 }
+
+// --- Daily well-being check-in (single-user feature) ----------------------
+
+export interface CheckinReply {
+  id: string;
+  reply: string;
+  replied_at: string;
+}
+
+export interface CheckinState {
+  /** Is this account the one shown the check-in? Decided server-side. */
+  enabled: boolean;
+  done_today: boolean;
+  /** An operator reply she hasn't seen yet, if any. */
+  pending_reply: CheckinReply | null;
+}
+
+export interface CheckinInboxItem {
+  id: string;
+  name: string | null;
+  mood: string;
+  message: string | null;
+  owner_reply: string | null;
+  owner_replied_at: string | null;
+  created_at: string;
+}
+
+/** Whether to show today's check-in, plus any unseen reply. `localDate` is her
+ * local calendar day (YYYY-MM-DD), so "once per day" follows her timezone. */
+export async function getCheckinState(localDate: string): Promise<CheckinState> {
+  const res = await request(
+    `${API_URL}/api/v1/checkin/state?local_date=${encodeURIComponent(localDate)}`,
+    { method: "GET", headers: await authHeader() },
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as CheckinState;
+}
+
+export async function submitCheckin(opts: {
+  mood: string;
+  message: string | null;
+  localDate: string;
+}): Promise<void> {
+  const res = await request(`${API_URL}/api/v1/checkin`, {
+    method: "POST",
+    headers: { ...(await authHeader()), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mood: opts.mood,
+      message: opts.message,
+      local_date: opts.localDate,
+    }),
+  });
+  if (!res.ok) return parseError(res);
+}
+
+export async function markReplySeen(checkinId: string): Promise<void> {
+  const res = await request(
+    `${API_URL}/api/v1/checkin/${encodeURIComponent(checkinId)}/seen`,
+    { method: "POST", headers: await authHeader() },
+  );
+  if (!res.ok) return parseError(res);
+}
+
+/** Operator-only: all check-in messages, newest first. */
+export async function getCheckinInbox(): Promise<CheckinInboxItem[]> {
+  const res = await request(`${API_URL}/api/v1/checkin/inbox`, {
+    method: "GET",
+    headers: await authHeader(),
+  });
+  if (!res.ok) return parseError(res);
+  return ((await res.json()) as { items: CheckinInboxItem[] }).items;
+}
+
+/** Operator-only: reply to a check-in; pushes the reply back to her. */
+export async function replyToCheckin(
+  checkinId: string,
+  reply: string,
+): Promise<void> {
+  const res = await request(
+    `${API_URL}/api/v1/checkin/inbox/${encodeURIComponent(checkinId)}/reply`,
+    {
+      method: "POST",
+      headers: { ...(await authHeader()), "Content-Type": "application/json" },
+      body: JSON.stringify({ reply }),
+    },
+  );
+  if (!res.ok) return parseError(res);
+}

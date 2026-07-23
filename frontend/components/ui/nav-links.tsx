@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import {
   BrainCircuit,
   CalendarClock,
+  Inbox,
   LayoutDashboard,
   Mic,
   UserRound,
@@ -29,12 +30,20 @@ const LINKS: { href: string; label: string; icon: LucideIcon; match: string[] }[
   { href: "/profile", label: "Profile", icon: UserRound, match: ["/profile"] },
 ];
 
-export function NavLinks() {
+const INBOX_LINK = {
+  href: "/inbox",
+  label: "Inbox",
+  icon: Inbox,
+  match: ["/inbox"],
+} as const;
+
+export function NavLinks({ showInbox = false }: { showInbox?: boolean }) {
   const pathname = usePathname();
+  const links = showInbox ? [...LINKS, INBOX_LINK] : LINKS;
 
   return (
     <div className="flex w-max items-center gap-1">
-      {LINKS.map(({ href, label, icon: Icon, match }) => {
+      {links.map(({ href, label, icon: Icon, match }) => {
         const active = match.some((m) => pathname.startsWith(m));
         return (
           <Link

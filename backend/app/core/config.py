@@ -89,6 +89,10 @@ class Settings(BaseSettings):
     owner_email: str = ""
     ai_daily_limit: int = 25
 
+    # The single user shown the daily well-being check-in after onboarding.
+    # Empty disables the feature. Matched against the JWT-verified email claim.
+    checkin_user_email: str = "chandhanasd2007@gmail.com"
+
     # Web Push (VAPID) for appointment reminders that arrive with the app
     # closed. Empty keys disable the reminder scheduler entirely.
     vapid_public_key: str = ""

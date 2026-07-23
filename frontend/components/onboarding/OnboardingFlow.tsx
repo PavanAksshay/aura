@@ -51,6 +51,7 @@ const PRACTICE_TYPES = [
   "Clinic / Hospital",
   "Telehealth",
   "Academic / Research",
+  "Personal Use",
 ];
 
 const EXPERIENCE = [
