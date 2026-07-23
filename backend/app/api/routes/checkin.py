@@ -113,6 +113,13 @@ def checkin_state(user: CurrentUser, local_date: str) -> dict[str, Any]:
         return {"enabled": False, "done_today": False, "pending_reply": None}
 
     db = get_service_client()
+    # Has she ever checked in? The very first greeting introduces Aura by name;
+    # every one after that drops the introduction (she already knows).
+    ever = (
+        db.table("daily_checkins").select("id")
+        .eq("user_id", user.id).limit(1)
+        .execute().data
+    )
     done = (
         db.table("daily_checkins").select("id")
         .eq("user_id", user.id).eq("checkin_date", local_date).limit(1)
@@ -133,7 +140,27 @@ def checkin_state(user: CurrentUser, local_date: str) -> dict[str, Any]:
             "reply": r["owner_reply"],
             "replied_at": r["owner_replied_at"],
         }
-    return {"enabled": True, "done_today": bool(done), "pending_reply": pending}
+    return {
+        "enabled": True,
+        "first_time": not ever,
+        "done_today": bool(done),
+        "pending_reply": pending,
+    }
+
+
+@router.get("/checkin/thread")
+def checkin_thread(user: CurrentUser) -> dict[str, Any]:
+    """Her own conversation — her messages and Aura's replies. Own rows only."""
+    rows = (
+        get_service_client()
+        .table("daily_checkins")
+        .select("id, mood, message, owner_reply, owner_replied_at, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", desc=True).limit(100)
+        .execute().data
+        or []
+    )
+    return {"items": rows}
 
 
 @router.post("/checkin", status_code=status.HTTP_201_CREATED)

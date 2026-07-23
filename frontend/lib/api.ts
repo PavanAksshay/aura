@@ -300,9 +300,20 @@ export interface CheckinReply {
 export interface CheckinState {
   /** Is this account the one shown the check-in? Decided server-side. */
   enabled: boolean;
+  /** True only before her very first check-in — controls the greeting. */
+  first_time: boolean;
   done_today: boolean;
   /** An operator reply she hasn't seen yet, if any. */
   pending_reply: CheckinReply | null;
+}
+
+export interface CheckinThreadItem {
+  id: string;
+  mood: string;
+  message: string | null;
+  owner_reply: string | null;
+  owner_replied_at: string | null;
+  created_at: string;
 }
 
 export interface CheckinInboxItem {
@@ -341,6 +352,16 @@ export async function submitCheckin(opts: {
     }),
   });
   if (!res.ok) return parseError(res);
+}
+
+/** Her own conversation with Aura — her messages and Aura's replies. */
+export async function getCheckinThread(): Promise<CheckinThreadItem[]> {
+  const res = await request(`${API_URL}/api/v1/checkin/thread`, {
+    method: "GET",
+    headers: await authHeader(),
+  });
+  if (!res.ok) return parseError(res);
+  return ((await res.json()) as { items: CheckinThreadItem[] }).items;
 }
 
 export async function markReplySeen(checkinId: string): Promise<void> {

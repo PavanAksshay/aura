@@ -21,13 +21,11 @@ import {
   submitCheckin,
   type CheckinReply,
 } from "@/lib/api";
+import { isCheckinEmail } from "@/lib/checkin-user";
 import { AuraMark } from "@/components/ui/aura-logo";
 import { Button } from "@/components/ui/button";
 import { EASE_OUT } from "@/components/motion/primitives";
 
-// The one account this runs for. The backend enforces the same; this just
-// avoids a network call for everyone else.
-const CHECKIN_EMAIL = "chandhanasd2007@gmail.com";
 const GREETING_NAME = "Chandhana";
 
 const MOODS = [
@@ -45,10 +43,11 @@ function localDay(): string {
 type Step = "reply" | "greeting" | "askMore" | "write" | "thanks";
 
 export function DailyCheckin({ userEmail }: { userEmail: string | null }) {
-  const isUser = (userEmail ?? "").trim().toLowerCase() === CHECKIN_EMAIL;
+  const isUser = isCheckinEmail(userEmail);
 
   const [step, setStep] = useState<Step | null>(null);
   const [reply, setReply] = useState<CheckinReply | null>(null);
+  const [firstTime, setFirstTime] = useState(false);
   const [mood, setMood] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -60,6 +59,7 @@ export function DailyCheckin({ userEmail }: { userEmail: string | null }) {
       try {
         const state = await getCheckinState(localDay());
         if (cancelled || !state.enabled) return;
+        setFirstTime(state.first_time);
         if (state.pending_reply) {
           setReply(state.pending_reply);
           setStep("reply");
@@ -169,7 +169,9 @@ export function DailyCheckin({ userEmail }: { userEmail: string | null }) {
           {step === "greeting" && (
             <div>
               <p className="font-display text-xl font-semibold tracking-tight">
-                Hi {GREETING_NAME}, I&apos;m Aura.
+                {firstTime
+                  ? `Hi ${GREETING_NAME}, I'm Aura.`
+                  : `Hi ${GREETING_NAME}.`}
               </p>
               <p className="mt-1 text-lg text-foreground/80">
                 How are you doing today?
@@ -241,7 +243,7 @@ export function DailyCheckin({ userEmail }: { userEmail: string | null }) {
           {step === "thanks" && (
             <div>
               <p className="text-base leading-relaxed">
-                Thank you for your response. I will get back to you asap!
+                Thank you for letting me know. I will get back to you asap!
               </p>
               <div className="mt-6 flex justify-end">
                 <Button onClick={close}>Close</Button>
