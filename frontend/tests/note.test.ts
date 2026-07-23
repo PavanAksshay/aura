@@ -10,7 +10,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { NOTE_SECTIONS, noteToText, normalizeNote } from "../lib/note.ts";
+import {
+  isNonEnglishTranscript,
+  NOTE_SECTIONS,
+  noteToText,
+  normalizeNote,
+} from "../lib/note.ts";
 
 test("reads the current two-section shape", () => {
   const note = normalizeNote({
@@ -87,4 +92,24 @@ test("section keys and labels stay in sync", () => {
     NOTE_SECTIONS.map((s) => s.key),
     ["discussed", "ahead"],
   );
+});
+
+// The session page uses this to flag a translated note for extra review, and
+// it must agree with the backend's _is_multilingual — both gate the same
+// safety behaviour on "is this session English?".
+test("flags Tamil and Hindi transcripts as non-English", () => {
+  assert.ok(isNonEnglishTranscript("எனக்கு தூக்கம் வரவில்லை. கவலையாக இருக்கிறேன்."));
+  assert.ok(isNonEnglishTranscript("मुझे बहुत चिंता हो रही है और मैं सो नहीं पाता।"));
+  // Code-switched (Hindi script + English) is still non-English.
+  assert.ok(isNonEnglishTranscript("Mujhe बहुत तनाव हो रहा है because of work."));
+});
+
+test("leaves English transcripts — including accented names — alone", () => {
+  assert.ok(
+    !isNonEnglishTranscript(
+      "The patient reported feeling anxious about work and poor sleep.",
+    ),
+  );
+  assert.ok(!isNonEnglishTranscript("José and café owner Renée spoke at length."));
+  assert.ok(!isNonEnglishTranscript(""));
 });

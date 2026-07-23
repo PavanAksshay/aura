@@ -58,6 +58,31 @@ export function noteHasContent(note: SessionNote): boolean {
   return note.discussed.length > 0 || note.ahead.length > 0;
 }
 
+/**
+ * Roughly, was this session spoken in a non-English language (Tamil, Hindi, …)?
+ *
+ * Whisper writes the transcript in the spoken language's own script, so a
+ * non-English session carries a substantial share of non-Latin letters even
+ * when code-switched with English. The summary is always written in English,
+ * which the backend can only do by understanding the other language — so on
+ * these sessions the note is a translation, and the automatic grounding check
+ * that guards English notes cannot run. The UI uses this to ask the clinician
+ * for extra scrutiny. Mirrors the backend's `_is_multilingual`; kept in step
+ * with it so both sides agree on what "non-English" means.
+ */
+export function isNonEnglishTranscript(transcript: string): boolean {
+  let letters = 0;
+  let foreign = 0;
+  for (const ch of transcript) {
+    if (!/\p{L}/u.test(ch)) continue;
+    letters += 1;
+    // Latin (incl. accented — José, café) ends at U+024F; Tamil, Devanagari,
+    // and other scripts sit above it.
+    if (ch.codePointAt(0)! > 0x024f) foreign += 1;
+  }
+  return letters > 0 && foreign / letters >= 0.15;
+}
+
 /** Plain-text rendering (clipboard, PDF fallback). */
 export function noteToText(note: SessionNote): string {
   return NOTE_SECTIONS.map(({ key, label }) => {

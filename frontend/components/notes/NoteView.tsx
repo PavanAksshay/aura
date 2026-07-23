@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   Check,
   Copy,
+  Languages,
   Loader2,
   MessagesSquare,
   Pencil,
@@ -66,6 +67,7 @@ export function NoteView({
   exported,
   reviewedAt,
   noteEditedAt,
+  nonEnglish = false,
 }: {
   sessionId: string;
   note: SessionNote | LegacySoapNote;
@@ -74,6 +76,8 @@ export function NoteView({
   reviewedAt?: string | null;
   /** When the note was last hand-corrected; null = still as the model wrote it. */
   noteEditedAt?: string | null;
+  /** Session spoken in a non-English language — this note is a translation. */
+  nonEnglish?: boolean;
 }) {
   const router = useRouter();
   const note = normalizeNote(raw);
@@ -231,6 +235,25 @@ export function NoteView({
             {reviewing ? <Loader2 className="animate-spin" /> : <BadgeCheck />}
             {reviewing ? "Saving…" : "Mark as reviewed"}
           </Button>
+        </div>
+      )}
+
+      {/* A non-English session (Tamil, Hindi, …) is transcribed in its own
+          language but summarised in English — so this note is a translation,
+          and the automatic check that guards English notes against fabrication
+          could not run on it. Ask for a closer read. */}
+      {nonEnglish && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-4 py-3">
+          <Languages
+            aria-hidden
+            className="size-4 shrink-0 text-sky-600 dark:text-sky-400"
+          />
+          <p className="min-w-0 flex-1 text-sm">
+            <strong className="font-medium">Translated summary.</strong> This
+            session wasn&apos;t in English, so Aura summarised it into English.
+            Translation can shift meaning — please check it against the
+            transcript with extra care.
+          </p>
         </div>
       )}
 

@@ -39,6 +39,14 @@ homework, routines or techniques to try, and any topic named for a future \
 session. Phrases like "let's try", "this week", "before bed", "next session" \
 signal these — capture them.
 
+LANGUAGE: The transcript may be in English, Tamil, Hindi, or several languages \
+mixed together — code-switching (e.g. Tamil or Hindi with English words) is \
+normal and expected. Understand it in whatever language it is spoken, then \
+write EVERY bullet in clear, professional English. Translate the clinical \
+meaning into English; never copy Tamil, Hindi, or other non-English text into \
+a bullet, and never romanise it. The finished note reads as English prose \
+regardless of the language spoken in the room.
+
 RULES — these override everything else:
 1. Write ONLY what the transcript states. Never infer, embellish, or add \
 typical therapy content that is not there. This note goes into a patient's \
@@ -76,6 +84,42 @@ _FUTURE_CUES = re.compile(
 )
 # Legacy empty-SOAP placeholder ("No … identified.").
 _LEGACY_PLACEHOLDER = re.compile(r"^no\b.*\bidentified\.?$", re.IGNORECASE)
+
+
+# --- Language --------------------------------------------------------------
+# Whisper transcribes in the spoken language's native script, so a Tamil or
+# Hindi session arrives as Tamil/Devanagari text — usually code-switched with
+# English ("Tanglish"/"Hinglish"). The summary is always written in English
+# (see the prompt's LANGUAGE clause), which means the English grounding guard
+# below cannot apply to these sessions: an English bullet summarising Tamil
+# speech shares almost none of the transcript's words, and the English-only
+# embedding model can't rescue it either, so the guard would silently delete a
+# correct summary — worst case, a pure-Tamil transcript has no Latin words at
+# all and the note comes back empty. For a non-English transcript we therefore
+# trust the model's bullets and lean on the clinician review gate, which the UI
+# flags for extra scrutiny on these sessions.
+
+# Above this share of non-Latin letters, treat the transcript as non-English.
+# An accented name in an English transcript (José, café) uses Latin-range code
+# points and stays well under it; a Tamil/Hindi session — even one heavily
+# mixed with English — clears it easily.
+_MULTILINGUAL_THRESHOLD = 0.15
+
+
+def _foreign_letter_share(text: str) -> float:
+    """Fraction of a transcript's letters that fall outside the Latin alphabet."""
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return 0.0
+    # Latin (incl. accented) ends at U+024F; Tamil, Devanagari, and other
+    # scripts sit above it. Punctuation and digits are excluded by isalpha.
+    foreign = sum(1 for c in letters if ord(c) > 0x024F)
+    return foreign / len(letters)
+
+
+def _is_multilingual(transcript: str) -> bool:
+    """True when the transcript is substantially non-English (Tamil, Hindi, …)."""
+    return _foreign_letter_share(transcript) >= _MULTILINGUAL_THRESHOLD
 
 
 def _clean_bullets(raw: Any, cap: int) -> list[str]:
@@ -247,14 +291,19 @@ def build_session_note(transcript: str) -> SessionNote:
         )
         response.raise_for_status()
         data = json.loads(response.json().get("response", "{}"))
-        # Every bullet must be traceable to the transcript before it reaches a
-        # clinical record; an empty note is the correct output for a recording
-        # with no clinical content, so it is returned as-is rather than
-        # triggering the fallback (which would only re-inject raw transcript).
-        return SessionNote(
-            discussed=_grounded(_clean_bullets(data.get("discussed"), _MAX_DISCUSSED), transcript),
-            ahead=_grounded(_clean_bullets(data.get("ahead"), _MAX_AHEAD), transcript),
-        )
+        discussed = _clean_bullets(data.get("discussed"), _MAX_DISCUSSED)
+        ahead = _clean_bullets(data.get("ahead"), _MAX_AHEAD)
+        # Every English bullet must be traceable to the transcript before it
+        # reaches a clinical record; an empty note is the correct output for a
+        # recording with no clinical content, so it is returned as-is rather
+        # than triggering the fallback (which would only re-inject raw
+        # transcript). The guard is English-lexical, so it only runs on an
+        # English transcript — on a Tamil/Hindi session it would delete a
+        # correct English summary it cannot match word-for-word.
+        if not _is_multilingual(transcript):
+            discussed = _grounded(discussed, transcript)
+            ahead = _grounded(ahead, transcript)
+        return SessionNote(discussed=discussed, ahead=ahead)
     except Exception:
         logger.warning(
             "Ollama note structuring unavailable — falling back to heuristic",

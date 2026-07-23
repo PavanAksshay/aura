@@ -1,6 +1,11 @@
 """Note structuring: the grounding guard, heuristic fallback, legacy-SOAP shim."""
 
-from app.services.note import _grounded, _heuristic_note, parse_note
+from app.services.note import (
+    _grounded,
+    _heuristic_note,
+    _is_multilingual,
+    parse_note,
+)
 
 TRANSCRIPT = (
     "Speaker 1: How has your week been? "
@@ -52,6 +57,26 @@ def test_grounding_keeps_honest_paraphrase() -> None:
 
 def test_grounding_on_empty_transcript_keeps_nothing() -> None:
     assert _grounded(FABRICATED, "") == []
+
+
+# Whisper writes non-English speech in its own script, so a Tamil or Hindi
+# session lands as non-Latin text. The summary is always English, which means
+# the English grounding guard can't run on it — _is_multilingual is what steers
+# build_session_note past the guard, so it must recognise these correctly.
+def test_multilingual_detects_tamil_and_hindi() -> None:
+    assert _is_multilingual("எனக்கு தூக்கம் வரவில்லை. மிகவும் கவலையாக இருக்கிறேன்.")
+    assert _is_multilingual("मुझे बहुत चिंता हो रही है और मैं सो नहीं पाता।")
+    # Code-switched (Hindi script + English words) still reads as non-English.
+    assert _is_multilingual("Mujhe बहुत तनाव हो रहा है because of work.")
+
+
+def test_multilingual_leaves_english_alone() -> None:
+    assert not _is_multilingual(
+        "The patient reported feeling anxious about work and poor sleep."
+    )
+    # Accented Latin names are still English — they must not trip the guard off.
+    assert not _is_multilingual("José and café owner Renée discussed the séance.")
+    assert not _is_multilingual("")
 
 
 def test_heuristic_splits_discussed_and_ahead() -> None:

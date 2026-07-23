@@ -8,6 +8,7 @@ import { ProcessingPoller } from "@/components/notes/ProcessingPoller";
 import { SessionDocPreview } from "@/components/notes/SessionDocPreview";
 import { NoteView } from "@/components/notes/NoteView";
 import { TranscriptPanel } from "@/components/notes/TranscriptPanel";
+import { isNonEnglishTranscript } from "@/lib/note";
 import {
   Badge,
   SESSION_STATUS_LABEL,
@@ -43,6 +44,9 @@ export default async function SessionPage({
   }
 
   const reviewable = session.status === "ready" || session.status === "exported";
+  const nonEnglish = session.raw_transcript
+    ? isNonEnglishTranscript(session.raw_transcript)
+    : false;
 
   return (
     <div>
@@ -91,6 +95,7 @@ export default async function SessionPage({
             exported={session.status === "exported"}
             reviewedAt={session.reviewed_at}
             noteEditedAt={session.note_edited_at}
+            nonEnglish={nonEnglish}
           />
         )}
 
