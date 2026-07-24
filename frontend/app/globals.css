@@ -498,7 +498,11 @@ body {
    The layout and colours are unchanged — the page simply stops repainting.
    Desktop keeps the full effect.
    -------------------------------------------------------------------------- */
-@media (hover: none) {
+/* `hover: none` alone misses Android browsers that report `hover: hover` on a
+   touchscreen, so the butterflies survived there. `pointer: coarse` catches
+   every touch device by its primary pointer; a laptop with a mouse stays
+   `pointer: fine` and keeps the full effect. */
+@media (hover: none), (pointer: coarse) {
   /* Butterflies are desktop-only. Merely freezing them still left a 115vw SVG
      to rasterise and keep in memory on a phone, so they are dropped outright.
      One rule on the wrapper covers every one of them — hero and
