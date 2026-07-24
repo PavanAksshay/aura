@@ -7,10 +7,11 @@
  * points there.
  *
  * Behaviour:
- *  - Shows once per browsing session until the app is installed. It never
- *    auto-dismisses: it stays until the user taps it, swipes it away, or closes
- *    it, then hides for the rest of the session (so it doesn't nag on every
- *    navigation) and reminds again next session.
+ *  - Shows on each visit (page load / login) until the app is installed. It
+ *    never auto-dismisses: it stays until the user taps it, swipes it away, or
+ *    closes it. Dismissing hides it for the rest of that visit — the workspace
+ *    layout stays mounted across in-app navigation, so it won't re-nag on every
+ *    click — and a fresh load or the next login shows it again.
  *  - Tapping the card opens the Profile; swiping it sideways or pressing × just
  *    dismisses it.
  *  - Suppresses itself when already installed, or when already on /profile.
@@ -23,8 +24,6 @@ import { X } from "lucide-react";
 
 import { AuraMark } from "@/components/ui/aura-logo";
 
-// Per-session so it reminds again next visit, but not on every page change.
-const DISMISS_KEY = "aura-install-nudge-dismissed";
 // Sideways travel (px) past which a swipe counts as "dismiss".
 const SWIPE_THRESHOLD = 90;
 
@@ -46,24 +45,21 @@ export function InstallNudge() {
   const dragged = useRef(false);
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
-      if (isInstalled()) return;
-      let dismissed = false;
-      try {
-        dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
-      } catch {
-        // Storage blocked (private mode) — showing it is the safe default.
-      }
-      if (!dismissed) setShow(true);
+      // Deferred past an await so the setState isn't synchronous in the effect
+      // body (which the react-hooks rule flags).
+      await Promise.resolve();
+      if (!cancelled && !isInstalled()) setShow(true);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function dismiss() {
-    try {
-      sessionStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      // ignore
-    }
+    // In-memory only: the layout persists across in-app navigation so this
+    // won't re-nag, but a full reload or a fresh login shows it again.
     setShow(false);
   }
 

@@ -83,6 +83,7 @@ const GENDERS = ["Woman", "Man", "Non-binary", PREFER_NOT_TO_SAY];
 // Grouped loosely by modality, then presentation, then population/context — so
 // the chip wall scans in a sensible order rather than alphabetically.
 const SPECIALIZATIONS = [
+  "None",
   // Modalities
   "CBT",
   "DBT",
