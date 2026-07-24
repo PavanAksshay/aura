@@ -2,19 +2,22 @@
 
 /**
  * Profile avatar: shows a custom photo if the clinician uploaded one, otherwise
- * their chosen Rorschach inkblot. Controls let them upload/replace a photo,
- * remove it (falling back to the inkblot), or pick a different inkblot. All
- * writes go under RLS; photos live in the private `avatars` bucket.
+ * their chosen Rorschach inkblot. Tapping the picture opens a crop/zoom adjuster
+ * (WhatsApp/Instagram style); choosing a new file routes through the same
+ * adjuster before it's saved. Controls also let them pick a different inkblot or
+ * remove the photo. All writes go under RLS; photos live in the private
+ * `avatars` bucket.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ImageUp, Loader2, Shuffle, Trash2 } from "lucide-react";
+import { Camera, Check, ImageUp, Loader2, Shuffle, Trash2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
 import { AVATARS, Avatar } from "@/lib/avatars";
 import { Button } from "@/components/ui/button";
+import { AvatarCropper } from "@/components/profile/AvatarCropper";
 
 const BUCKET = "avatars";
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -35,15 +38,41 @@ export function ProfileAvatar({
   const router = useRouter();
   const supabase = createClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const objUrl = useRef<string | null>(null);
   const [picker, setPicker] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+
+  // Revoke any object URL still held when the component goes away.
+  useEffect(
+    () => () => {
+      if (objUrl.current) URL.revokeObjectURL(objUrl.current);
+    },
+    [],
+  );
+
+  function openCropper(url: string) {
+    if (objUrl.current) URL.revokeObjectURL(objUrl.current);
+    objUrl.current = url;
+    setCropSrc(url);
+  }
+
+  function closeCropper() {
+    if (objUrl.current) {
+      URL.revokeObjectURL(objUrl.current);
+      objUrl.current = null;
+    }
+    setCropSrc(null);
+  }
 
   async function removeOldPhoto() {
     if (avatarPath) await supabase.storage.from(BUCKET).remove([avatarPath]);
   }
 
-  async function handleUpload(files: FileList | null) {
+  /** A newly-chosen file → validate, then hand it to the adjuster. */
+  function handleFile(files: FileList | null) {
     const file = files?.[0];
+    if (inputRef.current) inputRef.current.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Not an image", "Please choose a PNG, JPG, or WebP.");
@@ -53,13 +82,33 @@ export function ProfileAvatar({
       toast.error("Image too large", "Photos must be 5 MB or smaller.");
       return;
     }
-    setBusy(true);
-    const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+    openCropper(URL.createObjectURL(file));
+  }
 
+  /** Tapping the picture: re-adjust the current photo, or pick one if none. */
+  async function handleAvatarClick() {
+    if (busy) return;
+    if (!photoUrl) {
+      inputRef.current?.click();
+      return;
+    }
+    try {
+      // Fetch to a blob so the cropper works on a same-origin URL (a
+      // cross-origin <img> would taint the canvas on save).
+      const res = await fetch(photoUrl);
+      openCropper(URL.createObjectURL(await res.blob()));
+    } catch {
+      toast.error("Couldn't open the photo", "Try replacing it instead.");
+    }
+  }
+
+  /** Persist the cropped square the adjuster produced. */
+  async function uploadBlob(blob: Blob) {
+    setBusy(true);
+    const path = `${userId}/${crypto.randomUUID()}.jpg`;
     const { error: upErr } = await supabase.storage
       .from(BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
+      .upload(path, blob, { contentType: "image/jpeg", upsert: false });
     if (upErr) {
       setBusy(false);
       toast.error("Upload failed", upErr.message);
@@ -77,7 +126,7 @@ export function ProfileAvatar({
     }
     await removeOldPhoto();
     setBusy(false);
-    if (inputRef.current) inputRef.current.value = "";
+    closeCropper();
     toast.success("Profile photo updated");
     router.refresh();
   }
@@ -118,18 +167,23 @@ export function ProfileAvatar({
   return (
     <div>
       <div className="flex items-center gap-5">
-        <div className="size-24 overflow-hidden rounded-3xl shadow-sm sm:size-28">
+        <button
+          type="button"
+          onClick={handleAvatarClick}
+          disabled={busy}
+          aria-label={photoUrl ? "Adjust profile photo" : "Add a profile photo"}
+          className="group relative size-24 shrink-0 overflow-hidden rounded-3xl shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:size-28"
+        >
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={photoUrl}
-              alt="Profile"
-              className="size-full object-cover"
-            />
+            <img src={photoUrl} alt="Profile" className="size-full object-cover" />
           ) : (
             <Avatar id={avatarId} className="size-full" />
           )}
-        </div>
+          <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 opacity-0 transition-all duration-200 group-hover:bg-foreground/35 group-hover:opacity-100 group-focus-visible:bg-foreground/35 group-focus-visible:opacity-100">
+            <Camera className="size-6 text-white" />
+          </span>
+        </button>
 
         <div className="flex flex-col gap-2">
           <input
@@ -137,7 +191,7 @@ export function ProfileAvatar({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => handleUpload(e.target.files)}
+            onChange={(e) => handleFile(e.target.files)}
           />
           <Button
             size="sm"
@@ -202,6 +256,10 @@ export function ProfileAvatar({
             );
           })}
         </div>
+      )}
+
+      {cropSrc && (
+        <AvatarCropper src={cropSrc} onCancel={closeCropper} onSave={uploadBlob} />
       )}
     </div>
   );

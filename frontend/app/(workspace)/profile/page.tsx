@@ -133,9 +133,9 @@ export default async function ProfilePage() {
             <p className="mt-0.5 text-muted-foreground">{profile.title}</p>
           )}
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Mail className="size-4" />
-              {user.email}
+            <span className="flex min-w-0 max-w-full items-center gap-1.5">
+              <Mail className="size-4 shrink-0" />
+              <span className="min-w-0 break-all">{user.email}</span>
             </span>
             {profile.country && (
               <span className="flex items-center gap-1.5">
