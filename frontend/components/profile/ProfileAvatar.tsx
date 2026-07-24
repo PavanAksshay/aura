@@ -166,13 +166,13 @@ export function ProfileAvatar({
 
   return (
     <div>
-      <div className="flex items-center gap-5">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <button
           type="button"
           onClick={handleAvatarClick}
           disabled={busy}
           aria-label={photoUrl ? "Adjust profile photo" : "Add a profile photo"}
-          className="group relative size-24 shrink-0 overflow-hidden rounded-3xl shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:size-28"
+          className="group relative size-20 shrink-0 overflow-hidden rounded-3xl shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:size-24"
         >
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -181,18 +181,18 @@ export function ProfileAvatar({
             <Avatar id={avatarId} className="size-full" />
           )}
           <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 opacity-0 transition-all duration-200 group-hover:bg-foreground/35 group-hover:opacity-100 group-focus-visible:bg-foreground/35 group-focus-visible:opacity-100">
-            <Camera className="size-6 text-white" />
+            <Camera className="size-5 text-white" />
           </span>
         </button>
 
-        <div className="flex flex-col gap-2">
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleFile(e.target.files)}
-          />
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleFile(e.target.files)}
+        />
+        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
           <Button
             size="sm"
             variant="secondary"
@@ -200,36 +200,36 @@ export function ProfileAvatar({
             disabled={busy}
           >
             {busy ? <Loader2 className="animate-spin" /> : <ImageUp />}
-            {photoUrl ? "Replace photo" : "Upload photo"}
+            {photoUrl ? "Replace" : "Upload"}
           </Button>
-          <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setPicker((p) => !p)}
+            disabled={busy}
+          >
+            <Shuffle />
+            Inkblot
+          </Button>
+          {photoUrl && (
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => setPicker((p) => !p)}
+              onClick={handleRemovePhoto}
               disabled={busy}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <Shuffle />
-              Inkblot
+              <Trash2 />
+              Remove
             </Button>
-            {photoUrl && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleRemovePhoto}
-                disabled={busy}
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <Trash2 />
-                Remove
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
       {picker && (
-        <div className="mt-4 grid grid-cols-5 gap-2.5 sm:grid-cols-10">
+        // A single scrollable row keeps the picker compact — it never grows
+        // into a tall grid that pushes the rest of the card down.
+        <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
           {AVATARS.map((a) => {
             const selected = !photoUrl && a.id === avatarId;
             return (
@@ -240,7 +240,7 @@ export function ProfileAvatar({
                 disabled={busy}
                 aria-label={`Inkblot ${a.id}`}
                 aria-pressed={selected}
-                className={`relative aspect-square rounded-xl outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring ${
+                className={`relative size-12 shrink-0 rounded-xl outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring ${
                   selected
                     ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
                     : "opacity-85 hover:scale-105 hover:opacity-100"
