@@ -6,7 +6,8 @@
  * readers via aria-live.
  */
 
-import { useEffect, useState } from "react";
+import { type KeyboardEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 
@@ -40,6 +41,7 @@ function formatTime(ms: number): string {
 
 export function Toaster() {
   const [items, setItems] = useState<ToastItem[]>([]);
+  const router = useRouter();
 
   useEffect(() => subscribeToasts(setItems), []);
 
@@ -72,7 +74,26 @@ export function Toaster() {
               className="glass pointer-events-auto flex items-start gap-3 rounded-2xl p-4 active:cursor-grabbing"
             >
               <Icon className={`mt-0.5 size-5 shrink-0 ${ACCENT[t.variant]}`} />
-              <div className="min-w-0 flex-1">
+              <div
+                className={`min-w-0 flex-1 ${t.href ? "cursor-pointer" : ""}`}
+                {...(t.href
+                  ? {
+                      role: "button",
+                      tabIndex: 0,
+                      onClick: () => {
+                        router.push(t.href!);
+                        dismissToast(t.id);
+                      },
+                      onKeyDown: (e: KeyboardEvent) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          router.push(t.href!);
+                          dismissToast(t.id);
+                        }
+                      },
+                    }
+                  : {})}
+              >
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">{t.title}</p>
                   <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70">
@@ -82,6 +103,11 @@ export function Toaster() {
                 {t.description && (
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {t.description}
+                  </p>
+                )}
+                {t.href && t.actionLabel && (
+                  <p className="mt-1.5 text-xs font-medium text-primary">
+                    {t.actionLabel}
                   </p>
                 )}
               </div>

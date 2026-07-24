@@ -34,11 +34,20 @@ export interface ToastItem {
   createdAt: number;
   /** Sticky toasts wait for the user; transient ones expire on their own. */
   sticky: boolean;
+  /** If set, tapping the toast navigates here (and dismisses it). */
+  href?: string;
+  /** The tap affordance shown when `href` is set, e.g. "Open Profile →". */
+  actionLabel?: string;
+  /** De-dupe tag: a second toast with the same key is ignored while one is up. */
+  key?: string;
 }
 
 interface ToastOptions {
   /** Force the toast to wait for an explicit dismiss. */
   sticky?: boolean;
+  href?: string;
+  actionLabel?: string;
+  key?: string;
 }
 
 type Listener = (toasts: ToastItem[]) => void;
@@ -69,12 +78,29 @@ function push(
   title: string,
   description?: string,
   options?: ToastOptions,
-) {
+): number {
+  // De-dupe: while a keyed toast is already up, don't stack another (e.g. the
+  // install nudge firing again on a fast remount).
+  if (options?.key) {
+    const existing = toasts.find((t) => t.key === options.key);
+    if (existing) return existing.id;
+  }
+
   const id = ++counter;
   const sticky = options?.sticky ?? variant === "error";
   toasts = [
     ...toasts,
-    { id, title, description, variant, createdAt: Date.now(), sticky },
+    {
+      id,
+      title,
+      description,
+      variant,
+      createdAt: Date.now(),
+      sticky,
+      href: options?.href,
+      actionLabel: options?.actionLabel,
+      key: options?.key,
+    },
   ];
   emit();
 
@@ -84,6 +110,7 @@ function push(
       setTimeout(() => dismissToast(id), TOAST_DURATION_MS),
     );
   }
+  return id;
 }
 
 export function subscribeToasts(listener: Listener) {
