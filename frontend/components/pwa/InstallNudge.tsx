@@ -87,7 +87,7 @@ export function InstallNudge() {
   if (!show || pathname === "/profile") return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4 sm:justify-start sm:pl-4">
+    <div className="pointer-events-none fixed right-0 top-1/2 z-[90] flex -translate-y-1/2 justify-end px-3 sm:px-4">
       <motion.div
         drag="x"
         dragElastic={0.25}
@@ -96,10 +96,10 @@ export function InstallNudge() {
           dragged.current = true;
         }}
         onDragEnd={onDragEnd}
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.35 }}
-        className="pointer-events-auto w-[min(23rem,calc(100vw-2rem))] cursor-grab active:cursor-grabbing"
+        initial={{ opacity: 0, x: 64 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+        className="pointer-events-auto w-[min(23rem,calc(100vw-1.5rem))] cursor-grab active:cursor-grabbing"
       >
         <div
           role="button"
