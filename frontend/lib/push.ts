@@ -6,15 +6,31 @@
 
 import { createClient } from "@/lib/supabase/client";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+let cachedVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
+async function getVapidPublicKey(): Promise<string> {
+  if (cachedVapidKey) return cachedVapidKey;
+  try {
+    const res = await fetch("/api/push/vapid-key");
+    if (res.ok) {
+      const data = (await res.json()) as { key?: string };
+      if (data.key) {
+        cachedVapidKey = data.key;
+        return data.key;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return cachedVapidKey;
+}
 
 export function pushSupported(): boolean {
   return (
     typeof window !== "undefined" &&
     "serviceWorker" in navigator &&
     "PushManager" in window &&
-    typeof Notification !== "undefined" &&
-    VAPID_PUBLIC_KEY.length > 0
+    typeof Notification !== "undefined"
   );
 }
 
@@ -64,12 +80,15 @@ export async function enablePush(userId: string): Promise<boolean> {
   const reg = await registration();
   await navigator.serviceWorker.ready;
 
+  const vapidKey = await getVapidPublicKey();
+  if (!vapidKey) throw new Error("Push notifications are not configured.");
+
   const existing = await reg.pushManager.getSubscription();
   const sub =
     existing ??
     (await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
     }));
 
   const supabase = createClient();
