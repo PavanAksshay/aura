@@ -212,8 +212,9 @@ def mark_reply_seen(user: CurrentUser, checkin_id: str) -> dict[str, bool]:
 
 @router.get("/checkin/inbox")
 def checkin_inbox(user: CurrentUser) -> dict[str, Any]:
-    if not _is_owner(user.email):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Owner only.")
+    owner = get_settings().owner_email.strip().lower()
+    if owner and not _is_owner(user.email):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Operator access required to view check-in inbox.")
 
     db = get_service_client()
     rows = cast(

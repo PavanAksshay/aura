@@ -81,11 +81,11 @@ export function PatientHeader({ patient }: { patient: Patient }) {
         </div>
 
         {patient.presenting_concerns && (
-          <div className="mt-5 rounded-2xl border border-foreground/8 bg-foreground/3 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="mt-4 rounded-md border border-border bg-muted/40 p-3.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Presenting concerns
             </p>
-            <p className="mt-1.5 text-sm leading-relaxed">
+            <p className="mt-1 text-xs leading-relaxed text-foreground">
               {patient.presenting_concerns}
             </p>
           </div>

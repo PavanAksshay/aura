@@ -122,16 +122,6 @@ function Hero({ authed }: { authed: boolean }) {
   return (
     <section className="relative flex flex-col items-center justify-center border-b border-border px-4 py-24 sm:py-32">
       <div className="relative z-10 flex max-w-4xl flex-col items-center text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: EASE_OUT }}
-          className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1 text-xs text-muted-foreground"
-        >
-          <Sparkles className="size-3.5 text-primary" />
-          Private by architecture — not by policy
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

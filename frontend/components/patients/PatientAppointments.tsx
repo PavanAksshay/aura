@@ -61,13 +61,13 @@ export function PatientAppointments({
         <button
           type="button"
           onClick={openCreate}
-          className="glass-subtle flex w-full flex-col items-center rounded-2xl border-dashed px-6 py-8 text-center transition-colors hover:border-foreground/25"
+          className="flex w-full flex-col items-center rounded-md border border-dashed border-border bg-card px-6 py-6 text-center transition-colors hover:border-foreground/25"
         >
-          <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-            <CalendarPlus className="size-5" />
+          <div className="mb-2.5 flex size-9 items-center justify-center rounded-md bg-muted text-foreground">
+            <CalendarPlus className="size-4" />
           </div>
-          <p className="font-medium">No appointments yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-xs font-bold text-foreground">No appointments yet</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Book {patientName.split(" ")[0]}&rsquo;s next session.
           </p>
         </button>
@@ -78,9 +78,9 @@ export function PatientAppointments({
               <button
                 type="button"
                 onClick={() => openEdit(a)}
-                className="glass flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 hover:border-foreground/20"
+                className="flex w-full items-center gap-3 rounded-md border border-border bg-card p-3 text-left transition-colors hover:border-foreground/20"
               >
-                <div className="flex min-w-[4.5rem] flex-col items-center rounded-xl bg-primary/10 px-3 py-2 text-primary">
+                <div className="flex min-w-[4rem] flex-col items-center rounded-sm bg-muted px-2.5 py-1.5 text-foreground font-mono">
                   <span className="text-xs font-medium">
                     {dateFmt.format(new Date(a.starts_at))}
                   </span>

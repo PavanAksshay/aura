@@ -123,7 +123,7 @@ export function SessionTimeline({
                 )}
               </span>
 
-              <div className="glass-subtle overflow-hidden rounded-2xl">
+              <div className="overflow-hidden rounded-md border border-border bg-card">
                 {/* Always expandable: even a session with no transcript yet has
                     a notes space worth opening. */}
                 <button

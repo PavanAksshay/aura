@@ -39,7 +39,9 @@ export function InboxClient() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.toLowerCase().includes("token") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("expired")) {
-        setError("Sign-in required to view check-in inbox.");
+        setError("Sign in again to refresh your session and load messages.");
+      } else if (msg.toLowerCase().includes("operator") || msg.toLowerCase().includes("forbidden") || msg.toLowerCase().includes("owner")) {
+        setError("Check-in inbox is restricted to the practice operator account.");
       } else {
         setError(msg || "Could not load messages.");
       }

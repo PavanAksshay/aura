@@ -179,10 +179,10 @@ export function PatientDocuments({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="glass-subtle flex w-full flex-col items-center rounded-2xl border-dashed px-6 py-10 text-center transition-colors hover:border-foreground/25"
+          className="flex w-full flex-col items-center rounded-md border border-dashed border-border bg-card px-6 py-8 text-center transition-colors hover:border-foreground/25"
         >
-          <div className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-accent/12 text-accent">
-            <UploadCloud className="size-5" />
+          <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-muted text-foreground">
+            <Upload className="size-5" />
           </div>
           <p className="font-medium">Add intake forms, referrals, or scans</p>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -195,9 +195,9 @@ export function PatientDocuments({
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="glass flex items-center gap-4 rounded-2xl p-4"
+              className="flex items-center gap-3 rounded-md border border-border bg-card p-3"
             >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/12 text-accent">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
                 <FileText className="size-5" />
               </div>
               <div className="min-w-0 flex-1">

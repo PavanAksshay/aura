@@ -386,23 +386,22 @@ export function MemorySearch({
             </div>
           ) : messages.length === 0 && !busy ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-accent/12 text-accent">
-                <BrainCircuit className="size-7" />
+              <div className="flex size-10 items-center justify-center rounded-md border border-border bg-muted text-foreground">
+                <BrainCircuit className="size-5" />
               </div>
-              <h2 className="mt-5 font-display text-lg font-semibold">
-                Ask your practice a question
+              <h2 className="mt-4 text-sm font-bold text-foreground">
+                Search Clinical Memory
               </h2>
-              <p className="mx-auto mt-1.5 max-w-md text-sm text-muted-foreground">
-                Pick a patient below (or ask across everyone) — the conversation
-                is saved until you delete it. Try:
+              <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
+                Select a patient or query across your notes — answers are generated locally from your stored clinical notes.
               </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <div className="mt-4 flex flex-wrap justify-center gap-1.5">
                 {EXAMPLES.map((example) => (
                   <button
                     key={example}
                     type="button"
                     onClick={() => void send(example)}
-                    className="glass-subtle cursor-pointer rounded-full px-4 py-2 text-sm text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:text-foreground"
+                    className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground transition hover:bg-muted/80 hover:text-foreground"
                   >
                     {example}
                   </button>
@@ -414,38 +413,38 @@ export function MemorySearch({
               {messages.map((m) => (
                 <motion.div
                   key={m.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: EASE_OUT }}
+                  transition={{ duration: 0.2, ease: EASE_OUT }}
                   className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
                 >
                   {m.role === "user" ? (
-                    <p className="max-w-[85%] rounded-2xl rounded-br-md bg-primary/12 px-4 py-2.5 text-sm leading-relaxed">
+                    <p className="max-w-[85%] rounded-md border border-border bg-muted px-3.5 py-2 text-xs leading-relaxed text-foreground font-medium">
                       {m.content}
                     </p>
                   ) : (
                     <div className="max-w-[90%]">
-                      <div className="glass-subtle rounded-2xl rounded-bl-md p-4">
-                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                      <div className="rounded-md border border-border bg-card p-4">
+                        <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary">
                           <Sparkles className="size-3.5" />
                           Answer
                         </p>
-                        <p className="mt-2 text-sm leading-relaxed text-foreground/90">
+                        <p className="mt-1.5 text-xs leading-relaxed text-foreground">
                           {m.content}
                         </p>
                         {m.engine && m.engine !== "ollama" && (
-                          <p className="mt-2 text-xs text-muted-foreground/70">
-                            Local model offline — showing the closest note instead.
+                          <p className="mt-2 text-[11px] text-muted-foreground">
+                            Local model offline — showing closest note excerpt.
                           </p>
                         )}
                       </div>
                       {m.matches && m.matches.length > 0 && (
-                        <div className="mt-1.5 flex flex-wrap gap-2 pl-1">
+                        <div className="mt-1.5 flex flex-wrap gap-1.5 pl-1">
                           {m.matches.slice(0, 3).map((match) => (
                             <Link
                               key={`${m.id}-${match.session_id}-${match.chunk_index}`}
                               href={`/sessions/${match.session_id}`}
-                              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                              className="inline-flex items-center gap-1 rounded-sm border border-border bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
                             >
                               {Math.round(match.similarity * 100)}% · open note
                               <ArrowRight className="size-3" />
@@ -464,8 +463,8 @@ export function MemorySearch({
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
                 >
-                  <div className="glass-subtle flex items-center gap-2 rounded-2xl rounded-bl-md px-4 py-3 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" />
+                  <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2.5 text-xs text-muted-foreground">
+                    <Loader2 className="size-3.5 animate-spin" />
                     Recalling from your notes…
                   </div>
                 </motion.div>
