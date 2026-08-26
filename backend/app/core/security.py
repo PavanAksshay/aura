@@ -102,27 +102,30 @@ def get_current_user(
     if credentials is None:
         if is_dev:
             return AuthenticatedUser(
-                id="00000000-0000-0000-0000-000000000000",
-                email=settings.owner_email or "admin@example.com",
+                id="07104c38-689d-4246-bd0a-036bc1d5faf1",
+                email=settings.owner_email or "pavanaksshay07@gmail.com",
             )
         raise _unauthorized("Missing bearer token")
 
+    token = credentials.credentials
     try:
-        payload = _decode(credentials.credentials)
-        sub = payload.get("sub")
-        if not isinstance(sub, str):
-            raise _unauthorized("Malformed token subject")
-        email = payload.get("email")
-        return AuthenticatedUser(id=sub, email=email if isinstance(email, str) else None)
+        payload = _decode(token)
     except Exception as exc:
         if is_dev:
-            logger.warning("Dev mode JWT fallback due to: %s", exc)
-            return AuthenticatedUser(
-                id="00000000-0000-0000-0000-000000000000",
-                email=settings.owner_email or "admin@example.com",
-            )
-        logger.warning("JWT rejected: %s", type(exc).__name__)
-        raise _unauthorized("Invalid or expired token") from exc
+            logger.warning("Dev mode JWT verification failed (%s), extracting unverified claims", exc)
+            try:
+                payload = jwt.decode(token, options={"verify_signature": False})
+            except Exception:
+                payload = {"sub": "07104c38-689d-4246-bd0a-036bc1d5faf1", "email": settings.owner_email}
+        else:
+            logger.warning("JWT rejected: %s", type(exc).__name__)
+            raise _unauthorized("Invalid or expired token") from exc
+
+    sub = payload.get("sub")
+    if not isinstance(sub, str):
+        raise _unauthorized("Malformed token subject")
+    email = payload.get("email")
+    return AuthenticatedUser(id=sub, email=email if isinstance(email, str) else None)
 
 
 CurrentUser = Annotated[AuthenticatedUser, Depends(get_current_user)]
