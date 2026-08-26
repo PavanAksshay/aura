@@ -121,7 +121,7 @@ export default async function DashboardPage() {
           <p className="mt-0.5 text-xs text-muted-foreground">
             <span className="font-mono text-foreground/80">{todayLabel()}</span>
             {" · "}
-            Practice overview
+
           </p>
         </div>
         <div className="flex items-center gap-2">

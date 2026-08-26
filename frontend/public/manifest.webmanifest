@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f7efe6",
-  "theme_color": "#f7efe6",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "categories": ["medical", "productivity", "health"],
   "icons": [
     {

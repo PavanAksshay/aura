@@ -22,27 +22,23 @@ async function authHeader(): Promise<Record<string, string>> {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Supabase access tokens live ~1 hour. getSession() can hand back a token
-  // that's expired (or about to be) if the tab sat idle, and the backend then
-  // rejects it as "invalid or expired". Proactively refresh when the token has
-  // expired or is within 60s of doing so, so backend calls always carry a
-  // fresh token.
   const now = Math.floor(Date.now() / 1000);
   if (!session || (session.expires_at ?? 0) <= now + 60) {
-    const { data, error } = await supabase.auth.refreshSession();
-    if (error || !data.session) {
-      throw new Error("Your session has expired — please sign in again.");
+    try {
+      const { data } = await supabase.auth.refreshSession();
+      if (data?.session) session = data.session;
+    } catch {
+      // session refresh best-effort
     }
-    session = data.session;
   }
 
-  return {
-    Authorization: `Bearer ${session.access_token}`,
-    // Skip ngrok's free-tier browser interstitial, which otherwise returns an
-    // HTML warning page instead of the JSON the app expects. Harmless on any
-    // other backend (an ignored custom header).
+  const headers: Record<string, string> = {
     "ngrok-skip-browser-warning": "true",
   };
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+  return headers;
 }
 
 /**

@@ -37,6 +37,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
@@ -47,8 +48,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // Matches the manifest so the OS chrome blends with the app in both themes.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7efe6" },
-    { media: "(prefers-color-scheme: dark)", color: "#101817" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
   ],
   // Let the app draw under the iPhone's notch / home indicator.
   viewportFit: "cover",
