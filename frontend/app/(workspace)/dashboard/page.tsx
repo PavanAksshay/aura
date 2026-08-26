@@ -110,18 +110,28 @@ export default async function DashboardPage() {
   const unreviewed = unreviewedQ.count ?? 0;
 
   return (
-    <div className="space-y-6">
-      {/* Greeting Header */}
-      <FadeIn className="border-b border-border pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {greeting(profileQ.data?.timezone ?? null)}
-          {firstName ? `, ${firstName}` : ""}.
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground/90">{todayLabel()}</span>
-          {" · "}
-          Practice overview & quick actions
-        </p>
+    <div className="space-y-4">
+      {/* Greeting Header with inline CTA */}
+      <FadeIn className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            {greeting(profileQ.data?.timezone ?? null)}
+            {firstName ? `, ${firstName}` : ""}.
+          </h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            <span className="font-mono text-foreground/80">{todayLabel()}</span>
+            {" · "}
+            Practice overview
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm">
+            <Link href="/sessions/new">
+              <Mic className="size-3.5" />
+              New Session
+            </Link>
+          </Button>
+        </div>
       </FadeIn>
 
       {/* Unreviewed notes alert */}
@@ -129,24 +139,24 @@ export default async function DashboardPage() {
         <FadeIn>
           <Link
             href="/patients"
-            className="flex items-center gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 transition-colors hover:bg-amber-500/10"
+            className="flex items-center gap-2.5 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 transition-colors hover:bg-amber-500/10"
           >
             <BadgeCheck
               aria-hidden
               className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
             />
-            <p className="min-w-0 flex-1 text-xs text-foreground sm:text-sm">
+            <p className="min-w-0 flex-1 text-xs text-foreground">
               <strong className="font-semibold">
                 {unreviewed} {unreviewed === 1 ? "note" : "notes"} awaiting review
               </strong>{" "}
-              — drafted automatically from recordings. Verify clinical details before export.
+              — Verify clinical details before export.
             </p>
           </Link>
         </FadeIn>
       )}
 
-      {/* Stats row */}
-      <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {/* Compact Stats Grid */}
+      <Stagger className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {stats.map(({ icon, label, value }) => (
           <StaggerItem key={label}>
             <StatCard icon={icon} label={label} value={value} />
@@ -154,95 +164,26 @@ export default async function DashboardPage() {
         ))}
       </Stagger>
 
+      {/* Main Grid: Recent Sessions (8 cols) + Quick Actions (4 cols) */}
       <Stagger className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {/* Primary Action Card */}
-        <StaggerItem className="lg:col-span-7">
-          <div className="flex h-full flex-col justify-between rounded-md border border-border bg-card p-6">
-            <div>
-              <div className="mb-4 inline-flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <Mic className="size-5" />
-              </div>
-              <h2 className="text-xl font-bold tracking-tight text-foreground">
-                Clinical Session Capture
-              </h2>
-              <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed sm:text-sm">
-                Record live patient encounters. Audio stays local during transcription and is never permanently stored.
-              </p>
-            </div>
-            <div className="mt-6">
-              <Button asChild size="default">
-                <Link href="/sessions/new">
-                  Start New Recording
-                  <Mic className="size-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </StaggerItem>
-
-        {/* Right Rail: Quick Actions & Reflection */}
-        <StaggerItem className="lg:col-span-5">
-          <div className="flex h-full flex-col gap-4">
-            <div className="rounded-md border border-border bg-card p-5">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 gap-2">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="justify-start"
-                >
-                  <Link href="/patients">
-                    <UsersRound className="size-4" />
-                    Patient Directory
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="justify-start"
-                >
-                  <Link href="/memory">
-                    <BrainCircuit className="size-4" />
-                    Search Clinical Memory
-                  </Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex-1 rounded-md border border-border bg-muted/40 p-5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block mb-2">
-                Daily Reflection
-              </span>
-              <p className="text-xs italic leading-relaxed text-foreground/80 sm:text-sm">
-                {tip}
-              </p>
-            </div>
-          </div>
-        </StaggerItem>
-
-        {/* Recent sessions */}
-        <StaggerItem className="lg:col-span-12">
-          <div className="rounded-md border border-border bg-card p-5">
-            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+        <StaggerItem className="lg:col-span-8">
+          <div className="rounded-md border border-border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between border-b border-border pb-2.5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
                 Recent Sessions
               </h2>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/patients">View all patients →</Link>
+              <Button asChild variant="ghost" size="sm" className="h-7 text-xs px-2">
+                <Link href="/patients">View all →</Link>
               </Button>
             </div>
 
             {sessions.length === 0 ? (
-              <div className="flex flex-col items-center py-8 text-center">
-                <div className="flex size-10 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                  <AudioLines className="size-5" />
+              <div className="flex flex-col items-center py-6 text-center">
+                <div className="flex size-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <AudioLines className="size-4" />
                 </div>
-                <p className="mt-3 text-xs font-medium text-foreground sm:text-sm">No sessions recorded yet</p>
-                <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+                <p className="mt-2 text-xs font-medium text-foreground">No sessions recorded yet</p>
+                <p className="mt-0.5 max-w-xs text-[11px] text-muted-foreground">
                   Start a new recording to capture your first clinical note.
                 </p>
               </div>
@@ -252,14 +193,19 @@ export default async function DashboardPage() {
                   <Link
                     key={s.id}
                     href={`/sessions/${s.id}`}
-                    className="flex items-center justify-between py-3 px-2 transition-colors hover:bg-muted/50 rounded-sm"
+                    className="flex items-center justify-between py-2.5 px-2 transition-colors hover:bg-muted/40 rounded-sm"
                   >
-                    <div className="min-w-0 pr-4">
-                      <p className="truncate text-xs font-semibold text-foreground sm:text-sm">
+                    <div className="min-w-0 pr-3">
+                      <p className="truncate text-xs font-semibold text-foreground">
                         {s.title}
                       </p>
-                      <p className="mt-0.5 text-[11px] font-mono text-muted-foreground">
-                        {new Date(s.created_at).toLocaleString()}
+                      <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
+                        {new Date(s.created_at).toLocaleString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                     <Badge tone={SESSION_STATUS_TONE[s.status]}>
@@ -269,6 +215,62 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        </StaggerItem>
+
+        <StaggerItem className="lg:col-span-4">
+          <div className="flex flex-col gap-3">
+            <div className="rounded-md border border-border bg-card p-4">
+              <h2 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                Quick Actions
+              </h2>
+              <div className="grid grid-cols-1 gap-2">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="justify-start h-8 text-xs"
+                >
+                  <Link href="/sessions/new">
+                    <Mic className="size-3.5" />
+                    Start Session Recording
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="justify-start h-8 text-xs"
+                >
+                  <Link href="/patients">
+                    <UsersRound className="size-3.5" />
+                    Patient Directory
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="justify-start h-8 text-xs"
+                >
+                  <Link href="/memory">
+                    <BrainCircuit className="size-3.5" />
+                    Search Clinical Memory
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-card p-4">
+              <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+                Privacy Status
+              </h2>
+              <div className="space-y-1.5 text-xs text-muted-foreground leading-normal">
+                <p>• Local transcription on your machine.</p>
+                <p>• Raw audio deleted on job completion.</p>
+                <p>• Notes row-level isolated in Postgres.</p>
+              </div>
+            </div>
           </div>
         </StaggerItem>
       </Stagger>

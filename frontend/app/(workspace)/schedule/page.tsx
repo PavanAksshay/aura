@@ -53,36 +53,16 @@ export default async function SchedulePage() {
       <ScheduleView appointments={appointments} patients={roster} />
 
       {roster.length === 0 && (
-        <div className="glass-subtle mt-8 flex items-start gap-3 rounded-2xl p-5 text-sm text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0 text-accent" />
+        <div className="mt-6 flex items-start gap-2.5 rounded-md border border-border bg-card p-4 text-xs text-muted-foreground">
+          <Info className="mt-0.5 size-4 shrink-0 text-foreground" />
           <p>
             Add people to your{" "}
-            <span className="text-foreground">Patients</span> roster to link
+            <span className="font-semibold text-foreground">Patients</span> roster to link
             appointments to them. You can still schedule unattributed slots in
             the meantime.
           </p>
         </div>
       )}
-
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="glass-subtle rounded-2xl p-6">
-          <CalendarClock className="mb-3 size-5 text-primary" />
-          <p className="font-medium">Times follow your device</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Appointments are stored as absolute moments and shown in your
-            browser&rsquo;s current time zone, so they stay correct as you
-            travel.
-          </p>
-        </div>
-        <div className="glass-subtle rounded-2xl p-6">
-          <Info className="mb-3 size-5 text-accent" />
-          <p className="font-medium">Only you can see this</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Your calendar is isolated to your account. No colleague, and no
-            other clinician on Aura, can read or infer your schedule.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

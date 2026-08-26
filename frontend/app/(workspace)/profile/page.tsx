@@ -149,24 +149,24 @@ export default async function ProfilePage() {
             </span>
           </div>
         </div>
-        {/* Streak highlight — carries the dashboard's signature gradient */}
-        <div className="flex shrink-0 items-center gap-6 rounded-2xl bg-linear-140 from-aurora-cyan/90 via-aurora-teal/85 to-aurora-violet/80 px-6 py-4 text-primary-foreground shadow-[0_14px_34px_-16px] shadow-primary/60">
+        {/* Streak highlight */}
+        <div className="flex shrink-0 items-center gap-5 rounded-md border border-border bg-card px-5 py-3 text-foreground">
           <div className="text-center">
-            <p className="flex items-center justify-center gap-1 font-display text-3xl font-semibold tabular-nums">
-              <Flame className="size-6" />
+            <p className="flex items-center justify-center gap-1 font-mono text-2xl font-bold text-foreground">
+              <Flame className="size-5 text-amber-500" />
               {stats.currentStreak}
             </p>
-            <p className="text-xs uppercase tracking-wide text-primary-foreground/75">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Day streak
             </p>
           </div>
-          <div className="h-10 w-px bg-primary-foreground/25" />
+          <div className="h-8 w-px bg-border" />
           <div className="text-center">
-            <p className="flex items-center justify-center gap-1 font-display text-3xl font-semibold tabular-nums">
-              <Trophy className="size-5" />
+            <p className="flex items-center justify-center gap-1 font-mono text-2xl font-bold text-foreground">
+              <Trophy className="size-5 text-yellow-500" />
               {stats.longestStreak}
             </p>
-            <p className="text-xs uppercase tracking-wide text-primary-foreground/75">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Best
             </p>
           </div>
@@ -176,7 +176,7 @@ export default async function ProfilePage() {
 
       <StaggerItem>
       {/* Stat tiles */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tiles.map(({ icon, label, value }) => (
           <StatCard key={label} icon={icon} label={label} value={value} />
         ))}
@@ -185,19 +185,19 @@ export default async function ProfilePage() {
 
       <StaggerItem>
       {/* Details + specializations */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="glass-subtle rounded-2xl p-6">
-          <h3 className="mb-4 font-display text-lg font-semibold tracking-tight">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-md border border-border bg-card p-5">
+          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
             Practice details
           </h3>
-          <dl className="space-y-3">
+          <dl className="space-y-2.5">
             {details.map(({ label, value }) => (
               <div
                 key={label}
-                className="flex items-center justify-between gap-4 border-b border-border/60 pb-3 last:border-0 last:pb-0"
+                className="flex items-center justify-between gap-4 border-b border-border/50 pb-2 last:border-0 last:pb-0"
               >
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="text-right text-sm font-medium">
+                <dt className="text-xs text-muted-foreground">{label}</dt>
+                <dd className="text-right text-xs font-semibold text-foreground">
                   {value || <span className="text-muted-foreground/60">—</span>}
                 </dd>
               </div>
@@ -205,23 +205,23 @@ export default async function ProfilePage() {
           </dl>
         </div>
 
-        <div className="glass-subtle rounded-2xl p-6">
-          <h3 className="mb-4 font-display text-lg font-semibold tracking-tight">
+        <div className="rounded-md border border-border bg-card p-5">
+          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
             Specializations
           </h3>
           {profile.specializations.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {profile.specializations.map((s) => (
                 <span
                   key={s}
-                  className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-sm text-primary"
+                  className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
                 >
                   {s}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               None added yet — you can update these any time.
             </p>
           )}

@@ -62,30 +62,6 @@ export default async function PatientsPage() {
       )}
 
       <PatientsView patients={patients} />
-
-      {/* Practice tips — fills the space below the roster */}
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="glass-subtle rounded-2xl p-6">
-          <BrainCircuit className="mb-3 size-5 text-accent" />
-          <p className="font-medium">Link sessions to patients</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Every session you attach to a patient builds their private,
-            searchable memory — ask{" "}
-            <Link href="/memory" className="text-primary hover:underline">
-              Memory
-            </Link>{" "}
-            anything later.
-          </p>
-        </div>
-        <div className="glass-subtle rounded-2xl p-6">
-          <ShieldCheck className="mb-3 size-5 text-primary" />
-          <p className="font-medium">Only you can see this</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Row-level security scopes every patient and note to your account —
-            no other clinician can read, or even detect, your records.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

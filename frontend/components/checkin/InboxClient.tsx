@@ -37,14 +37,17 @@ export function InboxClient() {
       setItems(data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load messages.");
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("token") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("expired")) {
+        setError("Sign-in required to view check-in inbox.");
+      } else {
+        setError(msg || "Could not load messages.");
+      }
       setItems([]);
     }
   }
 
   useEffect(() => {
-    // Async so the first setState lands after an await, not synchronously in
-    // the effect body (which the react-hooks rule flags).
     void (async () => {
       await load();
     })();
@@ -57,7 +60,7 @@ export function InboxClient() {
     try {
       await replyToCheckin(id, reply);
       setDrafts((d) => ({ ...d, [id]: "" }));
-      toast.success("Reply sent", "She'll be notified right away.");
+      toast.success("Reply sent", "Notification queued for delivery.");
       await load();
     } catch (err) {
       toast.error(
@@ -71,70 +74,70 @@ export function InboxClient() {
 
   if (items === null) {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Loader2 className="size-4 animate-spin" /> Loading messages…
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {items.length} message{items.length === 1 ? "" : "s"}
         </p>
-        <Button variant="secondary" size="sm" onClick={() => void load()}>
-          <RefreshCw className="size-4" /> Refresh
+        <Button variant="outline" size="sm" onClick={() => void load()}>
+          <RefreshCw className="size-3.5" /> Refresh
         </Button>
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
           {error}
         </p>
       )}
 
       {items.length === 0 && !error && (
-        <p className="rounded-2xl border border-border/60 bg-background/40 p-6 text-sm text-muted-foreground">
+        <p className="rounded-md border border-border bg-card p-5 text-xs text-muted-foreground">
           No messages yet.
         </p>
       )}
 
-      <ul className="space-y-4">
+      <ul className="space-y-3">
         {items.map((item) => (
-          <li key={item.id} className="glass rounded-2xl border border-border/60 p-5">
+          <li key={item.id} className="rounded-md border border-border bg-card p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <span className="font-display font-semibold tracking-tight">
+              <span className="text-xs font-bold text-foreground">
                 {item.name ?? "Someone"}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] font-mono text-muted-foreground">
                 {formatWhen(item.created_at)}
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
               Feeling: {item.mood}
             </p>
 
             {item.message && (
-              <p className="mt-3 whitespace-pre-wrap rounded-xl bg-foreground/5 p-3 text-sm leading-relaxed">
+              <p className="mt-2.5 whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-3 text-xs leading-relaxed text-foreground">
                 {item.message}
               </p>
             )}
 
             {item.owner_reply ? (
-              <div className="mt-3 rounded-xl border border-primary/25 bg-primary/8 p-3">
-                <p className="text-xs font-medium text-primary">
+              <div className="mt-2.5 rounded-md border border-primary/30 bg-primary/5 p-3">
+                <p className="text-[11px] font-bold text-primary">
                   Your reply
                   {item.owner_replied_at
                     ? ` · ${formatWhen(item.owner_replied_at)}`
                     : ""}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
+                <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-foreground">
                   {item.owner_reply}
                 </p>
               </div>
             ) : (
-              <div className="mt-3">
+              <div className="mt-2.5">
                 <textarea
                   value={drafts[item.id] ?? ""}
                   onChange={(e) =>
@@ -142,7 +145,7 @@ export function InboxClient() {
                   }
                   rows={2}
                   placeholder="Write a reply…"
-                  className="w-full resize-y rounded-xl border border-border bg-background/60 px-3 py-2 text-sm leading-relaxed outline-none focus:border-primary"
+                  className="w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-xs leading-relaxed outline-none focus:border-primary"
                 />
                 <div className="mt-2 flex justify-end">
                   <Button
@@ -154,9 +157,9 @@ export function InboxClient() {
                     onClick={() => send(item.id)}
                   >
                     {sending === item.id ? (
-                      <Loader2 className="size-4 animate-spin" />
+                      <Loader2 className="size-3.5 animate-spin" />
                     ) : (
-                      <MessageSquareReply className="size-4" />
+                      <MessageSquareReply className="size-3.5" />
                     )}
                     Send reply
                   </Button>
