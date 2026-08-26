@@ -34,36 +34,18 @@ export function PageHeading({
   accent?: string;
   subtitle?: string;
 }) {
-  const words = title.split(" ");
   return (
-    <div className="mb-10">
-      <motion.h1
-        variants={container}
-        initial="hidden"
-        animate="visible"
-        className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl"
-      >
-        {words.map((w, i) => (
-          <motion.span key={i} variants={word} className="inline-block">
-            {w}
-            {" "}
-          </motion.span>
-        ))}
+    <div className="mb-8 border-b border-border pb-6">
+      <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {title}{" "}
         {accent ? (
-          <motion.span variants={word} className="text-gradient inline-block">
-            {accent}
-          </motion.span>
+          <span className="text-foreground/80">{accent}</span>
         ) : null}
-      </motion.h1>
+      </h1>
       {subtitle ? (
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.28 }}
-          className="mt-3 max-w-2xl text-base font-medium leading-relaxed text-foreground/70 sm:text-lg"
-        >
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
           {subtitle}
-        </motion.p>
+        </p>
       ) : null}
     </div>
   );

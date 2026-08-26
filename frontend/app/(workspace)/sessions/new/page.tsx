@@ -64,24 +64,24 @@ export default async function NewSessionPage({
 
         {/* Side panel — what happens next */}
         <aside className="lg:col-span-2">
-          <div className="glass rounded-3xl p-6">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              What happens next
+          <div className="rounded-md border border-border bg-card p-5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-3">
+              Workflow Lifecycle
             </h2>
-            <ol className="mt-5 space-y-5">
+            <ol className="mt-4 space-y-4">
               {STEPS.map(({ icon: Icon, title, body }, i) => (
-                <li key={title} className="flex gap-3.5">
+                <li key={title} className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
-                      <Icon className="size-4" />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-foreground">
+                      <Icon className="size-3.5" />
                     </div>
                     {i < STEPS.length - 1 && (
                       <span className="mt-1 w-px flex-1 bg-border" />
                     )}
                   </div>
                   <div className="pb-1">
-                    <p className="text-sm font-medium">{title}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                    <p className="text-xs font-bold text-foreground">{title}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                       {body}
                     </p>
                   </div>

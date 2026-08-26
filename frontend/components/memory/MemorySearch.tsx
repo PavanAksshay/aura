@@ -296,14 +296,14 @@ export function MemorySearch({
   return (
     <div className="grid gap-6 lg:grid-cols-[17rem_1fr]">
       {/* ------------------------------------------------ sidebar: chats */}
-      <aside className="glass flex max-h-[38rem] flex-col rounded-3xl p-3 lg:sticky lg:top-24">
+      <aside className="flex max-h-[38rem] flex-col rounded-md border border-border bg-card p-3 lg:sticky lg:top-20">
         <Button
-          variant="secondary"
+          variant="outline"
           size="sm"
           onClick={() => newChat()}
           className="w-full justify-start"
         >
-          <MessageSquarePlus />
+          <MessageSquarePlus className="size-4" />
           New chat
         </Button>
 
@@ -311,14 +311,14 @@ export function MemorySearch({
           {groups.map((g) => (
             <div key={g.key}>
               <div className="flex items-center justify-between px-2">
-                <p className="truncate text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="truncate text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                   {g.label}
                 </p>
                 <button
                   type="button"
                   aria-label={`New chat about ${g.label}`}
                   onClick={() => newChat(g.patientId)}
-                  className="cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-foreground/8 hover:text-foreground"
+                  className="cursor-pointer rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <Plus className="size-3.5" />
                 </button>
@@ -335,10 +335,10 @@ export function MemorySearch({
                         type="button"
                         onClick={() => void openChat(c)}
                         className={cn(
-                          "w-full cursor-pointer truncate rounded-xl px-3 py-2 pr-9 text-left text-sm transition-colors",
+                          "w-full cursor-pointer truncate rounded-md px-2.5 py-1.5 pr-8 text-left text-xs transition-colors",
                           c.id === activeId
-                            ? "bg-primary/12 font-medium text-foreground"
-                            : "text-muted-foreground hover:bg-foreground/6 hover:text-foreground",
+                            ? "bg-secondary font-semibold text-foreground border border-border"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent",
                         )}
                       >
                         {c.title}
@@ -350,10 +350,10 @@ export function MemorySearch({
                         }
                         onClick={() => void deleteChat(c.id)}
                         className={cn(
-                          "absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1.5 transition-all",
+                          "absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 transition-all",
                           confirmDelete === c.id
                             ? "bg-destructive/15 text-destructive"
-                            : "text-muted-foreground opacity-0 hover:bg-foreground/8 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100",
+                            : "text-muted-foreground opacity-0 hover:bg-muted hover:text-destructive group-hover:opacity-100",
                         )}
                       >
                         <Trash2 className="size-3.5" />
@@ -368,7 +368,7 @@ export function MemorySearch({
       </aside>
 
       {/* ------------------------------------------------ main: thread */}
-      <section className="glass flex h-[min(38rem,calc(100vh-16rem))] min-h-[24rem] flex-col rounded-3xl">
+      <section className="flex h-[min(38rem,calc(100vh-16rem))] min-h-[24rem] flex-col rounded-md border border-border bg-card">
         {/* Thread header */}
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
           <p className="truncate font-display text-sm font-semibold">

@@ -262,9 +262,9 @@ export function OnboardingFlow({
             Step {step + 1} of {STEP_META.length}
           </span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-foreground/8">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
           <motion.div
-            className="h-full rounded-full bg-linear-100 from-aurora-cyan via-aurora-teal to-aurora-violet"
+            className="h-full rounded-full bg-primary"
             initial={false}
             animate={{ width: `${((step + 1) / STEP_META.length) * 100}%` }}
             transition={{ duration: 0.5, ease: EASE_OUT }}
@@ -272,7 +272,7 @@ export function OnboardingFlow({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="glass rounded-3xl p-8">
+      <form onSubmit={handleSubmit} className="rounded-md border border-border bg-card p-6 sm:p-8">
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <motion.div
             key={step}

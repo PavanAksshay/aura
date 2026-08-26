@@ -6,11 +6,11 @@ import type {
 } from "@/lib/types";
 
 const TONES = {
-  primary: "bg-primary/15 text-primary",
-  amber: "bg-amber-500/15 text-amber-700",
-  muted: "bg-foreground/8 text-muted-foreground",
-  destructive: "bg-destructive/15 text-destructive",
-  accent: "bg-accent/15 text-accent-foreground",
+  primary: "bg-primary/10 text-primary border-primary/30",
+  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
+  muted: "bg-muted text-muted-foreground border-border",
+  destructive: "bg-destructive/10 text-destructive border-destructive/30",
+  accent: "bg-secondary text-secondary-foreground border-border",
 } as const;
 
 type Tone = keyof typeof TONES;
@@ -28,11 +28,6 @@ export const SESSION_STATUS_TONE: Record<SessionStatus, Tone> = {
   failed: "destructive",
 };
 
-/**
- * What the clinician reads. "exported" is the internal lifecycle value (note
- * finalized + indexed into Memory); "completed" is what that means to someone
- * looking at a session.
- */
 export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
   processing: "processing",
   ready: "ready",
@@ -58,7 +53,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+        "inline-flex items-center rounded-sm border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider",
         TONES[tone],
         className,
       )}

@@ -64,19 +64,18 @@ function Reveal({
 /* Nav                                                                      */
 /* ----------------------------------------------------------------------- */
 
+/* ----------------------------------------------------------------------- */
+/* Nav                                                                      */
+/* ----------------------------------------------------------------------- */
+
 function LandingNav({ authed }: { authed: boolean }) {
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: EASE_OUT }}
-      className="fixed inset-x-0 top-0 z-50"
-    >
-      <nav className="glass-subtle mx-auto mt-4 flex w-[min(72rem,calc(100%-2rem))] items-center justify-between rounded-2xl px-5 py-3">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
+      <nav className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" aria-label="Aura home">
           <AuraWordmark />
         </Link>
-        <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+        <div className="hidden items-center gap-6 text-xs font-medium text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
             Features
           </a>
@@ -87,13 +86,13 @@ function LandingNav({ authed }: { authed: boolean }) {
             Privacy
           </a>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
           {authed ? (
             <Button asChild size="sm">
               <Link href="/dashboard">
                 Open workspace
-                <ArrowRight />
+                <ArrowRight className="size-3.5" />
               </Link>
             </Button>
           ) : (
@@ -104,14 +103,14 @@ function LandingNav({ authed }: { authed: boolean }) {
               <Button asChild size="sm">
                 <Link href="/login">
                   Get started
-                  <ArrowRight />
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
             </>
           )}
         </div>
       </nav>
-    </motion.header>
+    </header>
   );
 }
 
@@ -121,87 +120,72 @@ function LandingNav({ authed }: { authed: boolean }) {
 
 function Hero({ authed }: { authed: boolean }) {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-24">
-      {/* Flowing cursor-trail across the hero (vendored 21st.dev effect).
-          Uses the shared component rather than a second inline copy, so the
-          desktop-only gate applies here too — this is the first thing anyone
-          opening the public link sees, phone included. */}
-      <CursorTrail />
-      {/* WebGL orb sits behind the copy, masked so text stays legible */}
-      <HeroOrb className="pointer-events-none absolute left-1/2 top-1/2 size-[min(120vw,54rem)] -translate-x-1/2 -translate-y-1/2 opacity-80 [mask-image:radial-gradient(circle,black_30%,transparent_72%)]" />
-
+    <section className="relative flex flex-col items-center justify-center border-b border-border px-4 py-24 sm:py-32">
       <div className="relative z-10 flex max-w-4xl flex-col items-center text-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: EASE_OUT }}
-          className="glass-subtle inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-muted-foreground"
+          transition={{ duration: 0.4, ease: EASE_OUT }}
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1 text-xs text-muted-foreground"
         >
           <Sparkles className="size-3.5 text-primary" />
           Private by architecture — not by policy
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.1 }}
-          className="mt-8 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
+          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.1 }}
+          className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
         >
           Sessions become notes.
           <br />
-          <span className="text-gradient">Voices stay in the room.</span>
+          <span className="text-foreground/80">Voices stay in the room.</span>
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.22 }}
-          className="mt-6 max-w-xl text-balance text-lg text-muted-foreground"
+          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.2 }}
+          className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base"
         >
           Aura listens to your therapy sessions and drafts the clinical note —
-          with every word transcribed on your own infrastructure and the raw
-          audio destroyed the moment it&apos;s done.
+          transcribed on your own infrastructure with raw audio deleted immediately.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.34 }}
-          className="mt-10 flex flex-col items-center gap-3 sm:flex-row"
+          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.3 }}
+          className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
         >
           <Button asChild size="lg">
             <Link href={authed ? "/dashboard" : "/login"}>
-              {authed ? "Open your workspace" : "Start writing less"}
-              <ArrowRight />
+              {authed ? "Open workspace" : "Get started now"}
+              <ArrowRight className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant="secondary" size="lg">
-            <a href="#how">See how it works</a>
+          <Button asChild variant="outline" size="lg">
+            <a href="#how">How it works</a>
           </Button>
         </motion.div>
 
-        {/* Truthful trust strip — architecture facts, not vanity metrics */}
         <motion.dl
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.55 }}
-          className="mt-16 grid grid-cols-3 gap-8 text-center"
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-14 grid grid-cols-3 gap-8 text-center border-t border-border pt-10 w-full max-w-2xl"
         >
-          {/* Every number here must stay literally true — this is a privacy
-              claim on a public page. "1 artifact persists: your note" was
-              wrong: migration 0007 retains the transcript too, deliberately,
-              so it can be reviewed and downloaded after the fact. Only the
-              audio is ephemeral. */}
           {[
             ["0", "audio recordings kept"],
             ["100%", "transcribed on your machine"],
             ["0", "words sent to a cloud AI"],
           ].map(([value, label]) => (
             <div key={label}>
-              <dt className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+              <dt className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-mono">
                 {value}
               </dt>
-              <dd className="mt-1 text-xs text-muted-foreground sm:text-sm">{label}</dd>
+              <dd className="mt-1 text-xs text-muted-foreground">{label}</dd>
             </div>
           ))}
         </motion.dl>
@@ -216,12 +200,12 @@ function Hero({ authed }: { authed: boolean }) {
 
 function Waveform() {
   return (
-    <div className="flex h-16 items-end gap-1.5" aria-hidden>
+    <div className="flex h-12 items-end gap-1.5" aria-hidden>
       {[0.4, 0.7, 1, 0.55, 0.85, 0.35, 0.9, 0.6, 0.75, 0.45, 1, 0.65].map(
         (h, i) => (
           <motion.span
             key={i}
-            className="w-2 origin-bottom rounded-full bg-linear-to-t from-aurora-teal to-aurora-cyan"
+            className="w-1.5 origin-bottom rounded-sm bg-primary"
             style={{ height: `${h * 100}%` }}
             animate={{ scaleY: [1, 0.45, 1] }}
             transition={{
@@ -248,7 +232,7 @@ const SAMPLE_NOTE: { heading: string; bullets: string[] }[] = [
   {
     heading: "What lies ahead",
     bullets: [
-      "Keep the daily breathing practice; fixed 11:30pm bedtime.",
+      "Keep daily breathing practice; fixed 11:30pm bedtime.",
       "Next session: fear of disappointing family.",
     ],
   },
@@ -256,34 +240,23 @@ const SAMPLE_NOTE: { heading: string; bullets: string[] }[] = [
 
 function NoteSkeleton() {
   return (
-    <div className="space-y-3">
-      {SAMPLE_NOTE.map((section, i) => (
-        <motion.div
+    <div className="space-y-2">
+      {SAMPLE_NOTE.map((section) => (
+        <div
           key={section.heading}
-          className="rounded-xl bg-foreground/[0.03] px-3 py-2.5"
-          initial={{ opacity: 0, x: -8 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.15 + i * 0.15 }}
+          className="rounded-md border border-border bg-muted/40 px-3 py-2"
         >
-          <p className="mb-1.5 font-display text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-primary">
             {section.heading}
           </p>
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {section.bullets.map((b, j) => (
-              <li
-                key={j}
-                className="flex gap-2 text-sm leading-snug text-foreground/75"
-              >
-                <span
-                  aria-hidden
-                  className="mt-1.5 size-1 shrink-0 rounded-full bg-primary/50"
-                />
-                {b}
+              <li key={j} className="text-xs text-muted-foreground leading-snug">
+                • {b}
               </li>
             ))}
           </ul>
-        </motion.div>
+        </div>
       ))}
     </div>
   );
@@ -307,29 +280,25 @@ const FEATURES = [
   {
     icon: Timer,
     title: "Ephemeral by design",
-    body: "Raw audio is deleted the moment transcription finishes — success or failure. The unedited transcript is purged in the same database write that exports your note. There is nothing left to breach.",
+    body: "Raw audio is deleted the moment transcription finishes — success or failure. The unedited transcript is purged in the same database write that exports your note.",
     span: "md:col-span-5",
     visual: null,
   },
   {
     icon: BrainCircuit,
     title: "Patient memory",
-    body: "Every exported note is indexed into a private semantic memory. Ask “how has Maya's sleep changed since March?” and Aura recalls the answer from your own notes — computed locally, stored under row-level isolation.",
+    body: "Every exported note is indexed into a private semantic memory. Ask “how has Maya's sleep changed since March?” and Aura recalls the answer from your own notes.",
     span: "md:col-span-7",
     visual: (
       <div className="flex flex-wrap gap-2" aria-hidden>
         {["sleep ↓ then ↑", "started CBT-i", "fewer nightmares", "meds unchanged"].map(
-          (chip, i) => (
-            <motion.span
+          (chip) => (
+            <span
               key={chip}
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.25 + i * 0.1, duration: 0.4, ease: EASE_OUT }}
-              className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs text-accent-foreground/90"
+              className="rounded-sm border border-border bg-muted px-2 py-1 text-[11px] font-mono text-muted-foreground"
             >
               {chip}
-            </motion.span>
+            </span>
           ),
         )}
       </div>
@@ -339,25 +308,25 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section id="features" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-28 sm:px-6">
+    <section id="features" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-20 sm:px-6 border-b border-border">
       <Reveal className="max-w-2xl">
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          Built for the fifty minutes,
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Built for clinical focus,
           <br />
-          <span className="text-gradient">not the paperwork after.</span>
+          <span className="text-muted-foreground">not paperwork administrative load.</span>
         </h2>
       </Reveal>
 
-      <div className="mt-12 grid gap-4 md:grid-cols-12">
+      <div className="mt-10 grid gap-4 md:grid-cols-12">
         {FEATURES.map(({ icon: Icon, title, body, span, visual }, i) => (
           <Reveal key={title} delay={i * 0.06} className={span}>
-            <div className="glass group flex h-full flex-col justify-between gap-6 rounded-3xl p-7 transition-colors duration-300 hover:border-primary/25">
+            <div className="group flex h-full flex-col justify-between gap-6 rounded-md border border-border bg-card p-6 transition-colors hover:border-foreground/30">
               <div>
-                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/12 text-primary">
-                  <Icon className="size-5" />
+                <div className="flex size-9 items-center justify-center rounded-md bg-muted text-foreground">
+                  <Icon className="size-4" />
                 </div>
-                <h3 className="mt-5 font-display text-lg font-semibold">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                <h3 className="mt-4 text-base font-bold text-foreground">{title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
               </div>
               {visual}
             </div>
@@ -367,18 +336,18 @@ function Features() {
 
       {/* Security strip */}
       <Reveal delay={0.1} className="mt-4">
-        <div className="glass-subtle grid gap-6 rounded-3xl p-7 sm:grid-cols-3">
+        <div className="grid gap-6 rounded-md border border-border bg-muted/40 p-6 sm:grid-cols-3">
           {[
-            [ShieldCheck, "Row-level isolation", "Postgres RLS scopes every row to its clinician — enforced by the database, not the app."],
-            [Fingerprint, "Verified on every request", "The backend cryptographically verifies your identity token before touching any data."],
-            [BrainCircuit, "No third-party AI", "Transcription and memory embeddings are computed in-process. No OpenAI, no data-sharing DPA needed."],
+            [ShieldCheck, "Row-level isolation", "Postgres RLS scopes every row to its clinician — enforced by the database."],
+            [Fingerprint, "Verified on every request", "The backend cryptographically verifies your identity token on each API route."],
+            [BrainCircuit, "No third-party AI", "Transcription and memory embeddings are computed in-process. No third-party data sharing."],
           ].map(([Icon, title, body]) => {
             const I = Icon as typeof ShieldCheck;
             return (
               <div key={title as string} className="flex gap-3">
-                <I className="mt-0.5 size-5 shrink-0 text-primary" />
+                <I className="mt-0.5 size-4 shrink-0 text-foreground" />
                 <div>
-                  <p className="text-sm font-medium">{title as string}</p>
+                  <p className="text-xs font-bold text-foreground">{title as string}</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     {body as string}
                   </p>
@@ -400,38 +369,38 @@ const STEPS = [
   {
     n: "01",
     title: "Record",
-    body: "One tap when the session starts. A live waveform confirms Aura is listening — and that nothing has left the device yet.",
+    body: "One tap when the session starts. A live indicator confirms recording — audio stays local to your device.",
   },
   {
-    n: "02",
     title: "Review",
-    body: "Minutes later, a structured note is waiting — what was discussed and what lies ahead. Edit it like a document; the raw transcript stays visible until you're done.",
+    n: "02",
+    body: "Minutes later, a structured note is ready. Edit it like a document; the transcript stays visible until exported.",
   },
   {
     n: "03",
     title: "Export & purge",
-    body: "Exporting copies the note out and permanently destroys the raw transcript in the same instant. The note is all that remains.",
+    body: "Exporting copies the note out and permanently destroys the raw transcript in the same instant.",
   },
 ] as const;
 
 function HowItWorks() {
   return (
-    <section id="how" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-28 sm:px-6">
+    <section id="how" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-20 sm:px-6 border-b border-border">
       <Reveal className="max-w-2xl">
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          Three moments. <span className="text-gradient">Zero admin evenings.</span>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Three moments. <span className="text-muted-foreground">Zero administrative bottleneck.</span>
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-10 md:grid-cols-3">
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
         {STEPS.map(({ n, title, body }, i) => (
-          <Reveal key={n} delay={i * 0.12}>
-            <div className="relative">
-              <span className="font-display text-6xl font-semibold text-gradient opacity-90">
+          <Reveal key={n} delay={i * 0.1}>
+            <div className="rounded-md border border-border bg-card p-6 h-full">
+              <span className="text-xl font-bold font-mono text-muted-foreground">
                 {n}
               </span>
-              <h3 className="mt-4 font-display text-xl font-semibold">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              <h3 className="mt-2 text-base font-bold text-foreground">{title}</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
             </div>
           </Reveal>
         ))}
@@ -447,38 +416,30 @@ function HowItWorks() {
 const LIFECYCLE = [
   ["Raw audio", "Deleted the moment transcription completes — even on failure."],
   ["Raw transcript", "Purged in the same write that exports your note."],
-  ["Structured note", "The only artifact that persists. Isolated to you."],
+  ["Structured note", "The only artifact that persists. Isolated to your clinician account."],
 ] as const;
 
 function Privacy() {
   return (
-    <section id="privacy" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-28 sm:px-6">
-      <div className="glass relative overflow-hidden rounded-[2.5rem] px-7 py-16 sm:px-14">
-        {/* quiet gradient wash inside the panel */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-32 -top-32 size-96 rounded-full bg-[radial-gradient(circle,oklch(0.6_0.19_295_/_18%),transparent_70%)]"
-        />
+    <section id="privacy" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-20 sm:px-6">
+      <div className="rounded-md border border-border bg-card p-8 sm:p-12">
         <Reveal>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             The Aura principle
           </p>
-          <blockquote className="mt-6 max-w-3xl font-display text-3xl font-semibold leading-snug tracking-tight sm:text-5xl">
-            We can&apos;t leak
-            <span className="text-gradient"> what we don&apos;t keep.</span>
+          <blockquote className="mt-4 max-w-3xl text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
+            We cannot leak what we do not keep.
           </blockquote>
-          <p className="mt-6 max-w-2xl text-muted-foreground">
-            Therapy transcripts hold the most sensitive words a person ever
-            says. Aura&apos;s answer isn&apos;t a privacy policy — it&apos;s an
-            architecture in which retention is impossible.
+          <p className="mt-4 max-w-2xl text-xs text-muted-foreground sm:text-sm leading-relaxed">
+            Therapy transcripts hold sensitive medical words. Aura&apos;s answer isn&apos;t a policy document — it&apos;s an architecture where long-term raw audio retention is impossible.
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {LIFECYCLE.map(([what, fate], i) => (
             <Reveal key={what} delay={0.1 + i * 0.1}>
-              <div className="rounded-2xl border border-foreground/8 bg-foreground/3 p-5">
-                <p className="font-display text-sm font-semibold text-foreground">{what}</p>
+              <div className="rounded-md border border-border bg-muted/40 p-4">
+                <p className="text-xs font-bold text-foreground">{what}</p>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{fate}</p>
               </div>
             </Reveal>

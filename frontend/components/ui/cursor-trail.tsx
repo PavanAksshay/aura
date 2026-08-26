@@ -15,20 +15,5 @@ import { renderCanvas } from "@/components/ui/canvas";
 import { useFinePointer } from "@/hooks/use-fine-pointer";
 
 export function CursorTrail() {
-  const finePointer = useFinePointer();
-
-  useEffect(() => {
-    if (!finePointer) return;
-    renderCanvas();
-  }, [finePointer]);
-
-  if (!finePointer) return null;
-
-  return (
-    <canvas
-      id="canvas"
-      aria-hidden
-      className="pointer-events-none fixed inset-0 -z-[1] h-full w-full"
-    />
-  );
+  return null;
 }

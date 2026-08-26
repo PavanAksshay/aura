@@ -18,15 +18,14 @@ export function StatCard({
   value: number | string;
 }) {
   return (
-    <div className="glass card-lift relative h-full overflow-hidden rounded-2xl p-5">
-      <Icon
-        aria-hidden
-        className="pointer-events-none absolute -right-2 -top-2 size-16 text-primary/10"
-      />
-      <p className="text-gradient font-display text-[2.6rem] font-bold leading-none tabular-nums">
+    <div className="bg-card border border-border rounded-md p-4 flex flex-col justify-between">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+        <Icon aria-hidden className="size-4 text-muted-foreground shrink-0" />
+      </div>
+      <p className="mt-2 text-2xl font-bold tracking-tight text-foreground tabular-nums">
         {typeof value === "number" ? <NumberTicker value={value} /> : value}
       </p>
-      <p className="mt-2 text-sm font-medium text-muted-foreground">{label}</p>
     </div>
   );
 }

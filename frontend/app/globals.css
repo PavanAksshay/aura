@@ -6,166 +6,99 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================================
-   Aura design system — a light "liquid glass" theme and its dark counterpart.
-   Semantic tokens only: components never hardcode raw hex values, which is why
-   both themes fall out of this one block. Surface *treatments* (glass, navbar,
-   shimmer…) are variables too, so the utilities below stay theme-agnostic.
-   Light: warm apricot page, sage glass, teal + violet aurora.
-   Dark:  deep teal-ink page, smoked sage glass, the same aurora lifted.
+   Aura design system — minimal, structured, intentional product theme.
+   Clean typography, thin 1px borders, subtle tone shifts, restrained palette.
    ============================================================================ */
 
 :root {
   color-scheme: light;
-  /* Surfaces — warm oat page under sage/mint cards: reviving + nourishing.
-     Cards stay green (see --card / glass); the page is a warm cream so the two
-     tones sit together like felt on linen rather than an all-green wash. */
-  --background: oklch(0.95 0.04 62);           /* warm apricot cream — pairs with sage cards */
-  --foreground: oklch(0.29 0.03 205);          /* soft ink, faintly green-cool */
-  --card: oklch(0.95 0.044 163 / 80%);         /* translucent sage glass */
-  --card-foreground: oklch(0.29 0.03 205);
-  --popover: oklch(0.96 0.03 162);
-  --popover-foreground: oklch(0.29 0.03 205);
+  --background: oklch(0.985 0.003 240);       /* clean light neutral page */
+  --foreground: oklch(0.18 0.02 250);         /* sharp dark slate text */
+  --card: oklch(1 0 0);                       /* pure white container background */
+  --card-foreground: oklch(0.18 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 250);
 
-  /* Brand */
-  --primary: oklch(0.56 0.11 195);             /* calm teal */
-  --primary-foreground: oklch(0.99 0.003 200);
-  --secondary: oklch(0.94 0.02 265);           /* whisper lavender */
-  --secondary-foreground: oklch(0.35 0.05 275);
-  --accent: oklch(0.56 0.17 295);              /* aurora violet */
-  --accent-foreground: oklch(0.35 0.14 295);
+  /* Brand / Primary — crisp slate-indigo single accent */
+  --primary: oklch(0.24 0.04 255);            /* deep slate accent */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.96 0.005 240);         /* subtle light gray fill */
+  --secondary-foreground: oklch(0.22 0.02 250);
+  --accent: oklch(0.94 0.01 250);
+  --accent-foreground: oklch(0.2 0.03 250);
 
   /* Support */
-  --muted: oklch(0.925 0.03 162);
-  --muted-foreground: oklch(0.5 0.022 205);
+  --muted: oklch(0.96 0.005 240);
+  --muted-foreground: oklch(0.48 0.015 250);
   --destructive: oklch(0.55 0.2 22);
   --destructive-foreground: oklch(0.98 0.01 20);
-  --border: oklch(0.3 0.035 260 / 12%);
-  --input: oklch(0.3 0.035 260 / 5%);
-  --ring: oklch(0.56 0.11 195 / 55%);
+  --border: oklch(0.89 0.008 240);            /* crisp 1px border */
+  --input: oklch(0.89 0.008 240);
+  --ring: oklch(0.24 0.04 255 / 40%);
 
-  --radius: 1rem;
+  --radius: 0.25rem;                          /* 4px strict minimal radius */
 
-  /* Aurora gradient stops (shared by blobs, text gradients, buttons).
-     Medium saturation: deep enough for text, soft as blobs at low opacity. */
-  --aurora-cyan: oklch(0.6 0.11 220);
-  --aurora-teal: oklch(0.6 0.12 180);
-  --aurora-violet: oklch(0.55 0.17 295);
-  --aurora-peach: oklch(0.78 0.1 55);
+  /* Neutral finish variables */
+  --glass-bg: var(--card);
+  --glass-border: var(--border);
+  --glass-shadow: none;
+  --glass-subtle-bg: var(--muted);
+  --glass-subtle-border: var(--border);
 
-  /* Surface treatments. Kept as variables (not baked into the utilities) so
-     each theme restates only the finish, never the structure. */
-  --glass-bg: linear-gradient(
-    160deg,
-    oklch(0.955 0.042 162 / 88%),
-    oklch(0.925 0.055 165 / 70%)
-  );
-  --glass-border: oklch(0.55 0.05 165 / 16%);
-  --glass-shadow:
-    0 1px 0 0 oklch(1 0 0 / 40%) inset,
-    0 20px 44px -18px oklch(0.4 0.06 185 / 22%);
-  --glass-subtle-bg: oklch(0.95 0.04 162 / 74%);
-  --glass-subtle-border: oklch(0.55 0.05 165 / 12%);
+  --navbar-bg: var(--background);
+  --navbar-border: var(--border);
+  --navbar-shadow: none;
 
-  --navbar-bg: linear-gradient(
-    100deg,
-    oklch(0.98 0.022 90 / 0.85),
-    oklch(0.93 0.05 205 / 0.62)
-  );
-  --navbar-border: oklch(1 0 0 / 0.5);
-  --navbar-shadow: 0 10px 30px -14px oklch(0.4 0.07 205 / 0.4);
+  --lift-border: oklch(0.6 0.02 250);
+  --lift-shadow: none;
 
-  --lift-border: oklch(0.55 0.09 165 / 28%);
-  --lift-shadow: 0 12px 32px -12px oklch(0.45 0.08 180 / 28%);
-
-  --shimmer-gradient: linear-gradient(
-    100deg,
-    oklch(0.45 0.05 165 / 7%) 40%,
-    oklch(0.98 0.02 165 / 55%) 50%,
-    oklch(0.45 0.05 165 / 7%) 60%
-  );
-  --shimmer-flat: oklch(0.45 0.05 165 / 8%);
-
-  --selection-bg: oklch(0.56 0.11 195 / 22%);
-  --scrollbar-thumb: oklch(0.75 0.02 250);
-  --grid-dot: oklch(0.3 0.035 260 / 9%);
-  --blob-a-opacity: 0.2;
-  --blob-b-opacity: 0.12;
-  --blob-c-opacity: 0.18;
+  --selection-bg: oklch(0.24 0.04 255 / 12%);
+  --scrollbar-thumb: oklch(0.8 0.01 240);
 }
 
 /* ----------------------------------------------------------------------------
-   Dark theme. Same structure, restated finishes: the page drops to a deep
-   teal-ink, cards become smoked sage glass, and the aurora + primaries lift in
-   lightness so they keep their contrast against a dark ground.
+   Dark theme — structured, high contrast, clean dark slate.
    ---------------------------------------------------------------------------- */
 .dark {
   color-scheme: dark;
 
-  --background: oklch(0.21 0.02 200);          /* deep ink, faintly teal */
-  --foreground: oklch(0.93 0.014 180);         /* soft off-white */
-  --card: oklch(0.29 0.03 172 / 72%);          /* smoked sage glass */
-  --card-foreground: oklch(0.93 0.014 180);
-  --popover: oklch(0.26 0.028 178);
-  --popover-foreground: oklch(0.93 0.014 180);
+  --background: oklch(0.14 0.005 250);        /* deep slate background */
+  --foreground: oklch(0.96 0.005 240);        /* crisp off-white text */
+  --card: oklch(0.18 0.008 250);              /* flat slate container */
+  --card-foreground: oklch(0.96 0.005 240);
+  --popover: oklch(0.18 0.008 250);
+  --popover-foreground: oklch(0.96 0.005 240);
 
-  --primary: oklch(0.74 0.12 195);             /* teal, lifted for dark ground */
-  --primary-foreground: oklch(0.19 0.02 200);
-  --secondary: oklch(0.32 0.03 265);
-  --secondary-foreground: oklch(0.9 0.02 275);
-  --accent: oklch(0.74 0.15 295);              /* aurora violet, lifted */
-  --accent-foreground: oklch(0.88 0.08 295);
+  --primary: oklch(0.96 0.005 240);           /* high contrast white primary in dark mode */
+  --primary-foreground: oklch(0.14 0.005 250);
+  --secondary: oklch(0.22 0.008 250);
+  --secondary-foreground: oklch(0.92 0.005 240);
+  --accent: oklch(0.24 0.01 250);
+  --accent-foreground: oklch(0.96 0.005 240);
 
-  --muted: oklch(0.3 0.022 178);
-  --muted-foreground: oklch(0.73 0.02 190);
+  --muted: oklch(0.21 0.008 250);
+  --muted-foreground: oklch(0.65 0.01 250);
   --destructive: oklch(0.66 0.19 22);
   --destructive-foreground: oklch(0.98 0.01 20);
-  --border: oklch(0.85 0.03 180 / 14%);
-  --input: oklch(0.9 0.02 180 / 7%);
-  --ring: oklch(0.74 0.12 195 / 55%);
+  --border: oklch(0.26 0.008 250);
+  --input: oklch(0.26 0.008 250);
+  --ring: oklch(0.96 0.005 240 / 40%);
 
-  --aurora-cyan: oklch(0.68 0.12 220);
-  --aurora-teal: oklch(0.7 0.12 180);
-  --aurora-violet: oklch(0.68 0.17 295);
-  --aurora-peach: oklch(0.74 0.1 55);
+  --glass-bg: var(--card);
+  --glass-border: var(--border);
+  --glass-shadow: none;
+  --glass-subtle-bg: var(--muted);
+  --glass-subtle-border: var(--border);
 
-  --glass-bg: linear-gradient(
-    160deg,
-    oklch(0.31 0.03 170 / 82%),
-    oklch(0.26 0.035 178 / 64%)
-  );
-  --glass-border: oklch(0.85 0.04 180 / 12%);
-  --glass-shadow:
-    0 1px 0 0 oklch(1 0 0 / 6%) inset,
-    0 20px 44px -18px oklch(0.05 0.02 200 / 65%);
-  --glass-subtle-bg: oklch(0.3 0.028 172 / 58%);
-  --glass-subtle-border: oklch(0.85 0.04 180 / 10%);
+  --navbar-bg: var(--background);
+  --navbar-border: var(--border);
+  --navbar-shadow: none;
 
-  --navbar-bg: linear-gradient(
-    100deg,
-    oklch(0.3 0.03 190 / 0.82),
-    oklch(0.27 0.04 210 / 0.66)
-  );
-  --navbar-border: oklch(1 0 0 / 0.1);
-  --navbar-shadow: 0 10px 30px -14px oklch(0.05 0.02 200 / 0.7);
+  --lift-border: oklch(0.5 0.01 250);
+  --lift-shadow: none;
 
-  --lift-border: oklch(0.78 0.1 180 / 34%);
-  --lift-shadow: 0 12px 32px -12px oklch(0.05 0.02 200 / 70%);
-
-  --shimmer-gradient: linear-gradient(
-    100deg,
-    oklch(0.9 0.02 180 / 5%) 40%,
-    oklch(0.9 0.03 180 / 17%) 50%,
-    oklch(0.9 0.02 180 / 5%) 60%
-  );
-  --shimmer-flat: oklch(0.9 0.02 180 / 6%);
-
-  --selection-bg: oklch(0.74 0.12 195 / 30%);
-  --scrollbar-thumb: oklch(0.45 0.02 200);
-  --grid-dot: oklch(0.9 0.03 200 / 7%);
-  /* Blobs glow rather than wash on a dark ground. */
-  --blob-a-opacity: 0.13;
-  --blob-b-opacity: 0.16;
-  --blob-c-opacity: 0.12;
+  --selection-bg: oklch(0.96 0.005 240 / 20%);
+  --scrollbar-thumb: oklch(0.3 0.008 250);
 }
 
 @theme inline {
@@ -188,24 +121,18 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-aurora-cyan: var(--aurora-cyan);
-  --color-aurora-teal: var(--aurora-teal);
-  --color-aurora-violet: var(--aurora-violet);
-  --color-aurora-peach: var(--aurora-peach);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
 }
 
-/* Base type scale bumped ~12% (16px → 18px) so the whole rem-based system
-   reads larger and more comfortable without touching individual components. */
 html {
-  font-size: 112.5%;
+  font-size: 100%;
 }
 
 body {
@@ -219,321 +146,42 @@ body {
   background: var(--selection-bg);
 }
 
-/* Slim, theme-matched scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
-/* --------------------------------------------------------------------------
-   Glass + gradient utilities. Structure lives here, finish comes from the
-   theme variables above — so these need no dark-mode branch of their own.
-   -------------------------------------------------------------------------- */
-
+/* Structural utilities — clear, flat containers, zero glassmorphism */
 @utility glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 @utility glass-subtle {
-  background: var(--glass-subtle-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--glass-subtle-border);
+  background: var(--muted);
+  border: 1px solid var(--border);
 }
 
-/* Floating workspace nav pill — set apart from the content cards and the page
-   in both themes. */
 .aura-navbar {
-  background: var(--navbar-bg);
-  border: 1px solid var(--navbar-border);
-  box-shadow: var(--navbar-shadow);
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
 }
 
 @utility text-gradient {
-  background: linear-gradient(
-    100deg,
-    var(--aurora-cyan) 0%,
-    var(--aurora-teal) 45%,
-    var(--aurora-violet) 100%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: var(--foreground);
 }
 
 @utility ring-glow {
-  box-shadow:
-    0 0 0 1px oklch(0.56 0.11 195 / 30%),
-    0 0 24px -4px oklch(0.56 0.11 195 / 25%);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-/* --------------------------------------------------------------------------
-   Aurora background motion — transform/opacity only, GPU-friendly.
-   -------------------------------------------------------------------------- */
-
-@keyframes aurora-drift-a {
-  0%, 100% { transform: translate3d(-8%, -6%, 0) scale(1); }
-  33%      { transform: translate3d(10%, 8%, 0) scale(1.15); }
-  66%      { transform: translate3d(-4%, 12%, 0) scale(0.95); }
-}
-
-@keyframes aurora-drift-b {
-  0%, 100% { transform: translate3d(6%, 10%, 0) scale(1.05); }
-  50%      { transform: translate3d(-12%, -8%, 0) scale(0.9); }
-}
-
-@keyframes aurora-drift-c {
-  0%, 100% { transform: translate3d(0%, 0%, 0) scale(0.95); }
-  50%      { transform: translate3d(8%, -12%, 0) scale(1.2); }
-}
-
-.aurora-blob {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  will-change: transform;
-  pointer-events: none;
-}
-
-.aurora-blob-a {
-  animation: aurora-drift-a 26s ease-in-out infinite;
-  /* Warm peach (not cyan) so the ambient wash reads warm, not green. */
-  background: radial-gradient(circle, var(--aurora-peach), transparent 65%);
-  opacity: var(--blob-a-opacity);
-}
-
-.aurora-blob-b {
-  animation: aurora-drift-b 32s ease-in-out infinite;
-  background: radial-gradient(circle, var(--aurora-violet), transparent 65%);
-  opacity: var(--blob-b-opacity);
-}
-
-.aurora-blob-c {
-  animation: aurora-drift-c 24s ease-in-out infinite;
-  background: radial-gradient(circle, var(--aurora-peach), transparent 65%);
-  opacity: var(--blob-c-opacity);
-}
-
-/* Faint dot grid that fades toward the center — quiet depth, not decoration */
-.aurora-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 20%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 20%, transparent 75%);
-  pointer-events: none;
-}
-
-/* --------------------------------------------------------------------------
-   Ambient butterfly + drifting quotes (workspace hero backdrop)
-   -------------------------------------------------------------------------- */
-
-/* The butterfly drifts on a wandering flight path while its wings flap. */
-@keyframes butterfly-travel {
-  0%   { transform: translate(-50%, -50%) translate3d(-14vw, 6vh, 0) rotate(-6deg); }
-  20%  { transform: translate(-50%, -50%) translate3d(6vw, -8vh, 0) rotate(5deg); }
-  40%  { transform: translate(-50%, -50%) translate3d(16vw, 4vh, 0) rotate(-3deg); }
-  60%  { transform: translate(-50%, -50%) translate3d(2vw, 10vh, 0) rotate(6deg); }
-  80%  { transform: translate(-50%, -50%) translate3d(-10vw, -4vh, 0) rotate(-4deg); }
-  100% { transform: translate(-50%, -50%) translate3d(-14vw, 6vh, 0) rotate(-6deg); }
-}
-
-.butterfly-float {
-  animation: butterfly-travel 30s ease-in-out infinite;
-  perspective: 1000px;
-  will-change: transform;
-}
-
-/* Wings flap in 3D — rotateY through the body axis (plus a scale so it reads
-   even where SVG 3D is flattened). Left/right mirror each other. */
-@keyframes wing-flap-left {
-  0%, 100% { transform: perspective(600px) rotateY(-10deg) scaleX(1); }
-  50%      { transform: perspective(600px) rotateY(78deg) scaleX(0.45); }
-}
-
-@keyframes wing-flap-right {
-  0%, 100% { transform: perspective(600px) rotateY(10deg) scaleX(1); }
-  50%      { transform: perspective(600px) rotateY(-78deg) scaleX(0.45); }
-}
-
-.butterfly-wing-left {
-  animation: wing-flap-left 1.1s ease-in-out infinite;
-  will-change: transform;
-}
-
-.butterfly-wing-right {
-  animation: wing-flap-right 1.1s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* One hover physics for every interactive card: a whisper of lift, a deeper
-   shadow, a warmer border — applied via .card-lift so all surfaces agree. */
 .card-lift {
-  transition:
-    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.25s ease;
+  transition: border-color 0.15s ease;
 }
 
 .card-lift:hover {
-  transform: translateY(-2px);
   border-color: var(--lift-border);
-  box-shadow: var(--lift-shadow);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .card-lift,
-  .card-lift:hover {
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Skeleton shimmer: a soft light sweep instead of a blunt opacity pulse. */
-@keyframes shimmer {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
-  }
-}
-
-.animate-shimmer {
-  background: var(--shimmer-gradient);
-  background-size: 200% 100%;
-  animation: shimmer 1.8s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-shimmer {
-    animation: none;
-    background: var(--shimmer-flat);
-  }
-}
-
-/* Timeline card entrance (components/ui/timeline.tsx). */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.4s ease-out both;
-}
-
-/* Quotes roam widely across the backdrop (in vw/vh) so they wander the whole
-   screen rather than nudging in place — each on its own broad, slow orbit so
-   they stay spread out and never bunch up. */
-@keyframes quote-drift-a {
-  0%   { transform: translate3d(0, 0, 0); }
-  33%  { transform: translate3d(4vw, 7vh, 0); }
-  66%  { transform: translate3d(2vw, -6vh, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-
-@keyframes quote-drift-b {
-  0%   { transform: translate3d(0, 0, 0); }
-  33%  { transform: translate3d(-4vw, 6vh, 0); }
-  66%  { transform: translate3d(-2vw, -7vh, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-
-@keyframes quote-drift-c {
-  0%   { transform: translate3d(0, 0, 0); }
-  33%  { transform: translate3d(4vw, -6vh, 0); }
-  66%  { transform: translate3d(1vw, 7vh, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-
-@keyframes quote-drift-d {
-  0%   { transform: translate3d(0, 0, 0); }
-  33%  { transform: translate3d(-4vw, -6vh, 0); }
-  66%  { transform: translate3d(-2vw, 6vh, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-
-.quote-drift-a { animation: quote-drift-a 46s ease-in-out infinite; }
-.quote-drift-b { animation: quote-drift-b 54s ease-in-out infinite; }
-.quote-drift-c { animation: quote-drift-c 50s ease-in-out infinite; }
-.quote-drift-d { animation: quote-drift-d 58s ease-in-out infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .aurora-blob,
-  .butterfly-float,
-  .butterfly-wing-left,
-  .butterfly-wing-right,
-  .quote-drift-a,
-  .quote-drift-b,
-  .quote-drift-c,
-  .quote-drift-d {
-    animation: none;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   Touch-device performance
-
-   On a phone the ambient layer costs almost nothing to LOOK at and a great
-   deal to ANIMATE. Three 90px-blurred aurora blobs and the butterflies drift
-   continuously *underneath* .glass surfaces, and backdrop-filter has to be
-   recomputed against whatever is behind it — so every frame of that barely
-   visible drift forces Safari to re-blur the nav and every card on screen.
-   That is the reported iPhone jank: the wings look "stuck" because the
-   compositor is dropping frames, not because the animation is wrong.
-
-   The motion is decorative and nearly imperceptible anyway (opacity 0.11–0.16
-   over 17–32s loops), so on touch devices it is dropped rather than throttled.
-   The layout and colours are unchanged — the page simply stops repainting.
-   Desktop keeps the full effect.
-   -------------------------------------------------------------------------- */
-/* `hover: none` alone misses Android browsers that report `hover: hover` on a
-   touchscreen, so the butterflies survived there. `pointer: coarse` catches
-   every touch device by its primary pointer; a laptop with a mouse stays
-   `pointer: fine` and keeps the full effect. */
-@media (hover: none), (pointer: coarse) {
-  /* Butterflies are desktop-only. Merely freezing them still left a 115vw SVG
-     to rasterise and keep in memory on a phone, so they are dropped outright.
-     One rule on the wrapper covers every one of them — hero and
-     scroll-revealed, workspace and landing. */
-  .butterfly-float {
-    display: none;
-  }
-
-  .aurora-blob-a,
-  .aurora-blob-b,
-  .aurora-blob-c {
-    animation: none;
-  }
-
-  /* Blur cost grows sharply with radius, and this is the most expensive single
-     paint on the page. Halved — at these opacities the wash looks the same. */
-  .aurora-blob {
-    filter: blur(45px);
-    /* Nothing is animating now, so release the compositor layers it needed. */
-    will-change: auto;
-  }
-
-  /* iOS pays for backdrop blur superlinearly, and these sit on the nav and on
-     every card. Lighter radius, same frosted read. */
-  .glass {
-    backdrop-filter: blur(10px) saturate(1.25);
-    -webkit-backdrop-filter: blur(10px) saturate(1.25);
-  }
-
-  .glass-subtle {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-}

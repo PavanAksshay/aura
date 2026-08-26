@@ -108,7 +108,7 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="glass-subtle flex items-center gap-0.5 rounded-xl p-1">
+          <div className="flex items-center gap-0.5 rounded-md border border-border bg-muted/40 p-1">
             {(
               [
                 ["groups", Columns3, "Grouped by status"],
@@ -122,25 +122,18 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                 aria-label={label}
                 aria-pressed={view === mode}
                 className={cn(
-                  "relative cursor-pointer rounded-lg px-3 py-1.5 transition-colors",
+                  "relative cursor-pointer rounded-sm px-2.5 py-1 text-xs font-medium transition-colors",
                   view === mode
-                    ? "text-foreground"
+                    ? "bg-card text-foreground font-semibold border border-border"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {view === mode && (
-                  <motion.span
-                    layoutId="view-toggle"
-                    className="absolute inset-0 rounded-lg bg-foreground/8"
-                    transition={{ type: "spring", stiffness: 400, damping: 34 }}
-                  />
-                )}
-                <Icon className="relative size-4" />
+                <Icon className="size-3.5" />
               </button>
             ))}
           </div>
-          <Button onClick={openCreate}>
-            <Plus />
+          <Button onClick={openCreate} size="sm">
+            <Plus className="size-4" />
             Add patient
           </Button>
         </div>
@@ -148,19 +141,18 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
 
       {/* Content */}
       {patients.length === 0 ? (
-        <div className="glass mt-10 flex flex-col items-center rounded-3xl px-8 py-16 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-            <UsersRound className="size-7" />
+        <div className="mt-8 flex flex-col items-center rounded-md border border-border bg-card px-8 py-16 text-center">
+          <div className="flex size-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <UsersRound className="size-6" />
           </div>
-          <h2 className="mt-5 font-display text-lg font-semibold">
+          <h2 className="mt-4 text-base font-bold text-foreground">
             Your roster is empty
           </h2>
-          <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
-            Add your first patient to start attaching sessions and building
-            their private memory.
+          <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+            Add your first patient to attach clinical sessions and build their record.
           </p>
-          <Button onClick={openCreate} className="mt-6">
-            <Plus />
+          <Button onClick={openCreate} className="mt-5" size="sm">
+            <Plus className="size-4" />
             Add your first patient
           </Button>
         </div>
@@ -169,47 +161,41 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
           {view === "groups" ? (
             <motion.div
               key="groups"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EASE_OUT }}
-              className="mt-8 space-y-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-6 space-y-6"
             >
               {STATUS_META.map(({ status, label, icon: Icon, accent, dot }) => {
                 const cards = filtered.filter((p) => p.status === status);
                 if (cards.length === 0) return null;
                 return (
                   <section key={status}>
-                    <div className="mb-3 flex items-center gap-2.5">
-                      <span className={`flex size-7 items-center justify-center rounded-lg bg-foreground/5 ${accent}`}>
-                        <Icon className="size-4" />
-                      </span>
-                      <h3 className="font-display text-lg font-semibold tracking-tight">
+                    <div className="mb-3 flex items-center gap-2 border-b border-border pb-2">
+                      <Icon className={cn("size-4", accent)} />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                         {label}
                       </h3>
-                      <span className="rounded-full bg-foreground/8 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      <span className="rounded-sm border border-border bg-muted px-1.5 py-0.2 text-[11px] font-mono text-muted-foreground">
                         {cards.length}
                       </span>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {cards.map((p, i) => (
-                        <motion.div
+                      {cards.map((p) => (
+                        <div
                           key={p.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.35, ease: EASE_OUT, delay: Math.min(i * 0.04, 0.4) }}
                           onClick={() => router.push(`/patients/${p.id}`)}
-                          className="glass card-lift group relative cursor-pointer rounded-2xl p-4"
+                          className="group relative cursor-pointer rounded-md border border-border bg-card p-4 transition-colors hover:border-foreground/40"
                         >
                           <div className="flex items-start gap-3">
-                            <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground/6 text-sm font-semibold ${accent}`}>
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-xs font-bold text-foreground">
                               {initials(p.full_name) || "?"}
                             </span>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate font-medium transition-colors group-hover:text-primary">
+                              <p className="truncate text-xs font-bold text-foreground group-hover:text-primary sm:text-sm">
                                 {p.full_name}
                               </p>
-                              <p className="mt-0.5 text-xs text-muted-foreground">
+                              <p className="mt-0.5 text-[11px] text-muted-foreground font-mono">
                                 {p.pronouns ? `${p.pronouns} · ` : ""}
                                 {age(p.date_of_birth) !== "—" ? `${age(p.date_of_birth)} yrs` : "Age —"}
                               </p>
@@ -217,7 +203,7 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                             <span className={`size-2 rounded-full ${dot}`} />
                           </div>
                           {p.presenting_concerns && (
-                            <p className="mt-3 line-clamp-2 border-t border-border/60 pt-2.5 text-xs leading-relaxed text-muted-foreground">
+                            <p className="mt-3 line-clamp-2 border-t border-border pt-2 text-xs text-muted-foreground">
                               {p.presenting_concerns}
                             </p>
                           )}
@@ -228,18 +214,18 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                               e.stopPropagation();
                               openEdit(p);
                             }}
-                            className="absolute right-2 top-2 cursor-pointer rounded-lg p-2 text-muted-foreground opacity-0 transition-all hover:bg-foreground/8 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+                            className="absolute right-2 top-2 cursor-pointer rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
                           >
                             <Pencil className="size-3.5" />
                           </button>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </section>
                 );
               })}
               {filtered.length === 0 && (
-                <p className="glass-subtle rounded-2xl px-5 py-10 text-center text-sm text-muted-foreground">
+                <p className="rounded-md border border-border bg-muted/30 px-5 py-8 text-center text-xs text-muted-foreground">
                   No patients match “{query}”.
                 </p>
               )}
@@ -247,51 +233,50 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
           ) : (
             <motion.div
               key="table"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EASE_OUT }}
-              className="glass mt-6 overflow-hidden rounded-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-6 overflow-hidden rounded-md border border-border bg-card"
             >
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-foreground/8 text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="px-5 py-3.5 font-medium">Name</th>
-                    <th className="hidden px-5 py-3.5 font-medium sm:table-cell">Age</th>
-                    <th className="hidden px-5 py-3.5 font-medium md:table-cell">
+                  <tr className="border-b border-border bg-muted/50 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 py-3 font-semibold">Name</th>
+                    <th className="hidden px-4 py-3 font-semibold sm:table-cell">Age</th>
+                    <th className="hidden px-4 py-3 font-semibold md:table-cell">
                       Presenting concerns
                     </th>
-                    <th className="px-5 py-3.5 font-medium">Status</th>
-                    <th className="px-2 py-3.5" />
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-2 py-3" />
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border">
                   {filtered.map((p) => (
                     <tr
                       key={p.id}
                       onClick={() => router.push(`/patients/${p.id}`)}
-                      className="group cursor-pointer border-b border-foreground/5 transition-colors last:border-b-0 hover:bg-foreground/5"
+                      className="group cursor-pointer transition-colors hover:bg-muted/50"
                     >
-                      <td className="px-5 py-4">
-                        <span className="font-medium transition-colors group-hover:text-primary">
+                      <td className="px-4 py-3">
+                        <span className="font-semibold text-foreground group-hover:text-primary">
                           {p.full_name}
                         </span>
                         {p.pronouns && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {p.pronouns}
+                          <span className="ml-2 text-[11px] text-muted-foreground">
+                            ({p.pronouns})
                           </span>
                         )}
                       </td>
-                      <td className="hidden px-5 py-4 text-muted-foreground sm:table-cell">
+                      <td className="hidden px-4 py-3 font-mono text-muted-foreground sm:table-cell">
                         {age(p.date_of_birth)}
                       </td>
-                      <td className="hidden max-w-64 truncate px-5 py-4 text-muted-foreground md:table-cell">
+                      <td className="hidden max-w-64 truncate px-4 py-3 text-muted-foreground md:table-cell">
                         {p.presenting_concerns ?? "—"}
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-4 py-3">
                         <Badge tone={PATIENT_STATUS_TONE[p.status]}>{p.status}</Badge>
                       </td>
-                      <td className="px-2 py-4">
+                      <td className="px-2 py-3">
                         <button
                           type="button"
                           aria-label={`Edit ${p.full_name}`}
@@ -299,9 +284,9 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                             e.stopPropagation();
                             openEdit(p);
                           }}
-                          className="cursor-pointer rounded-lg p-2 text-muted-foreground opacity-0 transition-all hover:bg-foreground/8 hover:text-foreground group-hover:opacity-100 focus-visible:opacity-100"
+                          className="cursor-pointer rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
                         >
-                          <Pencil className="size-4" />
+                          <Pencil className="size-3.5" />
                         </button>
                       </td>
                     </tr>
@@ -309,7 +294,7 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                 </tbody>
               </table>
               {filtered.length === 0 && (
-                <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+                <p className="px-5 py-8 text-center text-xs text-muted-foreground">
                   No patients match “{query}”.
                 </p>
               )}

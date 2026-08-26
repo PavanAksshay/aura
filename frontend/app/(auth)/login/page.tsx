@@ -145,15 +145,15 @@ export default function LoginPage() {
           >
             <AuraMark className="size-12" />
           </motion.div>
-          <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight">
-            <span className="text-gradient">Aura</span>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
+            Aura
           </h1>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground">
             The clinical scribe that never keeps your patients&apos; voices.
           </p>
         </div>
 
-        <div className="glass rounded-3xl p-8">
+        <div className="rounded-md border border-border bg-card p-6">
           <Button
             type="button"
             variant="secondary"

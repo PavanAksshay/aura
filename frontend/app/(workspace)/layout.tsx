@@ -61,12 +61,7 @@ export default async function WorkspaceLayout({
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <AuroraBackground />
-      <CursorTrail />
-      <Butterfly />
-      <FloatingQuotes />
-
+    <div className="relative flex min-h-screen flex-col bg-background">
       {profile?.onboarded && (
         <>
           <ActivityPing />
@@ -84,23 +79,24 @@ export default async function WorkspaceLayout({
         </>
       )}
 
-      <header className="sticky top-0 z-40 px-2 pt-2 sm:px-4 sm:pt-3">
-        <nav className="aura-navbar mx-auto flex w-full max-w-6xl items-center gap-2 rounded-2xl px-3 py-2.5 backdrop-blur-xl sm:gap-4 sm:px-5 sm:py-3">
-          <Link
-            href="/"
-            className="shrink-0 transition-opacity hover:opacity-80"
-            aria-label="Aura home"
-          >
-            <AuraWordmark />
-          </Link>
-          {/* Scrollable on small screens so the pill never pushes off-screen */}
-          <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <NavLinks
-              showInbox={isOwnerEmail(user.email) || isCheckinEmail(user.email)}
-            />
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+        <nav className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-6 min-w-0">
+            <Link
+              href="/"
+              className="shrink-0 transition-opacity hover:opacity-80"
+              aria-label="Aura home"
+            >
+              <AuraWordmark />
+            </Link>
+            <div className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <NavLinks
+                showInbox={isOwnerEmail(user.email) || isCheckinEmail(user.email)}
+              />
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2 sm:gap-4 sm:pl-2">
-            <span className="hidden text-[0.95rem] text-muted-foreground lg:inline">
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="hidden text-xs text-muted-foreground lg:inline font-mono">
               {user.email}
             </span>
             <ThemeToggle />
@@ -113,7 +109,7 @@ export default async function WorkspaceLayout({
           down, without hiding records that are still perfectly usable. */}
       <MaintenanceBanner />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         {children}
       </main>
     </div>

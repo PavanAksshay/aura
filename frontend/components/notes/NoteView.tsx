@@ -213,23 +213,22 @@ export function NoteView({
       {/* The note is drafted by a local model and indexed into Memory without
           anyone reading it first. Say so, until a clinician says otherwise. */}
       {reviewed ? (
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono text-muted-foreground">
           <BadgeCheck aria-hidden className="size-4 text-primary" />
-          Reviewed by you on {formatReviewDate(reviewed)}
+          Reviewed on {formatReviewDate(reviewed)}
           {edited && <span>· edited {formatReviewDate(edited)}</span>}
         </p>
       ) : (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3">
           <AlertTriangle
             aria-hidden
             className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
           />
-          <p className="min-w-0 flex-1 text-sm">
-            <strong className="font-medium">
+          <p className="min-w-0 flex-1 text-xs sm:text-sm text-foreground">
+            <strong className="font-semibold">
               AI draft — not yet reviewed.
             </strong>{" "}
-            Aura wrote this from the recording. Check it against what happened
-            before relying on it.
+            Verify against transcript before export.
           </p>
           <Button size="sm" onClick={handleReview} disabled={reviewing}>
             {reviewing ? <Loader2 className="animate-spin" /> : <BadgeCheck />}
@@ -238,21 +237,14 @@ export function NoteView({
         </div>
       )}
 
-      {/* A non-English session (Tamil, Hindi, …) is transcribed in its own
-          language but summarised in English — so this note is a translation,
-          and the automatic check that guards English notes against fabrication
-          could not run on it. Ask for a closer read. */}
       {nonEnglish && (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-sky-500/30 bg-sky-500/5 px-4 py-3">
           <Languages
             aria-hidden
             className="size-4 shrink-0 text-sky-600 dark:text-sky-400"
           />
-          <p className="min-w-0 flex-1 text-sm">
-            <strong className="font-medium">Translated summary.</strong> This
-            session wasn&apos;t in English, so Aura summarised it into English.
-            Translation can shift meaning — please check it against the
-            transcript with extra care.
+          <p className="min-w-0 flex-1 text-xs sm:text-sm text-foreground">
+            <strong className="font-semibold">Translated summary.</strong> Summarized into English from a non-English recording.
           </p>
         </div>
       )}
@@ -262,18 +254,13 @@ export function NoteView({
           const Icon = SECTION_ICON[key];
           const items = note[key];
           return (
-            <motion.section
+            <section
               key={key}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: EASE_OUT, delay: i * 0.08 }}
-              className="glass rounded-2xl p-6"
+              className="rounded-md border border-border bg-card p-5"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-6 items-center justify-center rounded-md bg-primary/15 text-primary">
-                  <Icon className="size-3.5" />
-                </span>
-                <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-primary">
+              <div className="flex items-center gap-2 border-b border-border pb-3">
+                <Icon className="size-4 text-primary" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   {label}
                 </h2>
               </div>
@@ -326,7 +313,7 @@ export function NoteView({
                   {EMPTY_COPY[key]}
                 </p>
               )}
-            </motion.section>
+            </section>
           );
         })}
       </div>

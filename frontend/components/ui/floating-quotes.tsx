@@ -40,22 +40,5 @@ const QUOTES: { text: string; author: string; className: string; delay: string }
 ];
 
 export function FloatingQuotes() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-[1] hidden overflow-hidden lg:block">
-      {QUOTES.map((q) => (
-        <figure
-          key={q.author + q.text.slice(0, 12)}
-          className={`absolute ${q.className}`}
-          style={{ animationDelay: q.delay }}
-        >
-          <blockquote className="font-display text-[0.85rem] italic leading-relaxed text-foreground/22">
-            {q.text}
-          </blockquote>
-          <figcaption className="mt-1 text-xs font-medium text-primary/40">
-            — {q.author}
-          </figcaption>
-        </figure>
-      ))}
-    </div>
-  );
+  return null;
 }

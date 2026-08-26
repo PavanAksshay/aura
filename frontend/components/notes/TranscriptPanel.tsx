@@ -108,30 +108,30 @@ export function TranscriptPanel({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {/* Transcript */}
-      <div className="glass rounded-2xl p-6">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="rounded-md border border-border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-2 border-b border-border pb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Full transcript
           </h3>
-          <Button variant="secondary" size="sm" onClick={downloadTxt}>
-            <Download />
+          <Button variant="outline" size="sm" onClick={downloadTxt}>
+            <Download className="size-3.5" />
             Download .txt
           </Button>
         </div>
-        <p className="max-h-96 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground/85">
+        <p className="max-h-96 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-foreground font-mono">
           {transcript}
         </p>
         {/* Diarization separates voices but cannot tell who is the clinician;
             it assumes whoever speaks first is the therapist. When that is
             wrong, every line is attributed to the wrong person. */}
         {hasRoleLabels && (
-          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
             <p className="min-w-0 flex-1 text-xs text-muted-foreground">
               Labels are a guess based on who spoke first. If they are the wrong
               way round, swap them — the note will be redrafted to match.
             </p>
             <Button
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={handleSwapSpeakers}
               disabled={swapping}
@@ -139,7 +139,7 @@ export function TranscriptPanel({
               {swapping ? (
                 <Loader2 className="animate-spin" />
               ) : (
-                <ArrowLeftRight />
+                <ArrowLeftRight className="size-3.5" />
               )}
               {swapping ? "Redrafting…" : "Swap speakers"}
             </Button>
@@ -148,13 +148,13 @@ export function TranscriptPanel({
       </div>
 
       {/* Summary */}
-      <div className="glass rounded-2xl p-6">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="rounded-md border border-border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-2 border-b border-border pb-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Summary
           </h3>
           <Button size="sm" onClick={summarize} disabled={busy}>
-            {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}
+            {busy ? <Loader2 className="animate-spin" /> : <Sparkles className="size-3.5" />}
             {summary ? "Regenerate" : "Summarize"}
           </Button>
         </div>

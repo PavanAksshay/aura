@@ -119,14 +119,9 @@ function Drifters({ set }: { set: Drift[] }) {
 
 /** The two hero-level drifters. */
 export function Butterfly() {
-  return <Drifters set={BUTTERFLIES} />;
+  return null;
 }
 
-/**
- * Three further butterflies placed deep in the page. Render inside a clipped,
- * page-height layer (see the landing page) so they appear as you scroll and
- * never widen the document.
- */
 export function ScrollButterflies() {
-  return <Drifters set={SCROLL_BUTTERFLIES} />;
+  return null;
 }

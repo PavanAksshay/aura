@@ -51,21 +51,14 @@ export function NavLinks({ showInbox = false }: { showInbox?: boolean }) {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 font-display text-[0.95rem] font-medium tracking-tight transition-colors duration-200 sm:px-4",
+              "relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
               active
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-secondary text-foreground font-semibold border border-border"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border border-transparent",
             )}
           >
-            {active && (
-              <motion.span
-                layoutId="nav-active"
-                className="absolute inset-0 rounded-full border border-foreground/10 bg-foreground/6"
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
-              />
-            )}
-            <Icon className="relative size-4" />
-            <span className="relative hidden sm:inline">{label}</span>
+            <Icon className="size-4 shrink-0" />
+            <span className="hidden sm:inline">{label}</span>
           </Link>
         );
       })}

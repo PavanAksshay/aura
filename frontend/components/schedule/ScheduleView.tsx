@@ -118,24 +118,23 @@ export function ScheduleView({
       </div>
 
       {appointments.length === 0 ? (
-        <div className="glass-subtle flex flex-col items-center rounded-2xl px-6 py-16 text-center">
-          <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+        <div className="flex flex-col items-center rounded-md border border-border bg-card px-6 py-16 text-center">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
             <CalendarPlus className="size-6" />
           </div>
-          <p className="font-display text-lg font-semibold">
-            No appointments yet
+          <p className="text-base font-bold text-foreground">
+            No appointments scheduled
           </p>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            Schedule your first session and it&rsquo;ll appear here, grouped by
-            day. Everything stays private to your account.
+          <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+            Schedule your first session to keep track of your calendar.
           </p>
-          <Button className="mt-6" onClick={openCreate}>
-            <CalendarPlus />
+          <Button className="mt-5" onClick={openCreate} size="sm">
+            <CalendarPlus className="size-4" />
             New appointment
           </Button>
         </div>
       ) : (
-        <div className="space-y-10">
+        <div className="space-y-8">
           <Section title="Upcoming" groups={upcoming} onEdit={openEdit} />
           <Section title="Past" groups={past} onEdit={openEdit} muted />
         </div>
@@ -165,13 +164,13 @@ function Section({
   if (groups.length === 0) return null;
   return (
     <section>
-      <h2 className="mb-4 font-display text-lg font-semibold tracking-tight">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
         {title}
       </h2>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {groups.map((g) => (
           <div key={g.key}>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="mb-2 text-[11px] font-mono uppercase text-muted-foreground">
               {relativeDayLabel(g.iso) ?? dayFmt.format(new Date(g.iso))}
             </p>
             <div className="space-y-2">
@@ -205,32 +204,32 @@ function AppointmentCard({
     <button
       type="button"
       onClick={() => onEdit(appt)}
-      className={`glass group flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 hover:border-foreground/20 ${
+      className={`group flex w-full items-center gap-4 rounded-md border border-border bg-card p-3.5 text-left transition-colors hover:border-foreground/30 ${
         muted ? "opacity-75 hover:opacity-100" : ""
       }`}
     >
-      <div className="flex min-w-[5.5rem] flex-col items-center rounded-xl bg-primary/10 px-3 py-2 text-primary">
-        <span className="text-sm font-semibold tabular-nums">
+      <div className="flex min-w-[5rem] flex-col items-center rounded-md border border-border bg-muted px-2.5 py-1.5 text-foreground">
+        <span className="text-xs font-bold tabular-nums font-mono">
           {timeFmt.format(new Date(appt.starts_at))}
         </span>
-        <span className="flex items-center gap-1 text-[0.7rem] text-primary/70">
+        <span className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
           <Clock className="size-3" />
           {timeFmt.format(new Date(appt.ends_at))}
         </span>
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{appt.title}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <p className="truncate text-xs font-bold text-foreground sm:text-sm">{appt.title}</p>
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
           {name && (
-            <span className="flex items-center gap-1.5">
-              <UserRound className="size-3.5" />
+            <span className="flex items-center gap-1">
+              <UserRound className="size-3" />
               {name}
             </span>
           )}
           {appt.location && (
-            <span className="flex items-center gap-1.5">
-              <MapPin className="size-3.5" />
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3" />
               {appt.location}
             </span>
           )}

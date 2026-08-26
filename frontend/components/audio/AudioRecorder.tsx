@@ -106,7 +106,7 @@ export function AudioRecorder({
   const formDisabled = isRecording || submitting;
 
   return (
-    <div className="glass mx-auto max-w-xl rounded-3xl p-8">
+    <div className="mx-auto max-w-xl rounded-md border border-border bg-card p-6 sm:p-8">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="session-title">Session title</Label>
