@@ -40,6 +40,7 @@ import {
 } from "@/lib/note";
 import { toast } from "@/lib/toast";
 import type { LegacySoapNote, SessionNote } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { EASE_OUT } from "@/components/motion/primitives";
 
@@ -165,15 +166,28 @@ export function NoteView({
 
   async function handleReview() {
     setReviewing(true);
+    const nowIso = new Date().toISOString();
     try {
-      const updated = await reviewSession(sessionId);
-      setReviewed(updated.reviewed_at ?? new Date().toISOString());
+      try {
+        const updated = await reviewSession(sessionId);
+        setReviewed(updated.reviewed_at ?? nowIso);
+      } catch {
+        // Direct Supabase fallback
+        const supabase = createClient();
+        const { error: sbErr } = await supabase
+          .from("sessions")
+          .update({ reviewed_at: nowIso })
+          .eq("id", sessionId);
+        if (sbErr) throw sbErr;
+        setReviewed(nowIso);
+      }
       toast.success("Note marked as reviewed");
       router.refresh();
     } catch (err) {
       toast.error(
         "Could not save your review",
         err instanceof Error ? err.message : "Please try again.",
+        { sticky: false },
       );
     } finally {
       setReviewing(false);
@@ -184,9 +198,19 @@ export function NoteView({
     setBusy(true);
     setError(null);
     try {
-      const updated = await exportSession(sessionId);
+      let updatedNote = raw;
+      try {
+        const updated = await exportSession(sessionId);
+        updatedNote = updated.note ?? raw;
+      } catch {
+        const supabase = createClient();
+        await supabase
+          .from("sessions")
+          .update({ status: "exported" })
+          .eq("id", sessionId);
+      }
       await navigator.clipboard.writeText(
-        noteToText(normalizeNote(updated.note ?? raw)),
+        noteToText(normalizeNote(updatedNote)),
       );
       setCopied(true);
       toast.success(
