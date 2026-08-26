@@ -91,7 +91,7 @@ export default async function DashboardPage() {
       // Hits sessions_unreviewed_idx (migration 0017).
       supabase
         .from("sessions")
-        .select("id", { count: "exact", head: true })
+        .select("id, title")
         .is("reviewed_at", null)
         .eq("status", "exported"),
     ]);
@@ -107,7 +107,13 @@ export default async function DashboardPage() {
   ];
 
   const sessions = recent.data ?? [];
-  const unreviewed = unreviewedQ.count ?? 0;
+  const unreviewedList = unreviewedQ.data ?? [];
+  const unreviewed = unreviewedList.length;
+  const firstUnreviewed = unreviewedList[0];
+  const reviewHref =
+    unreviewed === 1 && firstUnreviewed
+      ? `/sessions/${firstUnreviewed.id}`
+      : "/patients";
 
   return (
     <div className="space-y-6">
@@ -141,7 +147,7 @@ export default async function DashboardPage() {
       {unreviewed > 0 && (
         <FadeIn>
           <Link
-            href="/patients"
+            href={reviewHref}
             className="flex items-center gap-2.5 rounded-sm border border-border/70 bg-card/60 px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-card"
           >
             <BadgeCheck
@@ -150,9 +156,12 @@ export default async function DashboardPage() {
             />
             <p className="min-w-0 flex-1 text-xs text-muted-foreground">
               <strong className="font-semibold text-foreground">
-                {unreviewed} {unreviewed === 1 ? "note" : "notes"} awaiting review
+                {unreviewed}{" "}
+                {unreviewed === 1
+                  ? `note awaiting review (${firstUnreviewed?.title || "Open session"})`
+                  : "notes awaiting review"}
               </strong>{" "}
-              — Verify clinical details before export.
+              — Click to verify clinical details.
             </p>
           </Link>
         </FadeIn>
