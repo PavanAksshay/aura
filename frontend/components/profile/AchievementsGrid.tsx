@@ -46,10 +46,10 @@ export function AchievementsGrid({ earned }: { earned: string[] }) {
     : BADGES.filter((b) => earnedSet.has(b.id));
 
   return (
-    <div className="rounded-md border border-border bg-card p-5">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-3">
+    <div className="rounded-sm border border-border/70 bg-card/60 p-5">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-3">
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
             Achievements
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -58,18 +58,18 @@ export function AchievementsGrid({ earned }: { earned: string[] }) {
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <span className="font-mono text-base font-bold text-foreground">
+            <span className="font-mono text-sm font-bold text-foreground">
               {count}
             </span>
             <span className="font-mono text-xs text-muted-foreground">/{BADGES.length}</span>
-            <span className="ml-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+            <span className="ml-1 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
               unlocked
             </span>
           </div>
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
-            className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-muted/80"
+            className="rounded-sm border border-border/80 bg-muted px-2.5 py-1 text-xs font-semibold text-foreground transition hover:bg-muted/80"
           >
             {showAll ? "Show earned only" : `View all (${BADGES.length})`}
           </button>
@@ -92,7 +92,7 @@ export function AchievementsGrid({ earned }: { earned: string[] }) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, ease: EASE_OUT, delay: Math.min(i * 0.02, 0.4) }}
-                className={`relative flex flex-col rounded-md border p-3.5 transition-colors ${
+                className={`relative flex flex-col rounded-sm border p-3 transition-colors ${
                   isEarned
                     ? `bg-card ${tier.ring}`
                     : "bg-muted/30 border-border opacity-60"
@@ -100,7 +100,7 @@ export function AchievementsGrid({ earned }: { earned: string[] }) {
               >
                 <div className="mb-2 flex items-center justify-between">
                   <div
-                    className={`flex size-7 items-center justify-center rounded-md ${
+                    className={`flex size-6 items-center justify-center rounded-sm ${
                       isEarned ? tier.chip : "bg-muted text-muted-foreground border border-border"
                     }`}
                   >

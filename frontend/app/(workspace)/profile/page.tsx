@@ -22,7 +22,7 @@ import { PushToggle } from "@/components/profile/PushToggle";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PageHeading } from "@/components/ui/page-heading";
-import { StatCard } from "@/components/ui/stat-card";
+import { MetricStrip } from "@/components/ui/metric-strip";
 import { Stagger, StaggerItem } from "@/components/motion/primitives";
 
 export const metadata = { title: "Profile" };
@@ -117,87 +117,64 @@ export default async function ProfilePage() {
 
       <Stagger className="space-y-6">
       <StaggerItem>
-      {/* Identity card */}
-      <div className="glass flex flex-col gap-6 rounded-3xl p-6 sm:flex-row sm:items-center sm:gap-8 sm:p-8">
-        <ProfileAvatar
-          userId={user.id}
-          avatarId={profile.avatar_id}
-          avatarPath={profile.avatar_url}
-          photoUrl={photoUrl}
-        />
-        <div className="min-w-0 flex-1">
-          <h2 className="font-display text-2xl font-semibold tracking-tight">
-            {profile.full_name || "Your name"}
-          </h2>
-          {profile.title && (
-            <p className="mt-0.5 text-muted-foreground">{profile.title}</p>
-          )}
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex min-w-0 max-w-full items-center gap-1.5">
-              <Mail className="size-4 shrink-0" />
-              <span className="min-w-0 break-all">{user.email}</span>
-            </span>
-            {profile.country && (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="size-4" />
-                {profile.country}
-              </span>
+      {/* Identity block */}
+      <div className="flex flex-col gap-6 pb-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <ProfileAvatar
+            userId={user.id}
+            avatarId={profile.avatar_id}
+            avatarPath={profile.avatar_url}
+          />
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
+              {profile.full_name || "Your profile"}
+            </h2>
+            {profile.title && (
+              <p className="text-xs text-muted-foreground">{profile.title}</p>
             )}
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="size-4" />
-              Member since {memberSince(profile.created_at)}
-            </span>
-          </div>
-        </div>
-        {/* Streak highlight */}
-        <div className="flex shrink-0 items-center gap-5 rounded-md border border-border bg-card px-5 py-3 text-foreground">
-          <div className="text-center">
-            <p className="flex items-center justify-center gap-1 font-mono text-2xl font-bold text-foreground">
-              <Flame className="size-5 text-amber-500" />
-              {stats.currentStreak}
-            </p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Day streak
-            </p>
-          </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <p className="flex items-center justify-center gap-1 font-mono text-2xl font-bold text-foreground">
-              <Trophy className="size-5 text-yellow-500" />
-              {stats.longestStreak}
-            </p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Best
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 font-mono">
+              {user.email && (
+                <span className="flex items-center gap-1.5">
+                  <Mail className="size-3.5" />
+                  {user.email}
+                </span>
+              )}
+              {profile.country && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="size-3.5" />
+                  {profile.country}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="size-3.5" />
+                Member since {memberSince(profile.created_at)}
+              </span>
+            </div>
           </div>
         </div>
       </div>
       </StaggerItem>
 
+      {/* Integrated Metric Strip */}
       <StaggerItem>
-      {/* Stat tiles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {tiles.map(({ icon, label, value }) => (
-          <StatCard key={label} icon={icon} label={label} value={value} />
-        ))}
-      </div>
+        <MetricStrip items={metrics} />
       </StaggerItem>
 
       <StaggerItem>
       {/* Details + specializations */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-md border border-border bg-card p-5">
-          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
+        <div className="rounded-sm border border-border/70 bg-card/60 p-5">
+          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border/60 pb-2">
             Practice details
           </h3>
           <dl className="space-y-2.5">
             {details.map(({ label, value }) => (
               <div
                 key={label}
-                className="flex items-center justify-between gap-4 border-b border-border/50 pb-2 last:border-0 last:pb-0"
+                className="flex items-center justify-between gap-4 border-b border-border/40 pb-2 last:border-0 last:pb-0"
               >
                 <dt className="text-xs text-muted-foreground">{label}</dt>
-                <dd className="text-right text-xs font-semibold text-foreground">
+                <dd className="text-right text-xs font-semibold text-foreground font-mono">
                   {value || <span className="text-muted-foreground/60">—</span>}
                 </dd>
               </div>
@@ -205,8 +182,8 @@ export default async function ProfilePage() {
           </dl>
         </div>
 
-        <div className="rounded-md border border-border bg-card p-5">
-          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
+        <div className="rounded-sm border border-border/70 bg-card/60 p-5">
+          <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground border-b border-border/60 pb-2">
             Specializations
           </h3>
           {profile.specializations.length > 0 ? (
@@ -214,7 +191,7 @@ export default async function ProfilePage() {
               {profile.specializations.map((s) => (
                 <span
                   key={s}
-                  className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+                  className="rounded-sm border border-border/70 bg-muted/60 px-2.5 py-1 text-xs font-medium text-foreground"
                 >
                   {s}
                 </span>
@@ -227,7 +204,6 @@ export default async function ProfilePage() {
           )}
         </div>
       </div>
-
       </StaggerItem>
 
       <StaggerItem>

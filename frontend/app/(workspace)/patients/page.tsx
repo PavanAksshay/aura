@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Patient } from "@/lib/types";
 import { PatientsView } from "@/components/patients/PatientsView";
 import { PageHeading } from "@/components/ui/page-heading";
-import { StatCard } from "@/components/ui/stat-card";
+import { MetricStrip } from "@/components/ui/metric-strip";
 
 export const metadata = { title: "Patients" };
 
@@ -38,28 +38,22 @@ export default async function PatientsPage() {
   const stat = (s: Patient["status"]) =>
     patients.filter((p) => p.status === s).length;
 
-  const tiles = [
-    { icon: UsersRound, label: "Total", value: patients.length },
-    { icon: CircleDot, label: "Active", value: stat("active") },
+  const metrics = [
+    { icon: UsersRound, label: "Total caseload", value: patients.length },
+    { icon: CircleDot, label: "Active patients", value: stat("active") },
     { icon: PauseCircle, label: "Paused", value: stat("paused") },
     { icon: ShieldCheck, label: "Discharged", value: stat("discharged") },
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeading
         title="Your"
         accent="patients"
         subtitle="Your roster — isolated to your account by row-level security."
       />
 
-      {patients.length > 0 && (
-        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {tiles.map(({ icon, label, value }) => (
-            <StatCard key={label} icon={icon} label={label} value={value} />
-          ))}
-        </div>
-      )}
+      {patients.length > 0 && <MetricStrip items={metrics} />}
 
       <PatientsView patients={patients} />
     </div>

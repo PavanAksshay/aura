@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion/primitives";
-import { StatCard } from "@/components/ui/stat-card";
+import { MetricStrip } from "@/components/ui/metric-strip";
 
 type SessionRow = Pick<
   ClinicalSession,
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
   const tip = dailyTip();
 
   const stats = [
-    { icon: AudioLines, label: "Sessions", value: totalQ.count ?? 0 },
+    { icon: AudioLines, label: "Total sessions", value: totalQ.count ?? 0 },
     { icon: CalendarClock, label: "This week", value: weekQ.count ?? 0 },
     { icon: UsersRound, label: "Patients", value: patientsQ.count ?? 0 },
   ];
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
   const unreviewed = unreviewedQ.count ?? 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Greeting Header with inline CTA */}
       <FadeIn className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
         <div>
@@ -118,10 +118,8 @@ export default async function DashboardPage() {
             {greeting(profileQ.data?.timezone ?? null)}
             {firstName ? `, ${firstName}` : ""}.
           </h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            <span className="font-mono text-foreground/80">{todayLabel()}</span>
-            {" · "}
-
+          <p className="mt-0.5 text-xs text-muted-foreground font-mono">
+            {todayLabel()}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -134,12 +132,17 @@ export default async function DashboardPage() {
         </div>
       </FadeIn>
 
+      {/* Integrated Metric Strip */}
+      <FadeIn>
+        <MetricStrip items={stats} />
+      </FadeIn>
+
       {/* Unreviewed notes alert */}
       {unreviewed > 0 && (
         <FadeIn>
           <Link
             href="/patients"
-            className="flex items-center gap-2.5 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 transition-colors hover:bg-amber-500/10"
+            className="flex items-center gap-2.5 rounded-sm border border-amber-500/30 bg-amber-500/5 px-3.5 py-2.5 transition-colors hover:bg-amber-500/10"
           >
             <BadgeCheck
               aria-hidden
@@ -155,24 +158,15 @@ export default async function DashboardPage() {
         </FadeIn>
       )}
 
-      {/* Compact Stats Grid */}
-      <Stagger className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        {stats.map(({ icon, label, value }) => (
-          <StaggerItem key={label}>
-            <StatCard icon={icon} label={label} value={value} />
-          </StaggerItem>
-        ))}
-      </Stagger>
-
       {/* Main Grid: Recent Sessions (8 cols) + Quick Actions (4 cols) */}
       <Stagger className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <StaggerItem className="lg:col-span-8">
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="mb-3 flex items-center justify-between border-b border-border pb-2.5">
+          <div className="rounded-sm border border-border/70 bg-card/60 p-4">
+            <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-2.5">
               <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
                 Recent Sessions
               </h2>
-              <Button asChild variant="ghost" size="sm" className="h-7 text-xs px-2">
+              <Button asChild variant="ghost" size="sm" className="h-6 text-xs px-2 text-muted-foreground hover:text-foreground">
                 <Link href="/patients">View all →</Link>
               </Button>
             </div>
@@ -220,8 +214,8 @@ export default async function DashboardPage() {
 
         <StaggerItem className="lg:col-span-4">
           <div className="flex flex-col gap-3">
-            <div className="rounded-md border border-border bg-card p-4">
-              <h2 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            <div className="rounded-sm border border-border/70 bg-card/60 p-4">
+              <h2 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
                 Quick Actions
               </h2>
               <div className="grid grid-cols-1 gap-2">
@@ -229,7 +223,7 @@ export default async function DashboardPage() {
                   asChild
                   variant="outline"
                   size="sm"
-                  className="justify-start h-8 text-xs"
+                  className="justify-start h-8 text-xs rounded-sm"
                 >
                   <Link href="/sessions/new">
                     <Mic className="size-3.5" />
@@ -240,7 +234,7 @@ export default async function DashboardPage() {
                   asChild
                   variant="outline"
                   size="sm"
-                  className="justify-start h-8 text-xs"
+                  className="justify-start h-8 text-xs rounded-sm"
                 >
                   <Link href="/patients">
                     <UsersRound className="size-3.5" />
@@ -251,7 +245,7 @@ export default async function DashboardPage() {
                   asChild
                   variant="outline"
                   size="sm"
-                  className="justify-start h-8 text-xs"
+                  className="justify-start h-8 text-xs rounded-sm"
                 >
                   <Link href="/memory">
                     <BrainCircuit className="size-3.5" />
@@ -261,8 +255,8 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-md border border-border bg-card p-4">
-              <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-2">
+            <div className="rounded-sm border border-border/70 bg-card/60 p-4">
+              <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
                 Privacy Status
               </h2>
               <div className="space-y-1.5 text-xs text-muted-foreground leading-normal">

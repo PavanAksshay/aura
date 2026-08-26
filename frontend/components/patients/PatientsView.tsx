@@ -185,25 +185,27 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                         <div
                           key={p.id}
                           onClick={() => router.push(`/patients/${p.id}`)}
-                          className="group relative cursor-pointer rounded-md border border-border bg-card p-4 transition-colors hover:border-foreground/40"
+                          className="group relative cursor-pointer rounded-sm border border-border/70 bg-card/60 p-3.5 transition-all hover:border-foreground/40 hover:bg-card"
                         >
                           <div className="flex items-start gap-3">
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-xs font-bold text-foreground">
-                              {initials(p.full_name) || "?"}
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-sm border border-border/80 bg-muted/50 font-mono text-xs font-bold text-foreground">
+                              {p.full_name.charAt(0).toUpperCase()}
                             </span>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-xs font-bold text-foreground group-hover:text-primary sm:text-sm">
-                                {p.full_name}
-                              </p>
-                              <p className="mt-0.5 text-[11px] text-muted-foreground font-mono">
-                                {p.pronouns ? `${p.pronouns} · ` : ""}
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="truncate text-xs font-bold text-foreground group-hover:text-primary sm:text-sm">
+                                  {p.full_name}
+                                </p>
+                                <span className={`size-1.5 shrink-0 rounded-full ${dot}`} />
+                              </div>
+                              <p className="mt-0.5 text-[11px] font-mono text-muted-foreground">
+                                {p.pronouns ? `${p.pronouns} — ` : ""}
                                 {age(p.date_of_birth) !== "—" ? `${age(p.date_of_birth)} yrs` : "Age —"}
                               </p>
                             </div>
-                            <span className={`size-2 rounded-full ${dot}`} />
                           </div>
                           {p.presenting_concerns && (
-                            <p className="mt-3 line-clamp-2 border-t border-border pt-2 text-xs text-muted-foreground">
+                            <p className="mt-2.5 line-clamp-1 border-t border-border/50 pt-2 text-[11px] text-muted-foreground/90">
                               {p.presenting_concerns}
                             </p>
                           )}
@@ -214,9 +216,9 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                               e.stopPropagation();
                               openEdit(p);
                             }}
-                            className="absolute right-2 top-2 cursor-pointer rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                            className="absolute right-2 top-2 cursor-pointer rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
                           >
-                            <Pencil className="size-3.5" />
+                            <Pencil className="size-3" />
                           </button>
                         </div>
                       ))}
