@@ -82,11 +82,12 @@ export default async function ProfilePage() {
     photoUrl = data?.signedUrl ?? null;
   }
 
-  const tiles: { icon: LucideIcon; label: string; value: number | string }[] = [
+  const metrics = [
     { icon: Mic, label: "Sessions", value: stats.sessions },
     { icon: UsersRound, label: "Patients", value: stats.patients },
     { icon: CalendarClock, label: "Appointments", value: stats.appointments },
-    { icon: Flame, label: "Day streak", value: stats.currentStreak },
+    { icon: Flame, label: "Day streak", value: stats.currentStreak, accent: "text-amber-500" },
+    { icon: Trophy, label: "Best streak", value: stats.longestStreak, accent: "text-yellow-500" },
   ];
 
   const details: { label: string; value: string | null }[] = [
@@ -124,6 +125,7 @@ export default async function ProfilePage() {
             userId={user.id}
             avatarId={profile.avatar_id}
             avatarPath={profile.avatar_url}
+            photoUrl={photoUrl}
           />
           <div>
             <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
