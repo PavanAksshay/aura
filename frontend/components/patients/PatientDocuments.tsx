@@ -182,7 +182,7 @@ export function PatientDocuments({
           className="flex w-full flex-col items-center rounded-md border border-dashed border-border bg-card px-6 py-8 text-center transition-colors hover:border-foreground/25"
         >
           <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-muted text-foreground">
-            <Upload className="size-5" />
+            <UploadCloud className="size-5" />
           </div>
           <p className="font-medium">Add intake forms, referrals, or scans</p>
           <p className="mt-1 text-sm text-muted-foreground">
