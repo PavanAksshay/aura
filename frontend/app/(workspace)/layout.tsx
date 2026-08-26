@@ -58,7 +58,7 @@ export default async function WorkspaceLayout({
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="relative flex min-h-[100dvh] flex-col bg-background overflow-x-hidden">
       {profile?.onboarded && (
         <>
           <ActivityPing />

@@ -119,36 +119,36 @@ export default async function ProfilePage() {
       <Stagger className="space-y-6">
       <StaggerItem>
       {/* Identity block */}
-      <div className="flex flex-col gap-6 pb-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 pb-1">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <ProfileAvatar
             userId={user.id}
             avatarId={profile.avatar_id}
             avatarPath={profile.avatar_url}
             photoUrl={photoUrl}
           />
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
+          <div className="min-w-0 flex-1 space-y-1">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground break-words">
               {profile.full_name || "Your profile"}
             </h2>
             {profile.title && (
-              <p className="text-xs text-muted-foreground">{profile.title}</p>
+              <p className="text-xs text-muted-foreground font-medium">{profile.title}</p>
             )}
-            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 font-mono">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-xs text-muted-foreground/80 font-mono">
               {user.email && (
-                <span className="flex items-center gap-1.5">
-                  <Mail className="size-3.5" />
+                <span className="flex items-center gap-1.5 break-all">
+                  <Mail className="size-3.5 shrink-0" />
                   {user.email}
                 </span>
               )}
               {profile.country && (
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="size-3.5" />
+                  <MapPin className="size-3.5 shrink-0" />
                   {profile.country}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <Sparkles className="size-3.5" />
+                <Sparkles className="size-3.5 shrink-0" />
                 Member since {memberSince(profile.created_at)}
               </span>
             </div>

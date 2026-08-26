@@ -165,14 +165,14 @@ export function ProfileAvatar({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={handleAvatarClick}
           disabled={busy}
           aria-label={photoUrl ? "Adjust profile photo" : "Add a profile photo"}
-          className="group relative size-20 shrink-0 overflow-hidden rounded-3xl shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:size-24"
+          className="group relative size-16 sm:size-20 shrink-0 overflow-hidden rounded-sm border border-border/80 bg-muted/40 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
         >
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -181,7 +181,7 @@ export function ProfileAvatar({
             <Avatar id={avatarId} className="size-full" />
           )}
           <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 opacity-0 transition-all duration-200 group-hover:bg-foreground/35 group-hover:opacity-100 group-focus-visible:bg-foreground/35 group-focus-visible:opacity-100">
-            <Camera className="size-5 text-white" />
+            <Camera className="size-4 text-white" />
           </span>
         </button>
 
@@ -192,34 +192,36 @@ export function ProfileAvatar({
           className="hidden"
           onChange={(e) => handleFile(e.target.files)}
         />
-        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Button
             size="sm"
-            variant="secondary"
+            variant="outline"
+            className="h-7 px-2.5 text-xs rounded-sm"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
           >
-            {busy ? <Loader2 className="animate-spin" /> : <ImageUp />}
+            {busy ? <Loader2 className="size-3 animate-spin" /> : <ImageUp className="size-3" />}
             {photoUrl ? "Replace" : "Upload"}
           </Button>
           <Button
             size="sm"
             variant="ghost"
+            className="h-7 px-2.5 text-xs rounded-sm"
             onClick={() => setPicker((p) => !p)}
             disabled={busy}
           >
-            <Shuffle />
+            <Shuffle className="size-3" />
             Inkblot
           </Button>
           {photoUrl && (
             <Button
               size="sm"
               variant="ghost"
+              className="h-7 px-2 text-xs rounded-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={handleRemovePhoto}
               disabled={busy}
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 />
+              <Trash2 className="size-3" />
               Remove
             </Button>
           )}
@@ -227,9 +229,7 @@ export function ProfileAvatar({
       </div>
 
       {picker && (
-        // A single scrollable row keeps the picker compact — it never grows
-        // into a tall grid that pushes the rest of the card down.
-        <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+        <div className="-mx-1 mt-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
           {AVATARS.map((a) => {
             const selected = !photoUrl && a.id === avatarId;
             return (
@@ -240,16 +240,16 @@ export function ProfileAvatar({
                 disabled={busy}
                 aria-label={`Inkblot ${a.id}`}
                 aria-pressed={selected}
-                className={`relative size-12 shrink-0 rounded-xl outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring ${
+                className={`relative size-10 shrink-0 rounded-sm border outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring ${
                   selected
-                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                    : "opacity-85 hover:scale-105 hover:opacity-100"
+                    ? "border-primary ring-1 ring-primary"
+                    : "border-border/60 opacity-80 hover:opacity-100"
                 }`}
               >
                 <Avatar id={a.id} className="size-full" />
                 {selected && (
-                  <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Check className="size-2.5" />
+                  <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+                    <Check className="size-2" />
                   </span>
                 )}
               </button>

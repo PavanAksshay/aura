@@ -500,9 +500,9 @@ function CtaBand({ authed }: { authed: boolean }) {
 
 function Footer() {
   return (
-    <footer className="border-t border-foreground/6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 sm:flex-row sm:px-6">
-        <AuraWordmark className="opacity-80" />
+    <footer className="border-t border-border mt-auto">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6">
+        <AuraWordmark />
         <p className="text-xs text-muted-foreground">
           Built privacy-first for clinical psychologists.
         </p>
@@ -526,33 +526,17 @@ function Footer() {
 
 export function Landing({ authed }: { authed: boolean }) {
   return (
-    <div className="relative">
-      <AuroraBackground />
-      {/* Ambient butterflies pinned to the viewport so they drift over the hero
-          and stay behind content as the page scrolls. */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-[1] overflow-hidden"
-      >
-        <Butterfly />
+    <div className="relative min-h-[100dvh] flex flex-col justify-between overflow-x-hidden">
+      <div>
+        <LandingNav authed={authed} />
+        <main>
+          <Hero authed={authed} />
+          <Features />
+          <HowItWorks />
+          <Privacy />
+          <CtaBand authed={authed} />
+        </main>
       </div>
-      {/* Three more anchored down the page — met on the way down. inset-0 spans
-          the full document here (the root is relative), and overflow-hidden
-          keeps a wing from ever widening the page. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-[1] overflow-hidden"
-      >
-        <ScrollButterflies />
-      </div>
-      <LandingNav authed={authed} />
-      <main>
-        <Hero authed={authed} />
-        <Features />
-        <HowItWorks />
-        <Privacy />
-        <CtaBand authed={authed} />
-      </main>
       <Footer />
     </div>
   );
