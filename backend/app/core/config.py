@@ -40,9 +40,10 @@ class Settings(BaseSettings):
     max_concurrent_transcriptions: int = 1
 
     # Transcription: Whisper via faster-whisper (CTranslate2), fully local.
-    # "large-v3" = maximum accuracy; int8 keeps it runnable on CPU.
+    # "large-v3" = maximum accuracy; "auto" uses CUDA GPU if present, else CPU.
     whisper_model: str = "large-v3"
     whisper_compute_type: str = "int8"
+    whisper_device: str = "auto"
 
     # Speaker diarization (pyannote.audio). Optional enhancement: when enabled
     # AND the deps + gated model are available, transcripts are speaker-labeled;

@@ -1,0 +1,11 @@
+ollama serve
+ollama pull llama3.2:3b
+
+cd /Users/pavanaksshay/aura/backend 
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev,ml]"
+uvicorn app.main:app --reload --port 8000
+
+ngrok http 8000 --url=unimmediately-tellurous-marisha.ngrok-free.dev
+ngrok http 8000 

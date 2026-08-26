@@ -52,21 +52,19 @@ class SpeakerTurn:
 
 
 def _select_device(preferred: str) -> str:
-    """Pick a torch device for pyannote: the configured one, or auto (MPS/CPU).
-
-    pyannote is torch-based, so unlike Whisper it can use Apple's MPS GPU. On the
-    M1 that took diarization from tens of minutes on CPU to sub-realtime.
-    """
+    """Pick a torch device for pyannote: the configured one, or auto (CUDA/MPS/CPU)."""
     pref = preferred.strip().lower()
     if pref:
         return pref
     try:
         import torch
 
-        if torch.backends.mps.is_available():
+        if torch.cuda.is_available():
+            return "cuda"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
     except Exception:
-        logger.debug("MPS probe failed; falling back to CPU", exc_info=True)
+        logger.debug("Device probe failed; falling back to CPU", exc_info=True)
     return "cpu"
 
 

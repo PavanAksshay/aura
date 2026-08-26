@@ -52,15 +52,29 @@ def _get_model() -> Any:
             from faster_whisper import WhisperModel
 
             settings = get_settings()
+            device = settings.whisper_device.strip().lower()
+            compute_type = settings.whisper_compute_type
+
+            if device == "auto":
+                try:
+                    import torch
+                    device = "cuda" if torch.cuda.is_available() else "cpu"
+                except Exception:
+                    device = "cpu"
+
+            if device == "cuda" and compute_type == "int8":
+                compute_type = "float16"
+
             logger.info(
-                "Loading Whisper %s (%s) — first call may download weights",
+                "Loading Whisper %s (device=%s, compute_type=%s) — first call may download weights",
                 settings.whisper_model,
-                settings.whisper_compute_type,
+                device,
+                compute_type,
             )
             _model = WhisperModel(
                 settings.whisper_model,
-                device="cpu",
-                compute_type=settings.whisper_compute_type,
+                device=device,
+                compute_type=compute_type,
             )
     return _model
 
