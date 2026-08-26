@@ -20,6 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -180,13 +187,20 @@ function PatientForm({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="p-pronouns">Pronouns</Label>
-            <Input
-              id="p-pronouns"
+            <Label htmlFor="p-pronouns">Pronouns / Gender</Label>
+            <Select
               value={draft.pronouns}
-              onChange={(e) => set("pronouns", e.target.value)}
-              placeholder="she/her"
-            />
+              onValueChange={(val) => set("pronouns", val)}
+            >
+              <SelectTrigger id="p-pronouns">
+                <SelectValue placeholder="Select pronouns" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="he/him">he/him</SelectItem>
+                <SelectItem value="she/her">she/her</SelectItem>
+                <SelectItem value="they/them">they/them</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="p-dob">Date of birth</Label>
