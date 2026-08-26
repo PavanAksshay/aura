@@ -231,14 +231,13 @@ def _similar_to_transcript(bullets: list[str], transcript: str) -> dict[str, flo
 def _grounded(bullets: list[str], transcript: str) -> list[str]:
     """Drop bullets that neither share the transcript's words nor its meaning."""
     spoken = _content_words(transcript)
-    if not spoken:
-        return []
+    if not spoken or len(spoken) < 2:
+        return [b for b in bullets if any(w in spoken for w in _content_words(b))]
 
     kept: list[str] = []
     unanchored: list[str] = []
     for bullet in bullets:
         words = _content_words(bullet)
-        # No content words at all — nothing to verify against, so don't keep it.
         if not words:
             continue
         if len(words & spoken) / len(words) >= _GROUNDING_THRESHOLD:
@@ -246,13 +245,19 @@ def _grounded(bullets: list[str], transcript: str) -> list[str]:
         else:
             unanchored.append(bullet)
 
-    similarity = _similar_to_transcript(unanchored, transcript)
-    for bullet in unanchored:
-        score = similarity.get(bullet, 0.0)
-        if score >= _SIMILARITY_THRESHOLD:
-            kept.append(bullet)
-        else:
-            logger.warning("Dropped ungrounded note bullet (similarity %.2f): %r", score, bullet)
+    # Only rescue paraphrase via embeddings on substantial transcripts (> 30 words).
+    if len(transcript.split()) >= 30:
+        similarity = _similar_to_transcript(unanchored, transcript)
+        for bullet in unanchored:
+            score = similarity.get(bullet, 0.0)
+            if score >= _SIMILARITY_THRESHOLD:
+                kept.append(bullet)
+            else:
+                logger.warning("Dropped ungrounded note bullet (similarity %.2f): %r", score, bullet)
+    else:
+        for bullet in unanchored:
+            logger.warning("Dropped ungrounded note bullet on short transcript: %r", bullet)
+
     # Restore the model's ordering; the two passes above interleave it.
     return [b for b in bullets if b in kept]
 
