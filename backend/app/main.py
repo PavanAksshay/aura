@@ -59,12 +59,10 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        # The API authenticates via the Authorization header (Bearer JWT), not
-        # cookies, so cross-origin credentials are neither used nor allowed.
+        allow_origins=["*"] if is_dev else settings.cors_origins,
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type", "ngrok-skip-browser-warning"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     app.include_router(api_router, prefix="/api/v1")
     return app
