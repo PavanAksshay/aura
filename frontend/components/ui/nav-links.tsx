@@ -30,20 +30,12 @@ const LINKS: { href: string; label: string; icon: LucideIcon; match: string[] }[
   { href: "/profile", label: "Profile", icon: UserRound, match: ["/profile"] },
 ];
 
-const INBOX_LINK = {
-  href: "/inbox",
-  label: "Inbox",
-  icon: Inbox,
-  match: ["/inbox"],
-} as const;
-
-export function NavLinks({ showInbox = false }: { showInbox?: boolean }) {
+export function NavLinks() {
   const pathname = usePathname();
-  const links = showInbox ? [...LINKS, INBOX_LINK] : LINKS;
 
   return (
     <div className="flex w-max items-center gap-1">
-      {links.map(({ href, label, icon: Icon, match }) => {
+      {LINKS.map(({ href, label, icon: Icon, match }) => {
         const active = match.some((m) => pathname.startsWith(m));
         return (
           <Link

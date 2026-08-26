@@ -16,8 +16,6 @@ import { Butterfly } from "@/components/ui/butterfly";
 import { CursorTrail } from "@/components/ui/cursor-trail";
 import { FloatingQuotes } from "@/components/ui/floating-quotes";
 import { NavLinks } from "@/components/ui/nav-links";
-import { isOwnerEmail } from "@/lib/owner";
-import { isCheckinEmail } from "@/lib/checkin-user";
 import { SignOutButton } from "@/components/ui/SignOutButton";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AchievementToaster } from "@/components/profile/AchievementToaster";
@@ -26,7 +24,6 @@ import { SessionWatcher } from "@/components/notes/SessionWatcher";
 import { AppointmentReminder } from "@/components/schedule/AppointmentReminder";
 import { MaintenanceBanner } from "@/components/system/MaintenanceBanner";
 import { InstallNudge } from "@/components/pwa/InstallNudge";
-import { DailyCheckin } from "@/components/checkin/DailyCheckin";
 
 export default async function WorkspaceLayout({
   children,
@@ -74,8 +71,6 @@ export default async function WorkspaceLayout({
           />
           {/* One-time install suggestion for a just-registered clinician. */}
           <InstallNudge />
-          {/* Daily well-being check-in — a no-op for all but one account. */}
-          <DailyCheckin userEmail={user.email ?? null} />
         </>
       )}
 
@@ -90,9 +85,7 @@ export default async function WorkspaceLayout({
               <AuraWordmark />
             </Link>
             <div className="min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <NavLinks
-                showInbox={isOwnerEmail(user.email) || isCheckinEmail(user.email)}
-              />
+              <NavLinks />
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">

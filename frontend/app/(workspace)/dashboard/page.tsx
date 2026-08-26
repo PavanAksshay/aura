@@ -142,14 +142,14 @@ export default async function DashboardPage() {
         <FadeIn>
           <Link
             href="/patients"
-            className="flex items-center gap-2.5 rounded-sm border border-amber-500/30 bg-amber-500/5 px-3.5 py-2.5 transition-colors hover:bg-amber-500/10"
+            className="flex items-center gap-2.5 rounded-sm border border-border/70 bg-card/60 px-3.5 py-2.5 transition-colors hover:border-foreground/40 hover:bg-card"
           >
             <BadgeCheck
               aria-hidden
-              className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
+              className="size-4 shrink-0 text-muted-foreground"
             />
-            <p className="min-w-0 flex-1 text-xs text-foreground">
-              <strong className="font-semibold">
+            <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+              <strong className="font-semibold text-foreground">
                 {unreviewed} {unreviewed === 1 ? "note" : "notes"} awaiting review
               </strong>{" "}
               — Verify clinical details before export.
