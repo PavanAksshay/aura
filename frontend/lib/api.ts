@@ -205,7 +205,7 @@ export async function askMemory(opts: {
       // Cap client-side too; the schema rejects >12 turns.
       history: (opts.history ?? []).slice(-8),
     }),
-  });
+  }, LLM_TIMEOUT_MS);
   if (!res.ok) return parseError(res);
   return (await res.json()) as MemoryAnswer;
 }
@@ -400,11 +400,15 @@ export async function replyToCheckin(
 export async function crossReferenceGuidelines(
   sessionId: string,
 ): Promise<CrossReferenceAnalysis> {
-  const res = await request(`${API_URL}/api/v1/guidelines/cross-reference`, {
-    method: "POST",
-    headers: { ...(await authHeader()), "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId }),
-  });
+  const res = await request(
+    `${API_URL}/api/v1/guidelines/cross-reference`,
+    {
+      method: "POST",
+      headers: { ...(await authHeader()), "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId }),
+    },
+    LLM_TIMEOUT_MS,
+  );
   if (!res.ok) return parseError(res);
   return (await res.json()) as CrossReferenceAnalysis;
 }

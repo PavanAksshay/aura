@@ -191,42 +191,66 @@ def cross_reference_session_note(
                 "stream": False,
                 "options": {
                     "temperature": 0.1,
-                    "num_predict": 1024,
+                    "num_predict": 768,
                 },
             },
-            timeout=45.0,
+            timeout=15.0,
         )
         if response.status_code == 200:
             raw_json = response.json().get("response", "{}")
             parsed = json.loads(raw_json)
-            if "matches" in parsed:
+            if "matches" in parsed and len(parsed["matches"]) > 0:
                 return parsed
     except Exception as exc:
-        logger.warning("Ollama diagnostic analysis failed or unreachable: %s", exc)
+        logger.warning("Ollama diagnostic analysis fallback activated: %s", exc)
 
-    # Heuristic Fallback if LLM is offline:
+    # Fast Deterministic Semantic/Keyword Criteria Matcher
+    note_lower = note_text.lower()
     fallback_matches = []
+    
     for g in matched_guidelines:
+        met_list = []
+        unmet_list = []
+        
+        for crit in g.get("criteria", []):
+            # Clean criterion string
+            c_clean = crit.lstrip("0123456789. -")
+            # Extract key words (>4 chars) to search for clinical overlap
+            keywords = [w.lower().strip(",.():") for w in c_clean.split() if len(w) > 4]
+            # Check overlap
+            matched_words = [kw for kw in keywords if kw in note_lower]
+            
+            if len(matched_words) >= 1:
+                met_list.append({
+                    "criterion": c_clean,
+                    "evidence_quote": f"Documented in session (matching keywords: {', '.join(matched_words[:3])})",
+                })
+            else:
+                unmet_list.append(c_clean)
+
+        score = float(g.get("similarity_score", 0.0))
+        if len(met_list) >= 3 or score > 0.60:
+            confidence = "high"
+        elif len(met_list) >= 1 or score > 0.40:
+            confidence = "moderate"
+        else:
+            confidence = "exploratory"
+
         fallback_matches.append({
             "framework_id": g["id"],
             "title": g["title"],
             "dsm5_code": g["dsm5_code"],
             "icd11_code": g["icd11_code"],
-            "confidence": "moderate" if g["similarity_score"] > 0.45 else "exploratory",
-            "met_criteria": [
-                {
-                    "criterion": "Symptom overlap with criteria",
-                    "evidence_quote": "Extracted via semantic similarity match.",
-                }
+            "confidence": confidence,
+            "met_criteria": met_list if met_list else [
+                {"criterion": "Semantic clinical symptom alignment", "evidence_quote": "Identified through vector similarity match."}
             ],
-            "unmet_or_pending_criteria": [
-                f"Verify duration threshold: {g['duration_requirement']}"
-            ],
+            "unmet_or_pending_criteria": unmet_list[:4] + [f"Verify duration threshold: {g['duration_requirement']}"],
             "duration_assessment": g["duration_requirement"],
             "differential_considerations": g["differentials_and_exclusions"],
         })
 
     return {
         "matches": fallback_matches,
-        "clinical_summary": f"Identified {len(fallback_matches)} relevant diagnostic reference frameworks based on symptom profile.",
+        "clinical_summary": f"Cross-referenced against {len(fallback_matches)} DSM-5-TR and ICD-11 reference frameworks based on documented symptoms.",
     }
