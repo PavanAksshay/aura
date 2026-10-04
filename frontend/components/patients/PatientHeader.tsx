@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { CalendarDays, Mail, Mic, Pencil, Phone } from "lucide-react";
 
 import type { Patient } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 import { Badge, PATIENT_STATUS_TONE } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/primitives";
@@ -42,7 +43,7 @@ export function PatientHeader({ patient }: { patient: Patient }) {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-display text-2xl font-semibold tracking-tight">
-                {patient.full_name}
+                {firstName(patient.full_name)}
               </h1>
               {patient.pronouns && (
                 <span className="text-sm text-muted-foreground">

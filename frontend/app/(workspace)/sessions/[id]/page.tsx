@@ -15,6 +15,7 @@ import {
   SESSION_STATUS_TONE,
 } from "@/components/ui/badge";
 import type { ClinicalSession, Patient } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 
 export default async function SessionPage({
   params,
@@ -69,7 +70,7 @@ export default async function SessionPage({
                 href={`/patients/${patient.id}`}
                 className="text-primary underline-offset-4 hover:underline"
               >
-                {patient.full_name}
+                {firstName(patient.full_name)}
               </Link>
             </p>
           )}

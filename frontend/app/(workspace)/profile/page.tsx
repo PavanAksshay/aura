@@ -15,6 +15,7 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 import { computeEarnedBadges } from "@/lib/badges";
 import { gatherStats } from "@/lib/stats";
 import { AchievementsGrid } from "@/components/profile/AchievementsGrid";
@@ -129,7 +130,7 @@ export default async function ProfilePage() {
           />
           <div className="min-w-0 flex-1 space-y-1">
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground break-words">
-              {profile.full_name || "Your profile"}
+              {profile.full_name ? firstName(profile.full_name) : "Your profile"}
             </h2>
             {profile.title && (
               <p className="text-xs text-muted-foreground font-medium">{profile.title}</p>

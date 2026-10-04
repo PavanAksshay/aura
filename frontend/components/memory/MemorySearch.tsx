@@ -27,7 +27,7 @@ import { askMemory } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
 import type { MemoryChat, MemoryMessage, Patient } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, firstName } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,8 +82,10 @@ export function MemorySearch({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const active = chats.find((c) => c.id === activeId) ?? null;
-  const patientName = (id: string | null) =>
-    patients.find((p) => p.id === id)?.full_name ?? null;
+  const patientName = (id: string | null) => {
+    const raw = patients.find((p) => p.id === id)?.full_name;
+    return raw ? firstName(raw) : null;
+  };
 
   // Keep the thread pinned to its latest turn.
   useEffect(() => {
@@ -273,7 +275,7 @@ export function MemorySearch({
     [
       ...patients.map((p) => ({
         key: p.id,
-        label: p.full_name,
+        label: firstName(p.full_name),
         patientId: p.id as string | null,
         items: chats.filter((c) => c.patient_id === p.id),
       })),

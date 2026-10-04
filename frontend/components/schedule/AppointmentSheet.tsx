@@ -16,6 +16,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
 import type { Appointment, AppointmentStatus } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { DateField } from "@/components/ui/date-field";
@@ -287,7 +288,7 @@ function AppointmentForm({
               <SelectItem value="none">No patient (unattributed)</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  {p.full_name}
+                  {firstName(p.full_name)}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -97,7 +97,7 @@ export default async function DashboardPage() {
     ]);
 
   const firstName =
-    profileQ.data?.full_name?.trim().split(/\s+/).slice(-1)[0] ?? "";
+    profileQ.data?.full_name?.trim().split(/\s+/)[0] ?? "";
   const tip = dailyTip();
 
   const stats = [

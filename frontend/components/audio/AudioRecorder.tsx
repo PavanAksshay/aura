@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { submitRecording } from "@/lib/api";
 import { toast } from "@/lib/toast";
 import type { Patient } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,7 +136,7 @@ export function AudioRecorder({
                 <SelectItem value="none">No patient link</SelectItem>
                 {patients.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    {p.full_name}
+                    {firstName(p.full_name)}
                     {p.status !== "active" ? ` (${p.status})` : ""}
                   </SelectItem>
                 ))}

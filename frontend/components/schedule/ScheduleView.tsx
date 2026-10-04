@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { CalendarPlus, Clock, MapPin, UserRound } from "lucide-react";
 
 import type { Appointment } from "@/lib/types";
+import { firstName } from "@/lib/utils";
 import { Badge, APPOINTMENT_STATUS_TONE } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -199,7 +200,7 @@ function AppointmentCard({
   onEdit: (a: Appointment) => void;
   muted?: boolean;
 }) {
-  const name = appt.patients?.full_name;
+  const name = firstName(appt.patients?.full_name);
   return (
     <button
       type="button"
