@@ -86,9 +86,8 @@ export function ProcessingPoller({
           <span className="relative inline-flex size-3 rounded-full bg-amber-500" />
         </span>
         <p className="text-muted-foreground">
-          Transcribing and structuring your session… Whisper large-v3 is
-          thorough, so this can take a few minutes. This page updates
-          automatically.
+          Transcribing and structuring your session… Whisper large-v3-turbo is
+          processing your audio. This page updates automatically.
         </p>
       </div>
 
