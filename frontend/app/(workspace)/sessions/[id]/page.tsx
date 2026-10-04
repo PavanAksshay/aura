@@ -14,6 +14,7 @@ import {
   SESSION_STATUS_LABEL,
   SESSION_STATUS_TONE,
 } from "@/components/ui/badge";
+import { FormattedDate } from "@/components/ui/formatted-date";
 import type { ClinicalSession, Patient } from "@/lib/types";
 import { firstName } from "@/lib/utils";
 
@@ -75,9 +76,10 @@ export default async function SessionPage({
             </p>
           )}
         </div>
-        <span className="text-sm text-muted-foreground">
-          {new Date(session.created_at).toLocaleString()}
-        </span>
+        <FormattedDate
+          iso={session.created_at}
+          className="text-sm text-muted-foreground"
+        />
       </div>
 
       <div className="mt-8 space-y-8">

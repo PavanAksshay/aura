@@ -18,6 +18,7 @@ import {
   SESSION_STATUS_LABEL,
   SESSION_STATUS_TONE,
 } from "@/components/ui/badge";
+import { FormattedDate } from "@/components/ui/formatted-date";
 import { Button } from "@/components/ui/button";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion/primitives";
 import { MetricStrip } from "@/components/ui/metric-strip";
@@ -202,14 +203,10 @@ export default async function DashboardPage() {
                       <p className="truncate text-xs font-semibold text-foreground">
                         {s.title}
                       </p>
-                      <p className="mt-0.5 text-[10px] font-mono text-muted-foreground">
-                        {new Date(s.created_at).toLocaleString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
+                      <FormattedDate
+                        iso={s.created_at}
+                        className="mt-0.5 block text-[10px] font-mono text-muted-foreground"
+                      />
                     </div>
                     <Badge tone={SESSION_STATUS_TONE[s.status]}>
                       {SESSION_STATUS_LABEL[s.status]}
