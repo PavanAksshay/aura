@@ -84,11 +84,13 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # 4. Cloudflare Tunnel for persistent public backend access
+  # 4. Persistent Ngrok Tunnel for public backend access
   tunnel:
-    image: cloudflare/cloudflared:latest
+    image: ngrok/ngrok:latest
     container_name: aura-tunnel
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-eyJhIjoiOTExNTA5NzVkYzJlZTYyNDU5NWQ3N2IyN2NjN2FkM2EiLCJ0IjoiMWYzZjFjNTUtOGU5ZC00ZTllLWJkY2MtYTkyZWY1NWQxYjg4IiwicyI6IlpHWTFaV0k1TkRFdE1EazNPUzAwTW1VeExXRXpNemt0WXpJMlpqZGpObVE1TkdNeiJ9}
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command: http backend:8000 --url https://unimmediately-tellurous-marisha.ngrok-free.dev
     depends_on:
       backend:
         condition: service_healthy
