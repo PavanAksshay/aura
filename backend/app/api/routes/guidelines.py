@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.auth import AuthenticatedUser, get_current_user
+from app.core.security import CurrentUser
 from app.db.supabase import get_service_client
 from app.models.schemas import CrossReferenceRequest
 from app.services.guidelines import cross_reference_session_note, search_guidelines
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/guidelines")
 @router.post("/cross-reference")
 async def cross_reference(
     payload: CrossReferenceRequest,
-    user: AuthenticatedUser = Depends(get_current_user),
+    user: CurrentUser,
 ) -> dict[str, Any]:
     """Cross-reference a clinical note against DSM-5-TR and ICD-11 diagnostic criteria.
 
@@ -76,9 +76,9 @@ async def cross_reference(
 
 @router.get("/search")
 async def search(
+    user: CurrentUser,
     q: str = Query(..., min_length=2, description="Symptom or diagnostic query"),
     limit: int = Query(default=3, ge=1, le=10),
-    user: AuthenticatedUser = Depends(get_current_user),
 ) -> list[dict[str, Any]]:
     """Search DSM-5 & ICD-11 criteria matching symptoms."""
     return search_guidelines(query=q, top_k=limit)
