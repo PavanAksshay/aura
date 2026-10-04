@@ -136,7 +136,7 @@ export function AudioRecorder({
                 <SelectItem value="none">No patient link</SelectItem>
                 {patients.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    {firstName(p.full_name)}
+                    {p.full_name}
                     {p.status !== "active" ? ` (${p.status})` : ""}
                   </SelectItem>
                 ))}

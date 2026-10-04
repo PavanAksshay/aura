@@ -288,7 +288,7 @@ function AppointmentForm({
               <SelectItem value="none">No patient (unattributed)</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  {firstName(p.full_name)}
+                  {p.full_name}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -194,7 +194,7 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="truncate text-xs font-bold text-foreground group-hover:text-primary sm:text-sm">
-                                  {firstName(p.full_name)}
+                                  {p.full_name}
                                 </p>
                                 <span className={`size-1.5 shrink-0 rounded-full ${dot}`} />
                               </div>
@@ -261,7 +261,7 @@ export function PatientsView({ patients }: { patients: Patient[] }) {
                     >
                       <td className="px-4 py-3">
                         <span className="font-semibold text-foreground group-hover:text-primary">
-                          {firstName(p.full_name)}
+                          {p.full_name}
                         </span>
                         {p.pronouns && (
                           <span className="ml-2 text-[11px] text-muted-foreground">

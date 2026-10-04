@@ -70,7 +70,7 @@ export default async function SessionPage({
                 href={`/patients/${patient.id}`}
                 className="text-primary underline-offset-4 hover:underline"
               >
-                {firstName(patient.full_name)}
+                {patient.full_name}
               </Link>
             </p>
           )}

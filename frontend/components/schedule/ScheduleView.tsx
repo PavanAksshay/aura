@@ -200,7 +200,7 @@ function AppointmentCard({
   onEdit: (a: Appointment) => void;
   muted?: boolean;
 }) {
-  const name = firstName(appt.patients?.full_name);
+  const name = appt.patients?.full_name;
   return (
     <button
       type="button"

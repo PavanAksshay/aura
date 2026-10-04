@@ -43,7 +43,7 @@ export function PatientHeader({ patient }: { patient: Patient }) {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-display text-2xl font-semibold tracking-tight">
-                {firstName(patient.full_name)}
+                {patient.full_name}
               </h1>
               {patient.pronouns && (
                 <span className="text-sm text-muted-foreground">
