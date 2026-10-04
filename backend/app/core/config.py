@@ -40,8 +40,8 @@ class Settings(BaseSettings):
     max_concurrent_transcriptions: int = 1
 
     # Transcription: Whisper via faster-whisper (CTranslate2), fully local.
-    # "large-v3" = maximum accuracy; "auto" uses CUDA GPU if present, else CPU.
-    whisper_model: str = "large-v3"
+    # "large-v3-turbo" = optimal speed + accuracy; "auto" uses CUDA GPU if present, else CPU.
+    whisper_model: str = "large-v3-turbo"
     whisper_compute_type: str = "int8"
     whisper_device: str = "auto"
 
