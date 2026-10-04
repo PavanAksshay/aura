@@ -124,7 +124,34 @@ docker compose up -d
 - **Frontend Application**: [http://localhost:3000](http://localhost:3000)
 - **Backend API Health**: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
 - **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs) (available in development mode)
-- **Public Tunnel (Optional)**: Check tunnel URL with `docker logs aura-tunnel | grep trycloudflare.com`
+- **Public Tunnel Status**: View live tunnel logs with `docker logs aura-tunnel`
+
+---
+
+## Rate Limiting & Resource Protection
+
+Aura enforces a 3-tier safety valve to protect local CPU/GPU compute and ensure high availability across multi-user environments:
+
+### 1. Per-User Burst Rate Limiting (`app.core.ratelimit`)
+Authenticated endpoints use an in-memory sliding window limiter scoped to `user.id`. Excess requests receive `HTTP 429 Too Many Requests` with a dynamic `Retry-After` header:
+
+| Endpoint | Operation | Limit Window |
+| :--- | :--- | :--- |
+| `POST /api/v1/transcriptions` | Session audio upload & Whisper transcription | **10 requests / 5 minutes** |
+| `POST /api/v1/sessions/{id}/regenerate-note` | Redraft SOAP note via local LLM | **10 requests / 1 minute** |
+| `POST /api/v1/sessions/{id}/summary` | Generate session summary | **20 requests / 1 minute** |
+| `POST /api/v1/memory/ask` | Patient Memory AI Question & Answer | **20 requests / 1 minute** |
+| `POST /api/v1/sessions/{id}/swap-speakers` | Speaker turn re-labeling | **20 requests / 1 minute** |
+| `GET /api/v1/memory/search` | Semantic note vector search | **60 requests / 1 minute** |
+| `GET /api/v1/sessions/recent` | Session history polling | **30 requests / 1 minute** |
+
+### 2. Daily AI Quota Guard (`app.core.quota`)
+- **Operator Exemption:** The system operator (`OWNER_EMAIL` in `.env`) has **unlimited** daily AI invocations.
+- **Guest / Multi-User Cap:** Secondary clinician accounts are capped at `AI_DAILY_LIMIT` requests/day (tracked in Postgres) to prevent resource exhaustion.
+- **Core Recording Protected:** Recording and standard transcription are never throttled by the daily quota, ensuring clinicians can always document live sessions.
+
+### 3. Hardware Concurrency Control (`app.services.retention`)
+- Transcription and PyAnnote diarization pipelines are protected by a global bounded semaphore (`MAX_CONCURRENT_TRANSCRIPTIONS=1` default). Additional simultaneous uploads queue safely rather than competing for VRAM.
 
 ---
 
