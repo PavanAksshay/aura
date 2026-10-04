@@ -174,3 +174,26 @@ export interface Profile {
   created_at: string;
   updated_at: string;
 }
+
+export interface MetCriterion {
+  criterion: string;
+  evidence_quote: string;
+}
+
+export interface DiagnosticMatch {
+  framework_id: string;
+  title: string;
+  dsm5_code: string;
+  icd11_code: string;
+  confidence: "high" | "moderate" | "exploratory";
+  met_criteria: MetCriterion[];
+  unmet_or_pending_criteria: string[];
+  duration_assessment: string;
+  differential_considerations: string;
+}
+
+export interface CrossReferenceAnalysis {
+  matches: DiagnosticMatch[];
+  clinical_summary: string;
+}
+

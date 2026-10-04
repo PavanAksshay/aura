@@ -9,6 +9,8 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   ClinicalSession,
+  CrossReferenceAnalysis,
+  DiagnosticMatch,
   MemoryAnswer,
   MemoryMatch,
   SessionSummary,
@@ -393,3 +395,33 @@ export async function replyToCheckin(
   );
   if (!res.ok) return parseError(res);
 }
+
+/** Cross-reference a session note against local DSM-5-TR and ICD-11 guidelines. */
+export async function crossReferenceGuidelines(
+  sessionId: string,
+): Promise<CrossReferenceAnalysis> {
+  const res = await request(`${API_URL}/api/v1/guidelines/cross-reference`, {
+    method: "POST",
+    headers: { ...(await authHeader()), "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as CrossReferenceAnalysis;
+}
+
+/** Search DSM-5 and ICD-11 reference frameworks. */
+export async function searchGuidelines(
+  query: string,
+  limit = 4,
+): Promise<DiagnosticMatch[]> {
+  const res = await request(
+    `${API_URL}/api/v1/guidelines/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    {
+      method: "GET",
+      headers: await authHeader(),
+    },
+  );
+  if (!res.ok) return parseError(res);
+  return (await res.json()) as DiagnosticMatch[];
+}
+

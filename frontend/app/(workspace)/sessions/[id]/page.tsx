@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProcessingPoller } from "@/components/notes/ProcessingPoller";
 import { SessionDocPreview } from "@/components/notes/SessionDocPreview";
 import { NoteView } from "@/components/notes/NoteView";
+import { DiagnosticGuidelinesPanel } from "@/components/notes/DiagnosticGuidelinesPanel";
 import { TranscriptPanel } from "@/components/notes/TranscriptPanel";
 import { isNonEnglishTranscript } from "@/lib/note";
 import {
@@ -94,14 +95,17 @@ export default async function SessionPage({
         )}
 
         {reviewable && session.note && (
-          <NoteView
-            sessionId={session.id}
-            note={session.note}
-            exported={session.status === "exported"}
-            reviewedAt={session.reviewed_at}
-            noteEditedAt={session.note_edited_at}
-            nonEnglish={nonEnglish}
-          />
+          <>
+            <NoteView
+              sessionId={session.id}
+              note={session.note}
+              exported={session.status === "exported"}
+              reviewedAt={session.reviewed_at}
+              noteEditedAt={session.note_edited_at}
+              nonEnglish={nonEnglish}
+            />
+            <DiagnosticGuidelinesPanel sessionId={session.id} />
+          </>
         )}
 
         {reviewable && session.raw_transcript && (

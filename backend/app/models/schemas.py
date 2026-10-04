@@ -126,3 +126,10 @@ class SessionOut(BaseModel):
     # NULL means the note is still an unverified machine draft (migration 0017).
     reviewed_at: datetime | None = None
     reviewed_by: str | None = None
+
+
+class CrossReferenceRequest(BaseModel):
+    session_id: str | None = None
+    note_text: str | None = None
+    patient_presenting_concerns: str | None = None
+

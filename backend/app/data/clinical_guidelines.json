@@ -1,0 +1,147 @@
+[
+  {
+    "id": "mdd",
+    "title": "Major Depressive Disorder (MDD)",
+    "dsm5_code": "296.xx (F32.x / F33.x)",
+    "icd11_code": "6A70 (Single Episode) / 6A71 (Recurrent)",
+    "category": "Depressive Disorders",
+    "summary": "Characterized by persistent depressed mood and/or loss of interest or pleasure (anhedonia) for at least 2 weeks, accompanied by significant distress or impairment.",
+    "criteria": [
+      "Criterion A: 5 or more symptoms present during same 2-week period with change from previous functioning; at least one must be (1) Depressed mood or (2) Loss of interest/pleasure.",
+      "1. Depressed mood most of the day, nearly every day (feeling sad, empty, hopeless).",
+      "2. Markedly diminished interest or pleasure in all or almost all activities most of the day.",
+      "3. Significant weight loss when not dieting or weight gain, or decrease/increase in appetite.",
+      "4. Insomnia or hypersomnia nearly every day.",
+      "5. Psychomotor agitation or retardation nearly every day (observable by others).",
+      "6. Fatigue or loss of energy nearly every day.",
+      "7. Feelings of worthlessness or excessive, inappropriate guilt.",
+      "8. Diminished ability to think, concentrate, or indecisiveness.",
+      "9. Recurrent thoughts of death, suicidal ideation without a specific plan, or a suicide attempt."
+    ],
+    "duration_requirement": "At least 2 continuous weeks.",
+    "differentials_and_exclusions": "Rule out manic/hypomanic episodes (bipolar), substance/medication-induced depressive disorder, depressive disorder due to another medical condition (e.g. hypothyroidism), and normal bereavement/grief."
+  },
+  {
+    "id": "gad",
+    "title": "Generalized Anxiety Disorder (GAD)",
+    "dsm5_code": "300.02 (F41.1)",
+    "icd11_code": "6B00 (Generalized Anxiety Disorder)",
+    "category": "Anxiety Disorders",
+    "summary": "Excessive, uncontrollable anxiety and worry about multiple everyday events or activities occurring more days than not for at least 6 months.",
+    "criteria": [
+      "Criterion A: Excessive anxiety and worry occurring more days than not for at least 6 months about a number of events/activities.",
+      "Criterion B: The individual finds it difficult to control the worry.",
+      "Criterion C: Associated with 3 or more of the following 6 symptoms (with at least some symptoms present for more days than not for past 6 months):",
+      "1. Restlessness or feeling keyed up or on edge.",
+      "2. Being easily fatigued.",
+      "3. Difficulty concentrating or mind going blank.",
+      "4. Irritability.",
+      "5. Muscle tension.",
+      "6. Sleep disturbance (difficulty falling/staying asleep, restless unsatisfying sleep)."
+    ],
+    "duration_requirement": "More days than not for at least 6 months.",
+    "differentials_and_exclusions": "Rule out Panic Disorder (anxiety not confined to paroxysmal attacks), Social Anxiety Disorder, OCD, PTSD, hyperthyroidism, and caffeine/substance use."
+  },
+  {
+    "id": "panic_disorder",
+    "title": "Panic Disorder",
+    "dsm5_code": "300.01 (F41.0)",
+    "icd11_code": "6B01 (Panic Disorder)",
+    "category": "Anxiety Disorders",
+    "summary": "Recurrent unexpected panic attacks accompanied by persistent concern or worry about additional attacks and maladaptive changes in behavior.",
+    "criteria": [
+      "Criterion A: Recurrent unexpected panic attacks — an abrupt surge of intense fear or intense discomfort that reaches a peak within minutes.",
+      "Requires 4 or more somatic/cognitive symptoms: Palpitations/pounding heart, sweating, trembling/shaking, shortness of breath/smothering, feelings of choking, chest pain/discomfort, nausea/abdominal distress, dizziness/unsteadiness/lightheadedness, chills or heat sensations, paresthesias (numbness/tingling), derealization (unreality) or depersonalization (detached from oneself), fear of losing control or 'going crazy', fear of dying.",
+      "Criterion B: At least one attack has been followed by 1 month (or more) of persistent concern/worry about additional panic attacks or significant maladaptive change in behavior related to attacks."
+    ],
+    "duration_requirement": "At least 1 month of persistent worry or behavioral changes following an attack.",
+    "differentials_and_exclusions": "Rule out cardiac arrhythmias, pheochromocytoma, vestibular dysfunction, stimulant toxicity, and agoraphobia without panic."
+  },
+  {
+    "id": "ptsd",
+    "title": "Post-Traumatic Stress Disorder (PTSD) & Complex PTSD",
+    "dsm5_code": "309.81 (F43.10)",
+    "icd11_code": "6B40 (PTSD) / 6B41 (Complex PTSD)",
+    "category": "Trauma- and Stressor-Related Disorders",
+    "summary": "Development of characteristic intrusion, avoidance, cognitive/mood alterations, and hyperarousal symptoms following exposure to actual or threatened death, serious injury, or sexual violence.",
+    "criteria": [
+      "Criterion A (Stressor): Direct exposure, witnessing, learning of trauma to close relative/friend, or repeated extreme exposure to aversive details.",
+      "Criterion B (Intrusive symptoms - 1+ required): Recurrent distressing memories, distressing dreams, flashbacks/dissociative reactions, intense psychological distress at exposure to internal/external trauma cues.",
+      "Criterion C (Avoidance - 1+ required): Avoidance of trauma-related memories/thoughts/feelings, or avoidance of external reminders (people, places, conversations, activities).",
+      "Criterion D (Negative alterations in cognitions and mood - 2+ required): Inability to recall key features, persistent negative beliefs about oneself/world, distorted blame of self/others, pervasive negative emotional state, diminished interest, detachment/estrangement from others, persistent inability to experience positive emotions.",
+      "Criterion E (Alterations in arousal and reactivity - 2+ required): Irritability/angry outbursts, reckless/self-destructive behavior, hypervigilance, exaggerated startle response, concentration problems, sleep disturbance.",
+      "ICD-11 CPTSD Specifier: Includes all PTSD criteria plus severe disturbances in self-organization (affect dysregulation, negative self-concept, and relational difficulties)."
+    ],
+    "duration_requirement": "Duration of disturbance is more than 1 month.",
+    "differentials_and_exclusions": "Rule out Acute Stress Disorder (symptoms < 1 month post-trauma), Adjustment Disorder, MDD, BPD, and traumatic brain injury (TBI)."
+  },
+  {
+    "id": "ocd",
+    "title": "Obsessive-Compulsive Disorder (OCD)",
+    "dsm5_code": "300.3 (F42.2)",
+    "icd11_code": "6B20 (Obsessive-Compulsive Disorder)",
+    "category": "Obsessive-Compulsive and Related Disorders",
+    "summary": "Presence of obsessions (recurrent, persistent intrusive thoughts/urges), compulsions (repetitive behaviors/mental acts performed to reduce anxiety), or both, causing marked distress and consuming >1 hour daily.",
+    "criteria": [
+      "Obsessions: Recurrent and persistent thoughts, urges, or images experienced as intrusive and unwanted, causing marked anxiety or distress. The individual attempts to ignore or suppress them with other thoughts or actions.",
+      "Compulsions: Repetitive behaviors (hand washing, ordering, checking) or mental acts (praying, counting, repeating words silently) driven in response to an obsession or rigid rules, aimed at preventing or reducing anxiety.",
+      "Time consumption: Obsessions or compulsions are time-consuming (e.g., take more than 1 hour per day) or cause clinically significant impairment in social/occupational functioning."
+    ],
+    "duration_requirement": "Time-consuming (>1 hour/day) and persistent over weeks to months.",
+    "differentials_and_exclusions": "Rule out GAD (worries about real-life concerns), MDD (rumination), Body Dysmorphic Disorder, Trichotillomania, Tic disorders, and Delusional disorder."
+  },
+  {
+    "id": "adhd",
+    "title": "Attention-Deficit/Hyperactivity Disorder (ADHD)",
+    "dsm5_code": "314.0x (F90.x)",
+    "icd11_code": "6A05 (Attention Deficit Hyperactivity Disorder)",
+    "category": "Neurodevelopmental Disorders",
+    "summary": "A persistent pattern of inattention and/or hyperactivity-impulsivity that interferes with functioning or development, with several symptoms present prior to age 12 in 2 or more settings.",
+    "criteria": [
+      "Inattention (6+ symptoms for children, 5+ for adults 17+): Fails to give close attention to details/makes careless mistakes; difficulty sustaining attention; does not seem to listen when spoken to directly; fails to finish tasks/instructions; difficulty organizing tasks and activities; avoids tasks requiring sustained mental effort; loses things necessary for tasks; easily distracted by extraneous stimuli; forgetful in daily activities.",
+      "Hyperactivity and Impulsivity (6+ symptoms for children, 5+ for adults): Fidgets with hands/feet or squirms; leaves seat when remaining seated is expected; runs/climbs in inappropriate situations or feelings of restlessness; unable to engage in leisure activities quietly; 'on the go' or acts as if 'driven by a motor'; talks excessively; blurts out answers; difficulty waiting turn; interrupts or intrudes on others.",
+      "Cross-situational requirement: Symptoms must be present in two or more settings (e.g., at home, school/work, with friends)."
+    ],
+    "duration_requirement": "Persistent for at least 6 months, with onset before age 12.",
+    "differentials_and_exclusions": "Rule out Learning Disorders, Anxiety Disorders, MDD, Bipolar Disorder, Sleep Apnea, and Substance Use."
+  },
+  {
+    "id": "bpd",
+    "title": "Borderline Personality Disorder (BPD)",
+    "dsm5_code": "301.83 (F60.3)",
+    "icd11_code": "6D10 (Personality Disorder - Borderline Pattern)",
+    "category": "Personality Disorders",
+    "summary": "A pervasive pattern of instability of interpersonal relationships, self-image, and affects, and marked impulsivity beginning by early adulthood.",
+    "criteria": [
+      "5 or more of the following 9 criteria:",
+      "1. Frantic efforts to avoid real or imagined abandonment.",
+      "2. Pattern of unstable and intense interpersonal relationships characterized by alternating between extremes of idealization and devaluation ('splitting').",
+      "3. Identity disturbance: markedly and persistently unstable self-image or sense of self.",
+      "4. Impulsivity in at least 2 areas that are potentially self-damaging (spending, sex, substance abuse, reckless driving, binge eating).",
+      "5. Recurrent suicidal behavior, gestures, threats, or self-mutilating behavior.",
+      "6. Affective instability due to a marked reactivity of mood (intense episodic dysphoria, irritability, or anxiety lasting hours to days).",
+      "7. Chronic feelings of emptiness.",
+      "8. Inappropriate, intense anger or difficulty controlling anger.",
+      "9. Transient, stress-related paranoid ideation or severe dissociative symptoms."
+    ],
+    "duration_requirement": "Pervasive and inflexible across situations, persisting since early adulthood.",
+    "differentials_and_exclusions": "Rule out Bipolar II disorder (mood shifts in BPD are rapid and triggered by relational cues), Complex PTSD, MDD, and substance use disorders."
+  },
+  {
+    "id": "insomnia",
+    "title": "Insomnia Disorder",
+    "dsm5_code": "780.52 (G47.00)",
+    "icd11_code": "7A00 (Chronic Insomnia)",
+    "category": "Sleep-Wake Disorders",
+    "summary": "A predominant complaint of dissatisfaction with sleep quantity or quality, associated with difficulty initiating sleep, maintaining sleep, or early-morning awakening with inability to return to sleep.",
+    "criteria": [
+      "Criterion A: Dissatisfaction with sleep quantity or quality with 1+ of: (1) Difficulty initiating sleep, (2) Difficulty maintaining sleep (frequent awakenings), (3) Early-morning awakening with inability to return to sleep.",
+      "Criterion B: Sleep disturbance causes clinically significant distress or impairment in social, occupational, educational, academic, or behavioral functioning.",
+      "Criterion C: Sleep difficulty occurs at least 3 nights per week.",
+      "Criterion D: Sleep difficulty is present for at least 3 months.",
+      "Criterion E: Occurs despite adequate opportunity for sleep."
+    ],
+    "duration_requirement": "At least 3 nights per week for at least 3 months.",
+    "differentials_and_exclusions": "Rule out Sleep Apnea, Restless Legs Syndrome, Circadian Rhythm Sleep-Wake Disorders, and substance/caffeine use."
+  }
+]
