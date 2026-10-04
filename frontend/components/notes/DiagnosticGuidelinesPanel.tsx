@@ -56,7 +56,7 @@ export function DiagnosticGuidelinesPanel({ sessionId }: { sessionId: string }) 
             <h3 className="text-sm font-bold tracking-tight text-foreground">
               Clinical Guidelines Reference (DSM-5-TR / ICD-11)
             </h3>
-            <Badge tone="indigo">Local RAG</Badge>
+            <Badge tone="primary">Local RAG</Badge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Cross-reference documented symptoms and interventions against standard diagnostic frameworks.
@@ -129,10 +129,10 @@ export function DiagnosticGuidelinesPanel({ sessionId }: { sessionId: string }) 
                         <Badge
                           tone={
                             m.confidence === "high"
-                              ? "emerald"
+                              ? "primary"
                               : m.confidence === "moderate"
                                 ? "amber"
-                                : "zinc"
+                                : "muted"
                           }
                         >
                           {m.confidence} match
