@@ -32,6 +32,8 @@ dependencies = [
 ml = [
     # Whisper large-v3 on CTranslate2 — CPU int8, no PyTorch needed.
     "faster-whisper>=1.1",
+    # PyAV audio decoding pinned for faster-whisper metadata compatibility
+    "av>=11.0.0,<14.0.0",
     # Local ONNX embeddings for the patient-memory index.
     "fastembed>=0.5",
     # Deterministic script→Latin fallback for romanizing Tamil/Hindi

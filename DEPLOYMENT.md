@@ -48,7 +48,17 @@ you set in its dashboard.
 The frontend can't talk to `localhost:8000` on your Mac from the internet, so
 the backend needs a public HTTPS address. Two paths:
 
-### Free + permanent: an ngrok static domain (recommended)
+### Cloudflare Tunnel with Docker (Recommended)
+
+If running with Docker (`docker compose up -d`), Cloudflare Tunnel is built-in via the `aura-tunnel` container:
+
+```bash
+docker logs aura-tunnel | grep trycloudflare.com
+```
+
+Set that generated URL as `NEXT_PUBLIC_API_URL` in Vercel and **redeploy**.
+
+### Free + permanent: an ngrok static domain
 
 ngrok's free plan includes **one permanent static domain**, so the backend URL
 never changes — set it in Vercel once and forget it.

@@ -1,0 +1,105 @@
+services:
+  # 1. Local LLM Service for session note drafting & summarization
+  ollama:
+    image: ollama/ollama:latest
+    container_name: aura-ollama
+    # Exposing host port is optional and omitted by default to avoid conflicts if
+    # you already have Ollama running natively on port 11434 on your host machine.
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Optional helper to auto-pull the required LLM model on startup
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: aura-ollama-init
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["sh", "-c", "ollama pull llama3.2:3b"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  # 2. FastAPI Backend (Whisper transcription + pyannote diarization + fastembed)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aura-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+      - path: backend/.env
+        required: false
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - AUDIO_SCRATCH_DIR=/tmp/clinical-scribe-audio
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+      - fastembed_cache:/root/.cache/fastembed
+      - backend_scratch:/tmp/clinical-scribe-audio
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  # 3. Next.js Frontend (PWA Clinical Workspace)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-${NEXT_PUBLIC_SUPABASE_URL:-}}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}}
+    container_name: aura-frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env
+        required: false
+      - path: frontend/.env.local
+        required: false
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 4. Cloudflare Tunnel for public backend access
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: aura-tunnel
+    command: tunnel --no-autoupdate --url http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
+    name: aura_ollama_models
+  hf_cache:
+    name: aura_hf_cache
+  fastembed_cache:
+    name: aura_fastembed_cache
+  backend_scratch:
+    name: aura_backend_scratch

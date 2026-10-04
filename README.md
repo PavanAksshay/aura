@@ -99,13 +99,36 @@ health data becomes a live legal question (see `docs/regulatory-brief.md`).
 
 ## Setup
 
-### 1. Supabase
+### Option A: Quick Start with Docker (Recommended)
+
+Run the entire stack (Next.js frontend, FastAPI backend, local Ollama, and Cloudflare tunnel) with Docker Compose:
+
+```bash
+# 1. Configure environment variables in .env
+cp backend/.env.example .env
+
+# 2. Build and start all services in detached mode
+docker compose up -d
+
+# 3. View your public Cloudflare Tunnel backend URL:
+docker logs aura-tunnel | grep trycloudflare.com
+```
+
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
+- Detailed Docker architecture and commands are documented in [DOCKER.md](DOCKER.md).
+
+---
+
+### Option B: Local Manual Setup
+
+#### 1. Supabase
 
 Create a project, then run every migration in `supabase/migrations/` **in
 order** (SQL editor, or `supabase db push`). Collect: project URL, anon key,
 service-role key.
 
-### 2. Backend
+#### 2. Backend
 
 ```bash
 cd backend
@@ -134,7 +157,7 @@ Set `ENVIRONMENT=production` when deploying to disable the interactive API docs.
 
 Checks: `ruff check app tests && mypy app && pytest`
 
-### 3. Frontend
+#### 3. Frontend
 
 ```bash
 cd frontend
