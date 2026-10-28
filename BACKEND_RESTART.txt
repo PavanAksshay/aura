@@ -1,9 +1,9 @@
-# 1. Clone the repository
-git clone https://github.com/PavanAksshay/quantum.git
-cd quantum
+# 1. Clone your repo
+git clone https://github.com/PavanAksshay/aura.git
+cd aura
 
-# 2. Build and start the backend container
+# 2. Restore your .env file
+cp ~/aura_env_variables.txt .env
+
+# 3. Build and spin up all containers
 docker compose up -d --build
-
-docker ps
-curl http://localhost:8080/api/health
