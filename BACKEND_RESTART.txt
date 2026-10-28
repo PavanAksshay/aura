@@ -1,0 +1,9 @@
+# 1. Clone the repository
+git clone https://github.com/PavanAksshay/quantum.git
+cd quantum
+
+# 2. Build and start the backend container
+docker compose up -d --build
+
+docker ps
+curl http://localhost:8080/api/health
